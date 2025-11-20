@@ -7,9 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// VERİTABANI AYARLARI
 const pool = new Pool({
-    user: 'egemenkeles', // DİKKAT: Önceden 'postgres' idi, şimdi bunu yaptın.
+    user: 'egemenkeles',
     host: 'localhost',
     database: 'deneme',
     password: '1525Egos35.',
@@ -23,7 +22,6 @@ app.post('/login', async (req, res) => {
     console.log("1. İSTEK GELDİ -> Username:", username, " | Şifre:", password);
 
     try {
-        // Kullanıcıyı veritabanında ara
         const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
 
         console.log("2. DB SONUCU -> Bulunan Satır Sayısı:", result.rows.length);
@@ -32,7 +30,6 @@ app.post('/login', async (req, res) => {
             const user = result.rows[0];
             console.log("3. DB'DEKİ HASH:", user.password);
 
-            // Şifre Karşılaştırma
             const isMatch = await bcrypt.compare(password, user.password);
             console.log("4. KARŞILAŞTIRMA SONUCU (isMatch):", isMatch);
 
