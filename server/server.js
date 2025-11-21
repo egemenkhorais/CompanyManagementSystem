@@ -8,11 +8,22 @@ app.use(cors());
 app.use(express.json());
 
 const pool = new Pool({
-    user: 'egemenkeles',
-    host: 'localhost',
-    database: 'deneme',
-    password: '1525Egos35.',
+    user: 'postgres.zkvjaelvurhiaytlhedw',
+    host: 'aws-1-eu-central-1.pooler.supabase.com',
+    database: 'postgres',
+    password: 'kocaelidüzcetrabzon', // Replace with actual password
     port: 5432,
+    pool_mode: 'session'
+});
+
+// Test database connection
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('Database connection error:', err.stack);
+    } else {
+        console.log('Database connected successfully!');
+        release();
+    }
 });
 
 app.post('/login', async (req, res) => {
