@@ -1,31 +1,36 @@
-import React, { useState } from 'react'; // 1. useState eklendi
+import React, { useState } from 'react';
 import './LoginForm.css';
 import { FaUser } from "react-icons/fa";
 import { IoLockClosed } from "react-icons/io5";
-import axios from 'axios'; // 2. Axios eklendi (API isteği için)
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const LoginForm = () => {
-    // Kullanıcı verilerini tutacak değişkenler
+const LoginForm = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate(); // Hook eklendi
 
     const handleLogin = async (e) => {
-        e.preventDefault(); // Sayfanın yenilenmesini engelle
+        e.preventDefault();
 
         try {
-            // Backend'e (Node.js) veriyi gönderiyoruz
             const response = await axios.post('http://127.0.0.1:5001/login', {
                 username: username,
                 password: password
             });
 
-            // Eğer sunucudan olumlu yanıt gelirse:
             if (response.data.success) {
                 alert("Giriş Başarılı! Hoşgeldin " + username);
-                // Buraya daha sonra sayfa yönlendirmesi (navigate) ekleyeceğiz.
+
+                // Kullanıcı rolünü backend'den alıyoruz (varsa)
+                const userRole = response.data.role || 'user';
+
+                onLoginSuccess(userRole);
+
+                // HomePage'e yönlendiriyoruz
+                navigate('/home');
             }
         } catch (error) {
-            // Hata olursa (Şifre yanlışsa veya sunucu kapalıysa)
             if (error.response) {
                 alert("Hata: " + error.response.data.message);
             } else {
@@ -35,17 +40,18 @@ const LoginForm = () => {
     };
 
     return (
-        <div className='wrapper'>
-            <form onSubmit={handleLogin}> {/* Form gönderilince handleLogin çalışsın */}
-                <h1>Giriş</h1>
+        <div className='login-container'>
+            <div className='wrapper'>
+                <form onSubmit={handleLogin}>
+                <h1>CONNECTAGE</h1>
 
                 <div className="input-box">
                     <input
                         type="text"
                         placeholder="Kullanıcı Adı"
                         required
-                        value={username} // Değeri state'e bağladık
-                        onChange={(e) => setUsername(e.target.value)} // Yazdıkça state güncellensin
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                     />
                     <FaUser className='icon' />
                 </div>
@@ -55,8 +61,8 @@ const LoginForm = () => {
                         type="password"
                         placeholder="Şifre"
                         required
-                        value={password} // Değeri state'e bağladık
-                        onChange={(e) => setPassword(e.target.value)} // Yazdıkça state güncellensin
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
                     <IoLockClosed className='icon' />
                 </div>
@@ -72,6 +78,7 @@ const LoginForm = () => {
                     <p>Hesabın yok mu? <a href="#">Kaydol.</a></p>
                 </div>
             </form>
+        </div>
         </div>
     );
 };
