@@ -2,9 +2,7 @@ name: Günlük Supabase Yedeği
 
 on:
   schedule:
-    # Her gece 03:00'te (TSİ) çalışır
     - cron: '0 0 * * *'
-  # Elle tetiklemek için buton koyuyoruz
   workflow_dispatch:
 
 permissions:
@@ -18,20 +16,23 @@ jobs:
       - name: Projeyi Çek (Checkout)
         uses: actions/checkout@v3
 
-      # GÜNCELLENEN KISIM BURASI:
       - name: PostgreSQL 17 İstemcisini Kur
         run: |
+          # PostgreSQL resmi deposunu ekle
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          # İmza anahtarını ekle
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          # Listeyi güncelle ve v17'yi kur
           sudo apt-get update
-          sudo apt-get install -y postgresql-client-17.6
+          sudo apt-get install -y postgresql-client-17
 
-      - name: Yedeği Al (pg_dump)
+      - name: Yedeği Al (pg_dump v17 ile)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          # Veritabanını çekip backup.sql dosyasına yazıyoruz
-          pg_dump "$DATABASE_URL" > backup.sql
+          # DİKKAT: Burada 'pg_dump' yerine tam dosya yolunu yazıyoruz
+          # Bu sayede sistem mecburen 17 sürümünü kullanıyor
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" > backup.sql
 
       - name: Tarih Dosyası Oluştur
         run: date > son_yedeklenme_tarihi.txt
@@ -43,7 +44,7 @@ jobs:
           
           git add backup.sql son_yedeklenme_tarihi.txt
           
-          # Değişiklik varsa commit at, yoksa hata verme
+          # Değişiklik varsa commit at
           git commit -m "Otomatik Yedek: $(date)" || echo "Değişiklik yok"
           
           git push
