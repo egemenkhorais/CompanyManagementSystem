@@ -1,0 +1,120 @@
+.job-post-card {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.job-post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.job-post-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.job-post-label {
+    font-size: 15px;
+    color: #f5edff;
+    font-weight: 600;
+}
+
+.job-post-select {
+    position: relative;
+}
+
+.job-post-select select {
+    width: 100%;
+    padding: 16px 45px 16px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(157, 78, 221, 0.35);
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    font-size: 15px;
+    appearance: none;
+    outline: none;
+}
+
+.job-post-select select:focus {
+    border-color: #c77dff;
+    box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.2);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 16px;
+    color: #c77dff;
+}
+
+.job-post-textarea {
+    width: 100%;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(157, 78, 221, 0.35);
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    font-size: 15px;
+    resize: vertical;
+    min-height: 140px;
+}
+
+.job-post-textarea:focus {
+    outline: none;
+    border-color: #c77dff;
+    box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.2);
+}
+
+.job-post-hint {
+    color: #a8a8a8;
+    font-size: 13px;
+}
+
+.job-post-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: auto;
+}
+
+.job-post-card button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.job-post-select select:disabled {
+    color: #bcbcbc;
+}
+
+.job-post-status-message {
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+}
+
+.job-post-status-message.success {
+    border-color: rgba(31, 201, 122, 0.6);
+    background: rgba(31, 201, 122, 0.15);
+}
+
+.job-post-status-message.error {
+    border-color: rgba(255, 107, 107, 0.6);
+    background: rgba(255, 107, 107, 0.15);
+}
+
+.job-post-hint.error {
+    color: #ff9a9a;
+}
+

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './HomePage.css';
+import CreateJobPost from './JobPosts/CreateJobPost';
 import { Users, Settings, LogOut, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,11 +17,16 @@ const DashboardView = () => (
 //burası henüz overview. asset tiplerinin hepsi için bir profil oluşturacağız buraya üstteki gibi
 //ardından yetkiye göre assetleri göstereceğiz click işlevleri ve gösterimi unutmayın.
 
-const HROperationsView = () => (
+const HROperationsView = ({ onOpenJobPost }) => (
     <div className="content-card">
         <h2>İnsan Kaynakları Yönetimi</h2>
         <p>Buradan yeni işe alım talebi oluşturabilir veya izinleri onaylayabilirsiniz.</p>
-        <button className="action-btn"> + İşe Alım Talebi Aç</button>
+        <div className="hr-actions">
+            <button className="action-btn"> + İşe Alım Talebi Aç</button>
+            <button className="ghost-btn" onClick={onOpenJobPost}>
+                İş İlanı Oluştur
+            </button>
+        </div>
         <div className="request-list">
             <p>• Talep #1: Yazılım Uzmanı (Onay Bekliyor)</p>
             <p>• Talep #2: Pazarlama Asistanı (İşleme Alındı)</p>
@@ -39,6 +45,7 @@ const SettingsView = () => (
 
 const HomePage = ({ userRole, onLogout }) => { // onLogout prop'u eklendi
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [hrView, setHrView] = useState('overview');
     const navigate = useNavigate(); // Hook eklendi
 
     // Çıkış
@@ -47,12 +54,24 @@ const HomePage = ({ userRole, onLogout }) => { // onLogout prop'u eklendi
         navigate('/login'); // Login sayfasına yönlendir
     };
 
+    const handleTabChange = (tab, options = {}) => {
+        const { resetHrView = false } = options;
+        setActiveTab(tab);
+        if (tab !== 'hr' || resetHrView) {
+            setHrView('overview');
+        }
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard':
                 return <DashboardView />;
             case 'hr':
-                return <HROperationsView />;
+                return hrView === 'jobPost' ? (
+                    <CreateJobPost />
+                ) : (
+                    <HROperationsView onOpenJobPost={() => setHrView('jobPost')} />
+                );
             case 'settings':
                 return <SettingsView />;
             default:
@@ -76,21 +95,30 @@ const HomePage = ({ userRole, onLogout }) => { // onLogout prop'u eklendi
 
                     <button
                         className={`menu-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('dashboard')}
+                        onClick={() => handleTabChange('dashboard')}
                     >
                         <LayoutDashboard size={20} /> Ana Panel
                     </button>
 
                     <button
                         className={`menu-btn ${activeTab === 'hr' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('hr')}
+                        onClick={() => handleTabChange('hr', { resetHrView: true })}
                     >
                         <Users size={20} /> İK İşlemleri
                     </button>
 
+                    {activeTab === 'hr' && (
+                        <button
+                            className={`submenu-btn ${hrView === 'jobPost' ? 'active' : ''}`}
+                            onClick={() => setHrView('jobPost')}
+                        >
+                            İş İlanı Oluştur
+                        </button>
+                    )}
+
                     <button
                         className={`menu-btn ${activeTab === 'settings' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('settings')}
+                        onClick={() => handleTabChange('settings')}
                     >
                         <Settings size={20} /> Ayarlar
                     </button>

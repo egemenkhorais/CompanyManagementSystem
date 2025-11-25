@@ -37,6 +37,34 @@ app.get('/api/db-test', async (req, res) => {
     }
 });
 
+// --- DEPARTMAN ENDPOINTİ ---
+app.get('/api/departments', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('departments')
+            .select('*')
+            .order('departmentid', { ascending: true });
+
+        if (error) {
+            throw error;
+        }
+
+        res.json({
+            success: true,
+            data: data || []
+        });
+    } catch (error) {
+        console.error('Departmanları çekerken hata:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Departman listesi alınamadı: ' + (error.message || 'Bilinmeyen hata'),
+            details: error.details || null,
+            hint: error.hint || null,
+            code: error.code || null
+        });
+    }
+});
+
 // --- LOGIN ENDPOINT ---
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
@@ -82,6 +110,49 @@ app.post('/login', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Sunucu tarafında bir hata oluştu.'
+        });
+    }
+});
+
+// --- JOB POST OLUŞTURMA ENDPOINTİ ---
+app.post('/api/jobposts', async (req, res) => {
+    const { departmentId, expectations, companyId = null, createdByUser = null } = req.body;
+
+    if (!departmentId || !expectations || !expectations.trim()) {
+        return res.status(400).json({
+            success: false,
+            message: 'Departman ve beklenti alanları zorunludur.'
+        });
+    }
+
+    try {
+        const insertPayload = {
+            expectations: expectations.trim(),
+            departmentid: departmentId,
+            companyid: companyId,
+            createdbyuser: createdByUser
+        };
+
+        const { data, error } = await supabase
+            .from('jobposts')
+            .insert([insertPayload])
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'İş ilanı başarıyla oluşturuldu.',
+            jobPost: data
+        });
+    } catch (error) {
+        console.error('İş ilanı oluşturulamadı:', error);
+        res.status(500).json({
+            success: false,
+            message: 'İş ilanı oluşturulurken hata oluştu: ' + error.message
         });
     }
 });
@@ -138,6 +209,7 @@ app.post('/register', async (req, res) => {
                 }
             ])
             .select();
+            
 
         if (error) {
             console.error('Supabase Error:', error);
