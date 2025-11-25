@@ -1,0 +1,46 @@
+name: Günlük Supabase Yedeği
+
+on:
+  schedule:
+    # Her gece 03:00'te (TSİ) çalışır
+    - cron: '0 0 * * *'
+  # Elle tetiklemek için buton koyuyoruz
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Projeyi Çek (Checkout)
+        uses: actions/checkout@v3
+
+      - name: PostgreSQL Aracını Kur
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Yedeği Al (pg_dump)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # Veritabanını çekip backup.sql dosyasına yazıyoruz
+          pg_dump "$DATABASE_URL" > backup.sql
+
+      - name: Tarih Dosyası Oluştur
+        run: date > son_yedeklenme_tarihi.txt
+
+      - name: GitHub'a Kaydet ve Yolla
+        run: |
+          git config --global user.name "Yedekleme Botu"
+          git config --global user.email "actions@github.com"
+          
+          git add backup.sql son_yedeklenme_tarihi.txt
+          
+          # Değişiklik varsa commit at, yoksa hata verme
+          git commit -m "Otomatik Yedek: $(date)" || echo "Değişiklik yok"
+          
+          git push
