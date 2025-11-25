@@ -18,10 +18,13 @@ jobs:
       - name: Projeyi Çek (Checkout)
         uses: actions/checkout@v3
 
-      - name: PostgreSQL Aracını Kur
+      # GÜNCELLENEN KISIM BURASI:
+      - name: PostgreSQL 17 İstemcisini Kur
         run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-client-17
 
       - name: Yedeği Al (pg_dump)
         env:
