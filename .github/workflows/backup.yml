@@ -24,7 +24,7 @@ jobs:
           # --rm: İş bitince kapsülü sil
           # --entrypoint: Direkt pg_dump aracını çalıştır
           
-          docker run --rm --entrypoint pg_dump postgres:17-alpine "$DATABASE_URL" > backup.sql
+          docker run --rm --entrypoint pg_dump postgres:17 -n public "$DATABASE_URL" > backup.sql
 
       - name: Tarih Dosyası Oluştur
         run: date > son_yedeklenme_tarihi.txt
