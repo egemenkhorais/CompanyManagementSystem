@@ -1,0 +1,40 @@
+name: Günlük Supabase Yedeği
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Projeyi Çek
+        uses: actions/checkout@v3
+
+      - name: Yedeği Al (Docker ile Garanti Çözüm)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # Postgres 17 imajını indirip pg_dump komutunu çalıştırıyoruz
+          # --rm: İş bitince kapsülü sil
+          # --entrypoint: Direkt pg_dump aracını çalıştır
+          
+          docker run --rm --entrypoint pg_dump postgres:17 -n public "$DATABASE_URL" > backup.sql
+
+      - name: Tarih Dosyası Oluştur
+        run: date > son_yedeklenme_tarihi.txt
+
+      - name: GitHub'a Kaydet ve Yolla
+        run: |
+          git config --global user.name "Yedekleme Botu"
+          git config --global user.email "actions@github.com"
+          
+          git add backup.sql son_yedeklenme_tarihi.txt
+          
+          git commit -m "Otomatik Yedek: $(date)" || echo "Değişiklik yok"
+          git push
