@@ -13,26 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Projeyi Çek (Checkout)
+      - name: Projeyi Çek
         uses: actions/checkout@v3
 
-      - name: PostgreSQL 17 İstemcisini Kur
-        run: |
-          # PostgreSQL resmi deposunu ekle
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          # İmza anahtarını ekle
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          # Listeyi güncelle ve v17'yi kur
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-17
-
-      - name: Yedeği Al (pg_dump v17 ile)
+      - name: Yedeği Al (Docker ile Garanti Çözüm)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          # DİKKAT: Burada 'pg_dump' yerine tam dosya yolunu yazıyoruz
-          # Bu sayede sistem mecburen 17 sürümünü kullanıyor
-          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" > backup.sql
+          # Postgres 17 imajını indirip pg_dump komutunu çalıştırıyoruz
+          # --rm: İş bitince kapsülü sil
+          # --entrypoint: Direkt pg_dump aracını çalıştır
+          
+          docker run --rm --entrypoint pg_dump postgres:17-alpine "$DATABASE_URL" > backup.sql
 
       - name: Tarih Dosyası Oluştur
         run: date > son_yedeklenme_tarihi.txt
@@ -44,7 +36,5 @@ jobs:
           
           git add backup.sql son_yedeklenme_tarihi.txt
           
-          # Değişiklik varsa commit at
           git commit -m "Otomatik Yedek: $(date)" || echo "Değişiklik yok"
-          
           git push
