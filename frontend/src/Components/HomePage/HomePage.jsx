@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './HomePage.css';
 import CreateJobPost from './JobPosts/CreateJobPost';
+import CVAnalyze from './CVAnalyze/CVAnalyze';
 import { Users, Settings, LogOut, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,7 +18,7 @@ const DashboardView = () => (
 //burası henüz overview. asset tiplerinin hepsi için bir profil oluşturacağız buraya üstteki gibi
 //ardından yetkiye göre assetleri göstereceğiz click işlevleri ve gösterimi unutmayın.
 
-const HROperationsView = ({ onOpenJobPost }) => (
+const HROperationsView = ({ onOpenJobPost, onOpenCVAnalyze }) => (
     <div className="content-card">
         <h2>İnsan Kaynakları Yönetimi</h2>
         <p>Buradan yeni işe alım talebi oluşturabilir veya izinleri onaylayabilirsiniz.</p>
@@ -25,6 +26,9 @@ const HROperationsView = ({ onOpenJobPost }) => (
             <button className="action-btn"> + İşe Alım Talebi Aç</button>
             <button className="ghost-btn" onClick={onOpenJobPost}>
                 İş İlanı Oluştur
+            </button>
+            <button className="ghost-btn" onClick={onOpenCVAnalyze}>
+                CV Analiz
             </button>
         </div>
         <div className="request-list">
@@ -67,11 +71,18 @@ const HomePage = ({ userRole, onLogout }) => { // onLogout prop'u eklendi
             case 'dashboard':
                 return <DashboardView />;
             case 'hr':
-                return hrView === 'jobPost' ? (
-                    <CreateJobPost />
-                ) : (
-                    <HROperationsView onOpenJobPost={() => setHrView('jobPost')} />
-                );
+                if (hrView === 'jobPost') {
+                    return <CreateJobPost />;
+                } else if (hrView === 'cvAnalyze') {
+                    return <CVAnalyze />;
+                } else {
+                    return (
+                        <HROperationsView 
+                            onOpenJobPost={() => setHrView('jobPost')}
+                            onOpenCVAnalyze={() => setHrView('cvAnalyze')}
+                        />
+                    );
+                }
             case 'settings':
                 return <SettingsView />;
             default:
@@ -108,12 +119,20 @@ const HomePage = ({ userRole, onLogout }) => { // onLogout prop'u eklendi
                     </button>
 
                     {activeTab === 'hr' && (
-                        <button
-                            className={`submenu-btn ${hrView === 'jobPost' ? 'active' : ''}`}
-                            onClick={() => setHrView('jobPost')}
-                        >
-                            İş İlanı Oluştur
-                        </button>
+                        <>
+                            <button
+                                className={`submenu-btn ${hrView === 'jobPost' ? 'active' : ''}`}
+                                onClick={() => setHrView('jobPost')}
+                            >
+                                İş İlanı Oluştur
+                            </button>
+                            <button
+                                className={`submenu-btn ${hrView === 'cvAnalyze' ? 'active' : ''}`}
+                                onClick={() => setHrView('cvAnalyze')}
+                            >
+                                CV Analiz
+                            </button>
+                        </>
                     )}
 
                     <button
