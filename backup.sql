@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict XF6eHYMWaHSJWGdRe06eIebvdxbTc4xRzxcoaGYYJt32KrP1TjadztxlI6zXIAH
+\restrict VyqW1um8mgtoM8AJvGnEeNtabuHJccN2BswH6pr8LX05K0L9mXWaqtnOsDNngnQ
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -691,6 +691,8 @@ COPY public.departments (departmentid, departmentname, positionname) FROM stdin;
 --
 
 COPY public.jobposts (jobpostid, expectations, departmentid, companyid, createdbyuser) FROM stdin;
+1	- İleri Seviye Java\n- Etkili İletişim\n- 3+ yıl sektör deneyimi	1	\N	\N
+2	İletişim kabiliyeti yüksek\nİleri seviye ingilizce bilen	1	\N	\N
 \.
 
 
@@ -885,7 +887,7 @@ SELECT pg_catalog.setval('public.departments_departmentid_seq', 2, true);
 -- Name: jobpost_jobpostid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 1, false);
+SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 2, true);
 
 
 --
@@ -1529,5 +1531,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict XF6eHYMWaHSJWGdRe06eIebvdxbTc4xRzxcoaGYYJt32KrP1TjadztxlI6zXIAH
+\unrestrict VyqW1um8mgtoM8AJvGnEeNtabuHJccN2BswH6pr8LX05K0L9mXWaqtnOsDNngnQ
 
