@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+const { pool } = require('../config/database');
 
 class DepartmentService {
     /**
@@ -6,18 +6,16 @@ class DepartmentService {
      */
     async getAllDepartments() {
         try {
-            const { data, error } = await supabase
-                .from('departments')
-                .select('*')
-                .order('departmentid', { ascending: true });
-
-            if (error) {
-                throw error;
-            }
+            // Tüm departmanları ID'ye göre sıralı getir
+            const result = await pool.query(`
+                SELECT * 
+                FROM departments 
+                ORDER BY departmentid ASC
+            `);
 
             return {
                 success: true,
-                data: data || []
+                data: result.rows
             };
 
         } catch (error) {

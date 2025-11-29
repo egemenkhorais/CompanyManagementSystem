@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const supabase = require('../config/supabase');
+const { pool } = require('../config/database');
 
 class AuthService {
     /**
@@ -7,21 +7,23 @@ class AuthService {
      */
     async login(username, password) {
         try {
-            // 1. Kullanıcıyı bul
-            const { data: user, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .single();
+            // Kullanıcıyı username'e göre bul
+            const result = await pool.query(`
+                SELECT * 
+                FROM users 
+                WHERE username = '${username}'
+            `);
 
-            if (error || !user) {
+            const user = result.rows[0];
+
+            if (!user) {
                 return {
                     success: false,
                     message: 'Kullanıcı adı veya şifre hatalı!'
                 };
             }
 
-            // 2. Şifre kontrolü
+            // Şifre kontrolü
             const isMatch = await bcrypt.compare(password, user.password);
 
             if (!isMatch) {
@@ -31,13 +33,13 @@ class AuthService {
                 };
             }
 
-            // 3. Başarılı giriş
+            // Başarılı giriş
             return {
                 success: true,
                 message: 'Giriş başarılı',
                 role: user.role || 'user',
                 user: {
-                    id: user.id,
+                    id: user.userid,
                     username: user.username,
                     email: user.email,
                     fullName: user.full_name,
@@ -58,66 +60,53 @@ class AuthService {
         try {
             const { username, email, password, fullName, phone, department } = userData;
 
-            // 1. Kullanıcı adı kontrolü
-            const { data: existingUser } = await supabase
-                .from('users')
-                .select('username')
-                .eq('username', username)
-                .single();
+            // Aynı username var mı kontrol et
+            const userCheck = await pool.query(`
+                SELECT username 
+                FROM users 
+                WHERE username = '${username}'
+            `);
 
-            if (existingUser) {
+            if (userCheck.rows.length > 0) {
                 return {
                     success: false,
                     message: 'Bu kullanıcı adı zaten kullanılıyor!'
                 };
             }
 
-            // 2. Email kontrolü
-            const { data: existingEmail } = await supabase
-                .from('users')
-                .select('email')
-                .eq('email', email)
-                .single();
+            // Aynı email var mı kontrol et
+            const emailCheck = await pool.query(`
+                SELECT email 
+                FROM users 
+                WHERE email = '${email}'
+            `);
 
-            if (existingEmail) {
+            if (emailCheck.rows.length > 0) {
                 return {
                     success: false,
                     message: 'Bu e-posta adresi zaten kayıtlı!'
                 };
             }
 
-            // 3. Şifreyi hashle
+            // Şifreyi hashle
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // 4. Supabase'e kaydet
-            const { data, error } = await supabase
-                .from('users')
-                .insert([
-                    {
-                        username,
-                        email,
-                        password: hashedPassword,
-                        full_name: fullName,
-                        phone: phone || null,
-                        department: department || null,
-                        role: 'user',
-                        created_at: new Date().toISOString()
-                    }
-                ])
-                .select()
-                .single();
+            // Yeni kullanıcı ekle
+            const insertResult = await pool.query(`
+                INSERT INTO users (username, email, password, full_name, phone, department, role) 
+                VALUES ('${username}', '${email}', '${hashedPassword}', '${fullName}', '${phone}', '${department}', 'user') 
+                RETURNING userid, username, email
+            `);
 
-            if (error) {
-                throw error;
-            }
+            const newUser = insertResult.rows[0];
 
             return {
                 success: true,
-                message: 'Kullanıcı başarıyla oluşturuldu!',
+                message: 'Kayıt başarılı!',
                 user: {
-                    id: data.id,
-                    username: data.username,
-                    email: data.email
+                    id: newUser.userid,
+                    username: newUser.username,
+                    email: newUser.email
                 }
             };
 

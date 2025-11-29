@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+const { pool } = require('../config/database');
 
 class JobPostService {
     /**
@@ -16,28 +16,19 @@ class JobPostService {
                 };
             }
 
-            // Supabase'e kaydet
-            const { data, error } = await supabase
-                .from('jobposts')
-                .insert([
-                    {
-                        expectations: expectations.trim(),
-                        departmentid: departmentId,
-                        companyid: companyId,
-                        createdbyuser: createdByUser
-                    }
-                ])
-                .select()
-                .single();
+            // Yeni iş ilanı ekle ve eklenen kaydı geri döndür
+            const result = await pool.query(`
+                INSERT INTO jobposts (expectations, departmentid, companyid, createdbyuser) 
+                VALUES ('${expectations.trim()}', ${departmentId}, ${companyId}, ${createdByUser}) 
+                RETURNING * 
+            `);//trim komutu baştaki ve sondaki boslukları siler
 
-            if (error) {
-                throw error;
-            }
+            const jobPost = result.rows[0];
 
             return {
                 success: true,
                 message: 'İş ilanı başarıyla oluşturuldu.',
-                jobPost: data
+                jobPost: jobPost
             };
 
         } catch (error) {
