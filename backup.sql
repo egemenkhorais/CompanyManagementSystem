@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict VyqW1um8mgtoM8AJvGnEeNtabuHJccN2BswH6pr8LX05K0L9mXWaqtnOsDNngnQ
+\restrict zdFSyAS4pPFaXG7PBP4m7FbTcHDBXf8pdKPPmJ0FyB5gQY0dti9o8G990gfJA65
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -185,9 +185,11 @@ ALTER SEQUENCE public.companyrooms_companyroomid_seq OWNED BY public.companyroom
 
 CREATE TABLE public.cv (
     cvid integer NOT NULL,
-    cvname character varying(100),
+    cvsenderinfo character varying(100),
     cvdate timestamp without time zone,
-    cvitself bytea
+    cvitself bytea,
+    cvscore integer,
+    jobpostid integer
 );
 
 
@@ -221,8 +223,7 @@ ALTER SEQUENCE public.cv_cvid_seq OWNED BY public.cv.cvid;
 
 CREATE TABLE public.departments (
     departmentid integer NOT NULL,
-    departmentname character varying(100),
-    positionname character varying(100)
+    departmentname character varying(100)
 );
 
 
@@ -356,6 +357,84 @@ ALTER SEQUENCE public.menu_permissions_menuid_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.menu_permissions_menuid_seq OWNED BY public.menu_permissions.menuid;
+
+
+--
+-- Name: positionnames; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.positionnames (
+    id integer NOT NULL,
+    position_name character varying(100) NOT NULL,
+    description text,
+    level character varying(50),
+    is_active boolean DEFAULT true,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.positionnames OWNER TO postgres;
+
+--
+-- Name: positionnames_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.positionnames_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.positionnames_id_seq OWNER TO postgres;
+
+--
+-- Name: positionnames_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.positionnames_id_seq OWNED BY public.positionnames.id;
+
+
+--
+-- Name: positions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.positions (
+    id integer NOT NULL,
+    position_name_id integer NOT NULL,
+    departmentid integer NOT NULL,
+    quota integer DEFAULT 1,
+    is_active boolean DEFAULT true,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.positions OWNER TO postgres;
+
+--
+-- Name: positions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.positions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.positions_id_seq OWNER TO postgres;
+
+--
+-- Name: positions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.positions_id_seq OWNED BY public.positions.id;
 
 
 --
@@ -509,7 +588,8 @@ CREATE TABLE public.userdetails (
     departmentid integer,
     companyid integer,
     usersalary numeric(18,2),
-    yearsworked integer
+    yearsworked integer,
+    positionnames_id integer
 );
 
 
@@ -594,6 +674,20 @@ ALTER TABLE ONLY public.menu_permissions ALTER COLUMN menuid SET DEFAULT nextval
 
 
 --
+-- Name: positionnames id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.positionnames ALTER COLUMN id SET DEFAULT nextval('public.positionnames_id_seq'::regclass);
+
+
+--
+-- Name: positions id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.positions ALTER COLUMN id SET DEFAULT nextval('public.positions_id_seq'::regclass);
+
+
+--
 -- Name: request requestid; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -672,7 +766,7 @@ COPY public.companyrooms (companyroomid, companyroomname, companyroomtype, compa
 -- Data for Name: cv; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.cv (cvid, cvname, cvdate, cvitself) FROM stdin;
+COPY public.cv (cvid, cvsenderinfo, cvdate, cvitself, cvscore, jobpostid) FROM stdin;
 \.
 
 
@@ -680,9 +774,14 @@ COPY public.cv (cvid, cvname, cvdate, cvitself) FROM stdin;
 -- Data for Name: departments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.departments (departmentid, departmentname, positionname) FROM stdin;
-1	IT Departmanı	\N
-2	İnsan Kaynakları	\N
+COPY public.departments (departmentid, departmentname) FROM stdin;
+1	IT Departmanı
+2	İnsan Kaynakları
+3	Frontend Development
+4	Backend Development
+6	Muhasebe Departmanı
+5	QA/Test Departmanı
+7	Yönetim Departmanı
 \.
 
 
@@ -693,6 +792,8 @@ COPY public.departments (departmentid, departmentname, positionname) FROM stdin;
 COPY public.jobposts (jobpostid, expectations, departmentid, companyid, createdbyuser) FROM stdin;
 1	- İleri Seviye Java\n- Etkili İletişim\n- 3+ yıl sektör deneyimi	1	\N	\N
 2	İletişim kabiliyeti yüksek\nİleri seviye ingilizce bilen	1	\N	\N
+3	falna filan	3	\N	\N
+4	kjnjkkj	5	\N	\N
 \.
 
 
@@ -719,6 +820,62 @@ COPY public.menu_permissions (menuid, menuname) FROM stdin;
 6	menu_cv
 7	menu_talepler
 8	menu_projeler
+\.
+
+
+--
+-- Data for Name: positionnames; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.positionnames (id, position_name, description, level, is_active, created_at, updated_at) FROM stdin;
+1	Backend Developer	\N	Junior	t	2025-11-26 09:13:54.314838	2025-11-26 09:13:54.314838
+2	Backend Developer	\N	Mid	t	2025-11-26 09:18:55.870945	2025-11-26 09:18:55.870945
+3	Backend Developer	\N	Senior	t	2025-11-26 09:19:29.723868	2025-11-26 09:19:29.723868
+4	Backend Developer	\N	Lead	t	2025-11-26 09:19:50.355926	2025-11-26 09:19:50.355926
+5	Project Manager	Manages the department	Manager	t	2025-11-26 09:20:45.210938	2025-11-26 09:20:45.210938
+6	Frontend Developer	\N	Junior	t	2025-11-26 09:21:16.283042	2025-11-26 09:21:16.283042
+7	Frontend Developer	\N	Mid	t	2025-11-26 09:21:48.181754	2025-11-26 09:21:48.181754
+8	Frontend Developer	\N	Senior	t	2025-11-26 09:22:10.948443	2025-11-26 09:22:10.948443
+9	Frontend Developer	\N	Lead	t	2025-11-26 09:22:29.234558	2025-11-26 09:22:29.234558
+10	DevOps Engineer	\N	Junior 	t	2025-11-26 20:08:49.200316	2025-11-26 20:08:49.200316
+11	DevOps Engineer	\N	Mid	t	2025-11-26 20:09:47.326234	2025-11-26 20:09:47.326234
+12	DevOps Engineer 	\N	Senior	t	2025-11-26 20:10:20.206543	2025-11-26 20:10:20.206543
+13	Data Scientist	\N	Junior	t	2025-11-26 20:10:55.689811	2025-11-26 20:10:55.689811
+14	Data Analyst	\N	Junior	t	2025-11-26 20:11:58.982086	2025-11-26 20:11:58.982086
+15	QA Engineer	\N	Junior\n	t	2025-11-26 20:16:14.230716	2025-11-26 20:16:14.230716
+16	QA Engineer	\N	Mid	t	2025-11-26 20:16:40.621398	2025-11-26 20:16:40.621398
+17	QA Engineer	\N	Senior	t	2025-11-26 20:17:01.578414	2025-11-26 20:17:01.578414
+18	QA Engineer	\N	Lead	t	2025-11-26 20:17:20.861125	2025-11-26 20:17:20.861125
+19	CTO	\N	Manager	t	2025-11-26 20:17:45.125406	2025-11-26 20:17:45.125406
+\.
+
+
+--
+-- Data for Name: positions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.positions (id, position_name_id, departmentid, quota, is_active, created_at, updated_at) FROM stdin;
+1	1	4	1	t	2025-11-26 20:20:20.101851	2025-11-26 20:20:20.101851
+2	2	4	1	t	2025-11-26 20:20:44.820485	2025-11-26 20:20:44.820485
+3	3	4	1	t	2025-11-26 20:21:06.987593	2025-11-26 20:21:06.987593
+4	4	4	1	t	2025-11-26 20:21:22.506305	2025-11-26 20:21:22.506305
+5	5	4	1	t	2025-11-26 20:21:34.933348	2025-11-26 20:21:34.933348
+6	6	3	1	t	2025-11-26 20:21:56.530087	2025-11-26 20:21:56.530087
+7	7	3	1	t	2025-11-26 20:24:08.46831	2025-11-26 20:24:08.46831
+8	8	3	1	t	2025-11-26 20:24:17.832414	2025-11-26 20:24:17.832414
+9	9	3	1	t	2025-11-26 20:24:29.957814	2025-11-26 20:24:29.957814
+10	10	1	1	t	2025-11-26 20:25:00.806527	2025-11-26 20:25:00.806527
+11	11	1	1	t	2025-11-26 20:25:13.945172	2025-11-26 20:25:13.945172
+12	12	1	1	t	2025-11-26 20:25:23.471915	2025-11-26 20:25:23.471915
+13	13	1	1	t	2025-11-26 20:25:50.439624	2025-11-26 20:25:50.439624
+14	14	1	1	t	2025-11-26 20:26:12.781069	2025-11-26 20:26:12.781069
+15	15	5	1	t	2025-11-26 20:26:51.100715	2025-11-26 20:26:51.100715
+16	16	5	1	t	2025-11-26 20:27:03.277762	2025-11-26 20:27:03.277762
+17	17	5	1	t	2025-11-26 20:27:22.645196	2025-11-26 20:27:22.645196
+18	18	5	1	t	2025-11-26 20:27:35.012942	2025-11-26 20:27:35.012942
+19	19	7	1	t	2025-11-26 20:28:00.314595	2025-11-26 20:28:00.314595
+20	5	3	1	t	2025-11-26 20:28:28.106331	2025-11-26 20:28:28.106331
+21	5	1	1	t	2025-11-26 20:28:55.900883	2025-11-26 20:28:55.900883
 \.
 
 
@@ -823,10 +980,34 @@ COPY public.user_roles (userid, roleid) FROM stdin;
 -- Data for Name: userdetails; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, usersalary, yearsworked) FROM stdin;
-1	1	Ahmet Yılmaz	1	1	45000.50	3
-2	2	Ayşe Kaya	2	1	38000.00	5
-3	3	Mehmet Demir	1	2	25000.00	1
+COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, usersalary, yearsworked, positionnames_id) FROM stdin;
+1	1	Ahmet Yılmaz	1	1	45000.50	3	2
+2	2	Ayşe Kaya	2	1	38000.00	5	19
+3	3	Mehmet Demir	1	2	25000.00	1	5
+4	4	Ahmet Yılmaz	5	1	64648.00	3	12
+5	5	Ayşe Demir	1	1	63300.00	3	1
+6	6	Mehmet Kaya	3	1	26912.00	8	1
+7	7	Fatma Çelik	5	1	80684.00	6	16
+8	8	Mustafa Özkan	5	1	73032.00	7	18
+9	9	Zeynep Şahin	4	1	55571.00	2	15
+10	10	Emre Yıldız	1	1	28456.00	7	14
+11	11	Elif Koç	1	1	70403.00	8	14
+12	12	Burak Aydın	5	1	58287.00	10	13
+13	13	Hande Özdemir	3	1	62452.00	4	13
+14	14	Can Arslan	5	1	27177.00	2	9
+15	15	Merve Doğan	5	1	55572.00	10	8
+16	16	Volkan Kılıç	2	1	43568.00	9	7
+17	17	Özlem Aksoy	3	1	25620.00	9	7
+18	19	Büşra Yücel	4	1	31399.00	4	8
+19	20	Tolga Avcı	1	1	57389.00	5	7
+20	21	Gamze Polat	3	1	73702.00	5	2
+21	22	Sinan Coşkun	2	1	77226.00	1	1
+22	23	Pelin Korkmaz	1	1	52778.00	1	5
+23	24	Onur Çetinkaya	5	1	72962.00	2	2
+24	25	Esra Eroğlu	3	1	36030.00	11	4
+25	26	Mert Bulut	3	1	63151.00	2	3
+27	28	Selin Yaman	5	1	37077.00	6	1
+26	27	Deniz Karaca	4	1	45256.00	11	8
 \.
 
 
@@ -838,6 +1019,31 @@ COPY public.users (userid, username, password) FROM stdin;
 1	ahmet_yilmaz	sifre123
 3	mehmet_demir	sifre789
 2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C
+4	ahmet.yilmaz	Sifre123!
+5	ayse.demir	Sifre123!
+6	mehmet.kaya	Sifre123!
+7	fatma.celik	Sifre123!
+8	mustafa.ozkan	Sifre123!
+9	zeynep.sahin	Sifre123!
+10	emre.yildiz	Sifre123!
+11	elif.koc	Sifre123!
+12	burak.aydin	Sifre123!
+13	hande.ozdemir	Sifre123!
+14	can.arslan	Sifre123!
+15	merve.dogan	Sifre123!
+16	volkan.kilic	Sifre123!
+17	ozlem.aksoy	Sifre123!
+18	serkan.tasci	Sifre123!
+19	busra.yucel	Sifre123!
+20	tolga.avci	Sifre123!
+21	gamze.polat	Sifre123!
+22	sinan.coskun	Sifre123!
+23	pelin.korkmaz	Sifre123!
+24	onur.cetinkaya	Sifre123!
+25	esra.eroglu	Sifre123!
+26	mert.bulut	Sifre123!
+27	deniz.karaca	Sifre123!
+28	selin.yaman	Sifre123!
 \.
 
 
@@ -845,7 +1051,7 @@ COPY public.users (userid, username, password) FROM stdin;
 -- Name: User_userid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_userid_seq"', 3, true);
+SELECT pg_catalog.setval('public."User_userid_seq"', 28, true);
 
 
 --
@@ -887,7 +1093,7 @@ SELECT pg_catalog.setval('public.departments_departmentid_seq', 2, true);
 -- Name: jobpost_jobpostid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 2, true);
+SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 5, true);
 
 
 --
@@ -902,6 +1108,20 @@ SELECT pg_catalog.setval('public.meetings_meetingid_seq', 2, true);
 --
 
 SELECT pg_catalog.setval('public.menu_permissions_menuid_seq', 8, true);
+
+
+--
+-- Name: positionnames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.positionnames_id_seq', 1, true);
+
+
+--
+-- Name: positions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.positions_id_seq', 1, false);
 
 
 --
@@ -929,7 +1149,7 @@ SELECT pg_catalog.setval('public.roles_roleid_seq', 4, true);
 -- Name: userdetails_userdetailsid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.userdetails_userdetailsid_seq', 3, true);
+SELECT pg_catalog.setval('public.userdetails_userdetailsid_seq', 27, true);
 
 
 --
@@ -1005,6 +1225,30 @@ ALTER TABLE ONLY public.menu_permissions
 
 
 --
+-- Name: positionnames positionnames_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.positionnames
+    ADD CONSTRAINT positionnames_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: positions positions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.positions
+    ADD CONSTRAINT positions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: positions positions_position_name_id_departmentid_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.positions
+    ADD CONSTRAINT positions_position_name_id_departmentid_key UNIQUE (position_name_id, departmentid);
+
+
+--
 -- Name: request request_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1069,6 +1313,14 @@ ALTER TABLE ONLY public.company
 
 
 --
+-- Name: cv cv_jobpostid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cv
+    ADD CONSTRAINT cv_jobpostid_fkey FOREIGN KEY (jobpostid) REFERENCES public.jobposts(jobpostid) NOT VALID;
+
+
+--
 -- Name: jobposts jobpost_companyid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1098,6 +1350,22 @@ ALTER TABLE ONLY public.jobposts
 
 ALTER TABLE ONLY public.meetings
     ADD CONSTRAINT meetings_companyroomid_fkey FOREIGN KEY (companyroomid) REFERENCES public.companyrooms(companyroomid);
+
+
+--
+-- Name: positions positions_departmentid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.positions
+    ADD CONSTRAINT positions_departmentid_fkey FOREIGN KEY (departmentid) REFERENCES public.departments(departmentid);
+
+
+--
+-- Name: positions positions_position_name_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.positions
+    ADD CONSTRAINT positions_position_name_id_fkey FOREIGN KEY (position_name_id) REFERENCES public.positionnames(id);
 
 
 --
@@ -1186,6 +1454,14 @@ ALTER TABLE ONLY public.userdetails
 
 ALTER TABLE ONLY public.userdetails
     ADD CONSTRAINT userdetails_departmentid_fkey FOREIGN KEY (departmentid) REFERENCES public.departments(departmentid);
+
+
+--
+-- Name: userdetails userdetails_positionnames_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.userdetails
+    ADD CONSTRAINT userdetails_positionnames_id_fkey FOREIGN KEY (positionnames_id) REFERENCES public.positionnames(id);
 
 
 --
@@ -1369,6 +1645,42 @@ GRANT ALL ON SEQUENCE public.menu_permissions_menuid_seq TO service_role;
 
 
 --
+-- Name: TABLE positionnames; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.positionnames TO anon;
+GRANT ALL ON TABLE public.positionnames TO authenticated;
+GRANT ALL ON TABLE public.positionnames TO service_role;
+
+
+--
+-- Name: SEQUENCE positionnames_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.positionnames_id_seq TO anon;
+GRANT ALL ON SEQUENCE public.positionnames_id_seq TO authenticated;
+GRANT ALL ON SEQUENCE public.positionnames_id_seq TO service_role;
+
+
+--
+-- Name: TABLE positions; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.positions TO anon;
+GRANT ALL ON TABLE public.positions TO authenticated;
+GRANT ALL ON TABLE public.positions TO service_role;
+
+
+--
+-- Name: SEQUENCE positions_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.positions_id_seq TO anon;
+GRANT ALL ON SEQUENCE public.positions_id_seq TO authenticated;
+GRANT ALL ON SEQUENCE public.positions_id_seq TO service_role;
+
+
+--
 -- Name: TABLE request; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1531,5 +1843,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict VyqW1um8mgtoM8AJvGnEeNtabuHJccN2BswH6pr8LX05K0L9mXWaqtnOsDNngnQ
+\unrestrict zdFSyAS4pPFaXG7PBP4m7FbTcHDBXf8pdKPPmJ0FyB5gQY0dti9o8G990gfJA65
 
