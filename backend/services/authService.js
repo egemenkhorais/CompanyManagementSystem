@@ -9,11 +9,10 @@ class AuthService {
     async login(username, password) {
         try {
             // Kullanıcıyı username'e göre bul
-            const result = await pool.query(`
-                SELECT * 
-                FROM users 
-                WHERE username = '${username}'
-            `);
+            const result = await pool.query(
+                'SELECT * FROM users WHERE username = $1',
+                [username]
+            );
 
             const user = result.rows[0];
 
@@ -39,23 +38,44 @@ class AuthService {
                 id: user.userid,
                 username: user.username,
                 email: user.email,
-                role: user.role
+                roleid: user.roleid
             });
 
             return {
                 success: true,
                 message: 'Giriş başarılı',
-                token: token,  // JWT token buraya eklendi.
+                token: token,
                 user: {
                     id: user.userid,
                     username: user.username,
                     email: user.email,
-                    role: user.role
+                    roleid: user.roleid
                 }
             };
 
         } catch (error) {
             console.error('AuthService Login Error:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Kullanıcının yetkilerini getir
+     */
+    async getUserPermissions(userId) {
+        try {
+            const result = await pool.query(`
+                SELECT p.id, p.permission_code, p.permission_type, p.description, p.parent_code
+                FROM permissions p
+                JOIN role_permissions rp ON p.id = rp.permission_id
+                JOIN users u ON rp.roleid = u.roleid
+                WHERE u.userid = $1
+                ORDER BY p.permission_type, p.permission_code
+            `, [userId]);
+
+            return result.rows;
+        } catch (error) {
+            console.error('AuthService GetPermissions Error:', error);
             throw error;
         }
     }
@@ -68,11 +88,10 @@ class AuthService {
             const { username, email, password, fullName, phone, department } = userData;
 
             // Aynı username var mı kontrol et
-            const userCheck = await pool.query(`
-                SELECT username 
-                FROM users 
-                WHERE username = '${username}'
-            `);
+            const userCheck = await pool.query(
+                'SELECT username FROM users WHERE username = $1',
+                [username]
+            );
 
             if (userCheck.rows.length > 0) {
                 return {
@@ -81,29 +100,14 @@ class AuthService {
                 };
             }
 
-            // Aynı email var mı kontrol et
-            const emailCheck = await pool.query(`
-                SELECT email 
-                FROM users 
-                WHERE email = '${email}'
-            `);
-
-            if (emailCheck.rows.length > 0) {
-                return {
-                    success: false,
-                    message: 'Bu e-posta adresi zaten kayıtlı!'
-                };
-            }
-
             // Şifreyi hashle
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Yeni kullanıcı ekle
-            const insertResult = await pool.query(`
-                INSERT INTO users (username, email, password, full_name, phone, department, role) 
-                VALUES ('${username}', '${email}', '${hashedPassword}', '${fullName}', '${phone}', '${department}', 'user') 
-                RETURNING userid, username, email
-            `);
+            // Yeni kullanıcı ekle (varsayılan rol: 3 - backend_junior)
+            const insertResult = await pool.query(
+                'INSERT INTO users (username, password, roleid) VALUES ($1, $2, $3) RETURNING userid, username',
+                [username, hashedPassword, 3]
+            );
 
             const newUser = insertResult.rows[0];
 
@@ -112,8 +116,7 @@ class AuthService {
                 message: 'Kayıt başarılı!',
                 user: {
                     id: newUser.userid,
-                    username: newUser.username,
-                    email: newUser.email
+                    username: newUser.username
                 }
             };
 

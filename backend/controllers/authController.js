@@ -3,13 +3,11 @@ const authService = require('../services/AuthService');
 class AuthController {
     /**
      * Login İşlemi
-     * POST /api/auth/login
      */
     async login(req, res) {
         try {
             const { username, password } = req.body;
 
-            // Validasyon
             if (!username || !password) {
                 return res.status(400).json({
                     success: false,
@@ -17,15 +15,12 @@ class AuthController {
                 });
             }
 
-            // Service'i çağır
             const result = await authService.login(username, password);
 
-            // Başarısızsa 401 döndür
             if (!result.success) {
                 return res.status(401).json(result);
             }
 
-            // Başarılıysa 200 döndür
             res.json(result);
 
         } catch (error) {
@@ -38,22 +33,41 @@ class AuthController {
     }
 
     /**
+     * Kullanıcının yetkilerini getir
+     */
+    async getMyPermissions(req, res) {
+        try {
+            const userId = req.user.id;
+            const permissions = await authService.getUserPermissions(userId);
+
+            res.json({
+                success: true,
+                permissions: permissions
+            });
+
+        } catch (error) {
+            console.error('AuthController GetPermissions Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Yetkiler alınamadı.'
+            });
+        }
+    }
+
+    /**
      * Register İşlemi
-     * POST /api/auth/register
      */
     async register(req, res) {
         try {
             const { username, email, password, fullName, phone, department } = req.body;
 
-            // Validasyon
-            if (!username || !email || !password || !fullName) {
+            if (!username || !password) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Kullanıcı adı, email, şifre ve tam ad gereklidir!'
+                    message: 'Kullanıcı adı ve şifre gereklidir!'
                 });
             }
 
-            // Service'i çağır
             const result = await authService.register({
                 username,
                 email,
@@ -63,23 +77,20 @@ class AuthController {
                 department
             });
 
-            // Başarısızsa 400 döndür
             if (!result.success) {
                 return res.status(400).json(result);
             }
 
-            // Başarılıysa 201 döndür
             res.status(201).json(result);
 
         } catch (error) {
             console.error('AuthController Register Error:', error);
             res.status(500).json({
                 success: false,
-                message: 'Kayıt sırasında bir hata oluştu: ' + error.message
+                message: 'Kayıt sırasında bir hata oluştu.'
             });
         }
     }
 }
 
-// Singleton pattern
 module.exports = new AuthController();

@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './HomePage.css';
 import CreateJobPost from './JobPosts/CreateJobPost';
 import CVAnalyze from './CVAnalyze/CVAnalyze';
-import { Users, Settings, LogOut, LayoutDashboard } from 'lucide-react';
+import {
+    Users,
+    Settings,
+    LogOut,
+    LayoutDashboard,
+    Briefcase,
+    Calendar,
+    FileText,
+    Shield,
+    Building,
+    ChevronDown,
+    ChevronRight,
+    FileCheck
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../api/axiosInstance';
+
+// ==================== VIEW COMPONENTS ====================
 
 const DashboardView = () => (
     <div className="content-card">
@@ -15,19 +31,41 @@ const DashboardView = () => (
         </div>
     </div>
 );
-//burası henüz overview. asset tiplerinin hepsi için bir profil oluşturacağız buraya üstteki gibi
-//ardından yetkiye göre assetleri göstereceğiz click işlevleri ve gösterimi unutmayın.
 
-const HROperationsView = ({ onOpenJobPost, onOpenCVAnalyze }) => (
+const UserManagementView = () => (
+    <div className="content-card">
+        <h2>Kullanıcı Yönetimi</h2>
+        <p>Kullanıcıları buradan yönetebilirsiniz.</p>
+        {/* DataTable gelecek */}
+    </div>
+);
+
+const RoleManagementView = () => (
+    <div className="content-card">
+        <h2>Rol & Yetki Yönetimi</h2>
+        <p>Rolleri ve yetkileri buradan yönetebilirsiniz.</p>
+        {/* DataTable gelecek */}
+    </div>
+);
+
+const DepartmentManagementView = () => (
+    <div className="content-card">
+        <h2>Departman Yönetimi</h2>
+        <p>Departmanları buradan yönetebilirsiniz.</p>
+        {/* DataTable gelecek */}
+    </div>
+);
+
+const HROperationsView = ({ onNavigate }) => (
     <div className="content-card">
         <h2>İnsan Kaynakları Yönetimi</h2>
         <p>Buradan yeni işe alım talebi oluşturabilir veya izinleri onaylayabilirsiniz.</p>
         <div className="hr-actions">
-            <button className="action-btn"> + İşe Alım Talebi Aç</button>
-            <button className="ghost-btn" onClick={onOpenJobPost}>
+            <button className="action-btn">+ İşe Alım Talebi Aç</button>
+            <button className="ghost-btn" onClick={() => onNavigate('hr:job_post')}>
                 İş İlanı Oluştur
             </button>
-            <button className="ghost-btn" onClick={onOpenCVAnalyze}>
+            <button className="ghost-btn" onClick={() => onNavigate('hr:cv_analyze')}>
                 CV Analiz
             </button>
         </div>
@@ -37,8 +75,27 @@ const HROperationsView = ({ onOpenJobPost, onOpenCVAnalyze }) => (
         </div>
     </div>
 );
-//gösterim için aynı şekilde
 
+const ApplicationsView = () => (
+    <div className="content-card">
+        <h2>Başvurular</h2>
+        <p>İş başvurularını buradan görüntüleyebilirsiniz.</p>
+    </div>
+);
+
+const MeetingsView = () => (
+    <div className="content-card">
+        <h2>Toplantılar</h2>
+        <p>Toplantılarınızı buradan yönetebilirsiniz.</p>
+    </div>
+);
+
+const ReportsView = () => (
+    <div className="content-card">
+        <h2>Raporlar</h2>
+        <p>Sistem raporlarını buradan görüntüleyebilirsiniz.</p>
+    </div>
+);
 
 const SettingsView = () => (
     <div className="content-card">
@@ -47,42 +104,104 @@ const SettingsView = () => (
     </div>
 );
 
-const HomePage = ({ userRole, onLogout }) => { // onLogout prop'u eklendi
+// ==================== ICON MAPPING ====================
+
+const ICON_MAP = {
+    'dashboard': LayoutDashboard,
+    'admin:management': Shield,
+    'admin:users': Users,
+    'admin:roles': Shield,
+    'admin:departments': Building,
+    'hr:operations': Briefcase,
+    'hr:job_post': FileText,
+    'hr:cv_analyze': FileCheck,
+    'hr:applications': FileText,
+    'meetings': Calendar,
+    'reports': FileText,
+    'settings': Settings
+};
+
+// ==================== MAIN COMPONENT ====================
+
+const HomePage = ({ onLogout }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
-    const [hrView, setHrView] = useState('overview');
-    const navigate = useNavigate(); // Hook eklendi
+    const [expandedGroups, setExpandedGroups] = useState({});
+    const [permissions, setPermissions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+
+    // Kullanıcı bilgisi ve yetkilerini çek
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // LocalStorage'dan kullanıcı bilgisi
+                const userData = JSON.parse(localStorage.getItem('user'));
+                setUser(userData);
+
+                // API'den yetkileri çek
+                const response = await axiosInstance.get('/auth/my-permissions');
+                if (response.data.success) {
+                    setPermissions(response.data.permissions);
+                }
+            } catch (error) {
+                console.error('Veri çekme hatası:', error);
+                // Token geçersizse login'e yönlendir
+                if (error.response?.status === 401) {
+                    handleLogout();
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     // Çıkış
     const handleLogout = () => {
-        onLogout(); // App.jsx'teki state'i temizle
-        navigate('/login'); // Login sayfasına yönlendir
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (onLogout) onLogout();
+        navigate('/login');
     };
 
-    const handleTabChange = (tab, options = {}) => {
-        const { resetHrView = false } = options;
-        setActiveTab(tab);
-        if (tab !== 'hr' || resetHrView) {
-            setHrView('overview');
-        }
+    // Menü tıklama
+    const handleMenuClick = (permissionCode) => {
+        setActiveTab(permissionCode);
     };
 
+    // Grup açma/kapama
+    const toggleGroup = (groupCode) => {
+        setExpandedGroups(prev => ({
+            ...prev,
+            [groupCode]: !prev[groupCode]
+        }));
+    };
+
+    // İçerik render
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard':
                 return <DashboardView />;
-            case 'hr':
-                if (hrView === 'jobPost') {
-                    return <CreateJobPost />;
-                } else if (hrView === 'cvAnalyze') {
-                    return <CVAnalyze />;
-                } else {
-                    return (
-                        <HROperationsView 
-                            onOpenJobPost={() => setHrView('jobPost')}
-                            onOpenCVAnalyze={() => setHrView('cvAnalyze')}
-                        />
-                    );
-                }
+            case 'admin:users':
+                return <UserManagementView />;
+            case 'admin:roles':
+                return <RoleManagementView />;
+            case 'admin:departments':
+                return <DepartmentManagementView />;
+            case 'hr:operations':
+                return <HROperationsView onNavigate={handleMenuClick} />;
+            case 'hr:job_post':
+                return <CreateJobPost />;
+            case 'hr:cv_analyze':
+                return <CVAnalyze />;
+            case 'hr:applications':
+                return <ApplicationsView />;
+            case 'meetings':
+                return <MeetingsView />;
+            case 'reports':
+                return <ReportsView />;
             case 'settings':
                 return <SettingsView />;
             default:
@@ -90,70 +209,122 @@ const HomePage = ({ userRole, onLogout }) => { // onLogout prop'u eklendi
         }
     };
 
+    // Menü öğesi render
+    const renderMenuItem = (permission) => {
+        const Icon = ICON_MAP[permission.permission_code] || FileText;
+        const isActive = activeTab === permission.permission_code;
+
+        return (
+            <button
+                key={permission.id}
+                className={`menu-btn ${isActive ? 'active' : ''}`}
+                onClick={() => handleMenuClick(permission.permission_code)}
+            >
+                <Icon size={20} />
+                <span>{permission.description}</span>
+            </button>
+        );
+    };
+
+    // Grup menüsü render
+    const renderMenuGroup = (group) => {
+        const Icon = ICON_MAP[group.permission_code] || FileText;
+        const isExpanded = expandedGroups[group.permission_code];
+        const children = permissions.filter(p => p.parent_code === group.permission_code);
+
+        return (
+            <div key={group.id}>
+                <button
+                    className={`menu-btn ${isExpanded ? 'active' : ''}`}
+                    onClick={() => toggleGroup(group.permission_code)}
+                >
+                    <Icon size={20} />
+                    <span>{group.description}</span>
+                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+
+                {isExpanded && children.map(child => (
+                    <button
+                        key={child.id}
+                        className={`submenu-btn ${activeTab === child.permission_code ? 'active' : ''}`}
+                        onClick={() => handleMenuClick(child.permission_code)}
+                    >
+                        {child.description}
+                    </button>
+                ))}
+            </div>
+        );
+    };
+
+    // Sidebar render
+    const renderSidebar = () => {
+        // Tekil menüler (parent_code null ve menu tipinde)
+        const singleMenus = permissions.filter(
+            p => p.permission_type === 'menu' && !p.parent_code
+        );
+
+        // Grup menüler
+        const menuGroups = permissions.filter(
+            p => p.permission_type === 'menu_group'
+        );
+
+        return (
+            <>
+                {/* Dashboard her zaman ilk */}
+                {singleMenus
+                    .filter(m => m.permission_code === 'dashboard')
+                    .map(renderMenuItem)}
+
+                {/* Grup menüler */}
+                {menuGroups.map(renderMenuGroup)}
+
+                {/* Diğer tekil menüler (dashboard hariç) */}
+                {singleMenus
+                    .filter(m => m.permission_code !== 'dashboard')
+                    .map(renderMenuItem)}
+            </>
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className="home-page-wrapper">
+                <div className="home-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <p>Yükleniyor...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="home-page-wrapper">
             <div className="home-container">
-            <header className="main-header">
-                <div className="logo-area">Şirket Yönetim Sistemi</div>
-                <div className="user-info">
-                    <span>Hoşgeldin, Yönetici</span>
+                <header className="main-header">
+                    <div className="logo-area">Şirket Yönetim Sistemi</div>
+                    <div className="user-info">
+                        <span>Hoşgeldin, {user?.username || 'Kullanıcı'}</span>
+                    </div>
+                </header>
+
+                <div className="main-body">
+                    <aside className="sidebar">
+                        <div className="menu-title">MENÜ</div>
+
+                        {renderSidebar()}
+
+                        <div className="spacer"></div>
+
+                        <button className="menu-btn logout" onClick={handleLogout}>
+                            <LogOut size={20} />
+                            <span>Çıkış Yap</span>
+                        </button>
+                    </aside>
+
+                    <main className="content-area">
+                        {renderContent()}
+                    </main>
                 </div>
-            </header>
-
-            <div className="main-body">
-                <aside className="sidebar">
-                    <div className="menu-title">MENÜ</div>
-
-                    <button
-                        className={`menu-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-                        onClick={() => handleTabChange('dashboard')}
-                    >
-                        <LayoutDashboard size={20} /> Ana Panel
-                    </button>
-
-                    <button
-                        className={`menu-btn ${activeTab === 'hr' ? 'active' : ''}`}
-                        onClick={() => handleTabChange('hr', { resetHrView: true })}
-                    >
-                        <Users size={20} /> İK İşlemleri
-                    </button>
-
-                    {activeTab === 'hr' && (
-                        <>
-                            <button
-                                className={`submenu-btn ${hrView === 'jobPost' ? 'active' : ''}`}
-                                onClick={() => setHrView('jobPost')}
-                            >
-                                İş İlanı Oluştur
-                            </button>
-                            <button
-                                className={`submenu-btn ${hrView === 'cvAnalyze' ? 'active' : ''}`}
-                                onClick={() => setHrView('cvAnalyze')}
-                            >
-                                CV Analiz
-                            </button>
-                        </>
-                    )}
-
-                    <button
-                        className={`menu-btn ${activeTab === 'settings' ? 'active' : ''}`}
-                        onClick={() => handleTabChange('settings')}
-                    >
-                        <Settings size={20} /> Ayarlar
-                    </button>
-
-                    <div className="spacer"></div>
-
-                    <button className="menu-btn logout" onClick={handleLogout}>
-                        <LogOut size={20} /> Çıkış Yap
-                    </button>
-                </aside>
-
-                <main className="content-area">
-                    {renderContent()}
-                </main>
             </div>
-        </div>
         </div>
     );
 };
