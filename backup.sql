@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict zdFSyAS4pPFaXG7PBP4m7FbTcHDBXf8pdKPPmJ0FyB5gQY0dti9o8G990gfJA65
+\restrict 2T9MJqww0kRTzHnYwA0hdhvyyXyc6Zv4hrEBscZlBJw1NWYOgsGBmEeMtYTqHkZ
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -46,7 +46,8 @@ SET default_table_access_method = heap;
 CREATE TABLE public.users (
     userid integer NOT NULL,
     username character varying(100) NOT NULL,
-    password character varying(100) NOT NULL
+    password character varying(100) NOT NULL,
+    roleid integer
 );
 
 
@@ -72,40 +73,6 @@ ALTER SEQUENCE public."User_userid_seq" OWNER TO postgres;
 --
 
 ALTER SEQUENCE public."User_userid_seq" OWNED BY public.users.userid;
-
-
---
--- Name: action_permissions; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.action_permissions (
-    actionid integer NOT NULL,
-    actionname character varying(100) NOT NULL
-);
-
-
-ALTER TABLE public.action_permissions OWNER TO postgres;
-
---
--- Name: action_permissions_actionid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.action_permissions_actionid_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.action_permissions_actionid_seq OWNER TO postgres;
-
---
--- Name: action_permissions_actionid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.action_permissions_actionid_seq OWNED BY public.action_permissions.actionid;
 
 
 --
@@ -326,22 +293,24 @@ ALTER SEQUENCE public.meetings_meetingid_seq OWNED BY public.meetings.meetingid;
 
 
 --
--- Name: menu_permissions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: permissions; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.menu_permissions (
-    menuid integer NOT NULL,
-    menuname character varying(100) NOT NULL
+CREATE TABLE public.permissions (
+    id integer NOT NULL,
+    permission_code character varying(50) NOT NULL,
+    permission_type character varying(10) NOT NULL,
+    description character varying(200)
 );
 
 
-ALTER TABLE public.menu_permissions OWNER TO postgres;
+ALTER TABLE public.permissions OWNER TO postgres;
 
 --
--- Name: menu_permissions_menuid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.menu_permissions_menuid_seq
+CREATE SEQUENCE public.permissions_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -350,13 +319,13 @@ CREATE SEQUENCE public.menu_permissions_menuid_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.menu_permissions_menuid_seq OWNER TO postgres;
+ALTER SEQUENCE public.permissions_id_seq OWNER TO postgres;
 
 --
--- Name: menu_permissions_menuid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.menu_permissions_menuid_seq OWNED BY public.menu_permissions.menuid;
+ALTER SEQUENCE public.permissions_id_seq OWNED BY public.permissions.id;
 
 
 --
@@ -508,28 +477,16 @@ ALTER SEQUENCE public.requesttype_requesttypeid_seq OWNED BY public.requesttype.
 
 
 --
--- Name: role_action_permissions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: role_permissions; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.role_action_permissions (
+CREATE TABLE public.role_permissions (
     roleid integer NOT NULL,
-    actionid integer NOT NULL
+    permission_id integer NOT NULL
 );
 
 
-ALTER TABLE public.role_action_permissions OWNER TO postgres;
-
---
--- Name: role_menu_permissions; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.role_menu_permissions (
-    roleid integer NOT NULL,
-    menuid integer NOT NULL
-);
-
-
-ALTER TABLE public.role_menu_permissions OWNER TO postgres;
+ALTER TABLE public.role_permissions OWNER TO postgres;
 
 --
 -- Name: roles; Type: TABLE; Schema: public; Owner: postgres
@@ -564,18 +521,6 @@ ALTER SEQUENCE public.roles_roleid_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.roles_roleid_seq OWNED BY public.roles.roleid;
 
-
---
--- Name: user_roles; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.user_roles (
-    userid integer NOT NULL,
-    roleid integer NOT NULL
-);
-
-
-ALTER TABLE public.user_roles OWNER TO postgres;
 
 --
 -- Name: userdetails; Type: TABLE; Schema: public; Owner: postgres
@@ -615,13 +560,6 @@ ALTER SEQUENCE public.userdetails_userdetailsid_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.userdetails_userdetailsid_seq OWNED BY public.userdetails.userdetailsid;
-
-
---
--- Name: action_permissions actionid; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.action_permissions ALTER COLUMN actionid SET DEFAULT nextval('public.action_permissions_actionid_seq'::regclass);
 
 
 --
@@ -667,10 +605,10 @@ ALTER TABLE ONLY public.meetings ALTER COLUMN meetingid SET DEFAULT nextval('pub
 
 
 --
--- Name: menu_permissions menuid; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: permissions id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.menu_permissions ALTER COLUMN menuid SET DEFAULT nextval('public.menu_permissions_menuid_seq'::regclass);
+ALTER TABLE ONLY public.permissions ALTER COLUMN id SET DEFAULT nextval('public.permissions_id_seq'::regclass);
 
 
 --
@@ -720,25 +658,6 @@ ALTER TABLE ONLY public.userdetails ALTER COLUMN userdetailsid SET DEFAULT nextv
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN userid SET DEFAULT nextval('public."User_userid_seq"'::regclass);
-
-
---
--- Data for Name: action_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.action_permissions (actionid, actionname) FROM stdin;
-1	kullanici_ekle
-2	kullanici_sil
-3	kullanici_duzenle
-4	toplanti_olustur
-5	toplanti_sil
-6	maas_goruntule
-7	maas_duzenle
-8	cv_goruntule
-9	cv_sil
-10	talep_olustur
-11	talep_onayla
-\.
 
 
 --
@@ -792,8 +711,6 @@ COPY public.departments (departmentid, departmentname) FROM stdin;
 COPY public.jobposts (jobpostid, expectations, departmentid, companyid, createdbyuser) FROM stdin;
 1	- İleri Seviye Java\n- Etkili İletişim\n- 3+ yıl sektör deneyimi	1	\N	\N
 2	İletişim kabiliyeti yüksek\nİleri seviye ingilizce bilen	1	\N	\N
-3	falna filan	3	\N	\N
-4	kjnjkkj	5	\N	\N
 \.
 
 
@@ -808,18 +725,27 @@ COPY public.meetings (meetingid, companyroomid, meetingdate, meetingsubject, ise
 
 
 --
--- Data for Name: menu_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.menu_permissions (menuid, menuname) FROM stdin;
-1	menu_dashboard
-2	menu_calisanlar
-3	menu_ekibim
-4	menu_toplanti
-5	menu_maas
-6	menu_cv
-7	menu_talepler
-8	menu_projeler
+COPY public.permissions (id, permission_code, permission_type, description) FROM stdin;
+1	dashboard	menu	Ana Panel
+2	user_management	menu	Kullanıcı Yönetimi
+3	hr_operations	menu	İK İşlemleri
+4	meetings	menu	Toplantılar
+5	reports	menu	Raporlar
+6	settings	menu	Sistem Ayarları
+7	users:create	action	Kullanıcı oluşturma
+8	users:edit	action	Kullanıcı düzenleme
+9	users:delete	action	Kullanıcı silme
+10	jobs:create	action	İş ilanı oluşturma
+11	jobs:edit	action	İş ilanı düzenleme
+12	jobs:delete	action	İş ilanı silme
+13	salary:view	action	Maaş görüntüleme
+14	salary:edit	action	Maaş düzenleme
+15	meetings:create	action	Toplantı oluşturma
+16	meetings:delete	action	Toplantı silme
+17	requests:approve	action	Talep onaylama
 \.
 
 
@@ -901,10 +827,10 @@ COPY public.requesttype (requesttypeid, requesttypename) FROM stdin;
 
 
 --
--- Data for Name: role_action_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: role_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.role_action_permissions (roleid, actionid) FROM stdin;
+COPY public.role_permissions (roleid, permission_id) FROM stdin;
 1	1
 1	2
 1	3
@@ -916,43 +842,28 @@ COPY public.role_action_permissions (roleid, actionid) FROM stdin;
 1	9
 1	10
 1	11
+1	12
+1	13
+1	14
+1	15
+1	16
+1	17
 2	1
 2	2
 2	3
-2	8
-2	9
-2	11
-3	3
-3	4
-3	6
-3	11
-4	10
-\.
-
-
---
--- Data for Name: role_menu_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.role_menu_permissions (roleid, menuid) FROM stdin;
-1	1
-1	2
-1	3
-1	4
-1	5
-1	6
-1	7
-1	8
-2	1
-2	2
-2	6
 2	7
+2	8
+2	10
+2	11
+2	12
+2	17
 3	1
-3	3
 3	4
-3	7
+3	13
+3	15
+3	16
+3	17
 4	1
-4	7
 \.
 
 
@@ -965,14 +876,6 @@ COPY public.roles (roleid, rolename) FROM stdin;
 2	İK
 3	Yönetici
 4	Çalışan
-\.
-
-
---
--- Data for Name: user_roles; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.user_roles (userid, roleid) FROM stdin;
 \.
 
 
@@ -1015,35 +918,35 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (userid, username, password) FROM stdin;
-1	ahmet_yilmaz	sifre123
-3	mehmet_demir	sifre789
-2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C
-4	ahmet.yilmaz	Sifre123!
-5	ayse.demir	Sifre123!
-6	mehmet.kaya	Sifre123!
-7	fatma.celik	Sifre123!
-8	mustafa.ozkan	Sifre123!
-9	zeynep.sahin	Sifre123!
-10	emre.yildiz	Sifre123!
-11	elif.koc	Sifre123!
-12	burak.aydin	Sifre123!
-13	hande.ozdemir	Sifre123!
-14	can.arslan	Sifre123!
-15	merve.dogan	Sifre123!
-16	volkan.kilic	Sifre123!
-17	ozlem.aksoy	Sifre123!
-18	serkan.tasci	Sifre123!
-19	busra.yucel	Sifre123!
-20	tolga.avci	Sifre123!
-21	gamze.polat	Sifre123!
-22	sinan.coskun	Sifre123!
-23	pelin.korkmaz	Sifre123!
-24	onur.cetinkaya	Sifre123!
-25	esra.eroglu	Sifre123!
-26	mert.bulut	Sifre123!
-27	deniz.karaca	Sifre123!
-28	selin.yaman	Sifre123!
+COPY public.users (userid, username, password, roleid) FROM stdin;
+4	ahmet.yilmaz	Sifre123!	\N
+5	ayse.demir	Sifre123!	\N
+6	mehmet.kaya	Sifre123!	\N
+7	fatma.celik	Sifre123!	\N
+8	mustafa.ozkan	Sifre123!	\N
+9	zeynep.sahin	Sifre123!	\N
+10	emre.yildiz	Sifre123!	\N
+11	elif.koc	Sifre123!	\N
+12	burak.aydin	Sifre123!	\N
+13	hande.ozdemir	Sifre123!	\N
+14	can.arslan	Sifre123!	\N
+15	merve.dogan	Sifre123!	\N
+16	volkan.kilic	Sifre123!	\N
+17	ozlem.aksoy	Sifre123!	\N
+18	serkan.tasci	Sifre123!	\N
+19	busra.yucel	Sifre123!	\N
+20	tolga.avci	Sifre123!	\N
+21	gamze.polat	Sifre123!	\N
+22	sinan.coskun	Sifre123!	\N
+23	pelin.korkmaz	Sifre123!	\N
+24	onur.cetinkaya	Sifre123!	\N
+25	esra.eroglu	Sifre123!	\N
+26	mert.bulut	Sifre123!	\N
+27	deniz.karaca	Sifre123!	\N
+28	selin.yaman	Sifre123!	\N
+1	ahmet_yilmaz	sifre123	1
+2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2
+3	mehmet_demir	sifre789	4
 \.
 
 
@@ -1052,13 +955,6 @@ COPY public.users (userid, username, password) FROM stdin;
 --
 
 SELECT pg_catalog.setval('public."User_userid_seq"', 28, true);
-
-
---
--- Name: action_permissions_actionid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.action_permissions_actionid_seq', 11, true);
 
 
 --
@@ -1104,10 +1000,10 @@ SELECT pg_catalog.setval('public.meetings_meetingid_seq', 2, true);
 
 
 --
--- Name: menu_permissions_menuid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.menu_permissions_menuid_seq', 8, true);
+SELECT pg_catalog.setval('public.permissions_id_seq', 17, true);
 
 
 --
@@ -1161,14 +1057,6 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: action_permissions action_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.action_permissions
-    ADD CONSTRAINT action_permissions_pkey PRIMARY KEY (actionid);
-
-
---
 -- Name: company company_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1217,11 +1105,19 @@ ALTER TABLE ONLY public.meetings
 
 
 --
--- Name: menu_permissions menu_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: permissions permissions_permission_code_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.menu_permissions
-    ADD CONSTRAINT menu_permissions_pkey PRIMARY KEY (menuid);
+ALTER TABLE ONLY public.permissions
+    ADD CONSTRAINT permissions_permission_code_key UNIQUE (permission_code);
+
+
+--
+-- Name: permissions permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.permissions
+    ADD CONSTRAINT permissions_pkey PRIMARY KEY (id);
 
 
 --
@@ -1265,19 +1161,11 @@ ALTER TABLE ONLY public.requesttype
 
 
 --
--- Name: role_action_permissions role_action_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: role_permissions role_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.role_action_permissions
-    ADD CONSTRAINT role_action_permissions_pkey PRIMARY KEY (roleid, actionid);
-
-
---
--- Name: role_menu_permissions role_menu_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.role_menu_permissions
-    ADD CONSTRAINT role_menu_permissions_pkey PRIMARY KEY (roleid, menuid);
+ALTER TABLE ONLY public.role_permissions
+    ADD CONSTRAINT role_permissions_pkey PRIMARY KEY (roleid, permission_id);
 
 
 --
@@ -1286,14 +1174,6 @@ ALTER TABLE ONLY public.role_menu_permissions
 
 ALTER TABLE ONLY public.roles
     ADD CONSTRAINT roles_pkey PRIMARY KEY (roleid);
-
-
---
--- Name: user_roles user_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.user_roles
-    ADD CONSTRAINT user_roles_pkey PRIMARY KEY (userid, roleid);
 
 
 --
@@ -1393,51 +1273,19 @@ ALTER TABLE ONLY public.request
 
 
 --
--- Name: role_action_permissions role_action_permissions_actionid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: role_permissions role_permissions_permission_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.role_action_permissions
-    ADD CONSTRAINT role_action_permissions_actionid_fkey FOREIGN KEY (actionid) REFERENCES public.action_permissions(actionid);
-
-
---
--- Name: role_action_permissions role_action_permissions_roleid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.role_action_permissions
-    ADD CONSTRAINT role_action_permissions_roleid_fkey FOREIGN KEY (roleid) REFERENCES public.roles(roleid);
+ALTER TABLE ONLY public.role_permissions
+    ADD CONSTRAINT role_permissions_permission_id_fkey FOREIGN KEY (permission_id) REFERENCES public.permissions(id);
 
 
 --
--- Name: role_menu_permissions role_menu_permissions_menuid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: role_permissions role_permissions_roleid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.role_menu_permissions
-    ADD CONSTRAINT role_menu_permissions_menuid_fkey FOREIGN KEY (menuid) REFERENCES public.menu_permissions(menuid);
-
-
---
--- Name: role_menu_permissions role_menu_permissions_roleid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.role_menu_permissions
-    ADD CONSTRAINT role_menu_permissions_roleid_fkey FOREIGN KEY (roleid) REFERENCES public.roles(roleid);
-
-
---
--- Name: user_roles user_roles_roleid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.user_roles
-    ADD CONSTRAINT user_roles_roleid_fkey FOREIGN KEY (roleid) REFERENCES public.roles(roleid);
-
-
---
--- Name: user_roles user_roles_userid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.user_roles
-    ADD CONSTRAINT user_roles_userid_fkey FOREIGN KEY (userid) REFERENCES public.users(userid);
+ALTER TABLE ONLY public.role_permissions
+    ADD CONSTRAINT role_permissions_roleid_fkey FOREIGN KEY (roleid) REFERENCES public.roles(roleid);
 
 
 --
@@ -1473,6 +1321,14 @@ ALTER TABLE ONLY public.userdetails
 
 
 --
+-- Name: users users_roleid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_roleid_fkey FOREIGN KEY (roleid) REFERENCES public.roles(roleid);
+
+
+--
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: pg_database_owner
 --
 
@@ -1498,24 +1354,6 @@ GRANT ALL ON TABLE public.users TO service_role;
 GRANT ALL ON SEQUENCE public."User_userid_seq" TO anon;
 GRANT ALL ON SEQUENCE public."User_userid_seq" TO authenticated;
 GRANT ALL ON SEQUENCE public."User_userid_seq" TO service_role;
-
-
---
--- Name: TABLE action_permissions; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.action_permissions TO anon;
-GRANT ALL ON TABLE public.action_permissions TO authenticated;
-GRANT ALL ON TABLE public.action_permissions TO service_role;
-
-
---
--- Name: SEQUENCE action_permissions_actionid_seq; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON SEQUENCE public.action_permissions_actionid_seq TO anon;
-GRANT ALL ON SEQUENCE public.action_permissions_actionid_seq TO authenticated;
-GRANT ALL ON SEQUENCE public.action_permissions_actionid_seq TO service_role;
 
 
 --
@@ -1627,21 +1465,21 @@ GRANT ALL ON SEQUENCE public.meetings_meetingid_seq TO service_role;
 
 
 --
--- Name: TABLE menu_permissions; Type: ACL; Schema: public; Owner: postgres
+-- Name: TABLE permissions; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON TABLE public.menu_permissions TO anon;
-GRANT ALL ON TABLE public.menu_permissions TO authenticated;
-GRANT ALL ON TABLE public.menu_permissions TO service_role;
+GRANT ALL ON TABLE public.permissions TO anon;
+GRANT ALL ON TABLE public.permissions TO authenticated;
+GRANT ALL ON TABLE public.permissions TO service_role;
 
 
 --
--- Name: SEQUENCE menu_permissions_menuid_seq; Type: ACL; Schema: public; Owner: postgres
+-- Name: SEQUENCE permissions_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON SEQUENCE public.menu_permissions_menuid_seq TO anon;
-GRANT ALL ON SEQUENCE public.menu_permissions_menuid_seq TO authenticated;
-GRANT ALL ON SEQUENCE public.menu_permissions_menuid_seq TO service_role;
+GRANT ALL ON SEQUENCE public.permissions_id_seq TO anon;
+GRANT ALL ON SEQUENCE public.permissions_id_seq TO authenticated;
+GRANT ALL ON SEQUENCE public.permissions_id_seq TO service_role;
 
 
 --
@@ -1717,21 +1555,12 @@ GRANT ALL ON SEQUENCE public.requesttype_requesttypeid_seq TO service_role;
 
 
 --
--- Name: TABLE role_action_permissions; Type: ACL; Schema: public; Owner: postgres
+-- Name: TABLE role_permissions; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON TABLE public.role_action_permissions TO anon;
-GRANT ALL ON TABLE public.role_action_permissions TO authenticated;
-GRANT ALL ON TABLE public.role_action_permissions TO service_role;
-
-
---
--- Name: TABLE role_menu_permissions; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.role_menu_permissions TO anon;
-GRANT ALL ON TABLE public.role_menu_permissions TO authenticated;
-GRANT ALL ON TABLE public.role_menu_permissions TO service_role;
+GRANT ALL ON TABLE public.role_permissions TO anon;
+GRANT ALL ON TABLE public.role_permissions TO authenticated;
+GRANT ALL ON TABLE public.role_permissions TO service_role;
 
 
 --
@@ -1750,15 +1579,6 @@ GRANT ALL ON TABLE public.roles TO service_role;
 GRANT ALL ON SEQUENCE public.roles_roleid_seq TO anon;
 GRANT ALL ON SEQUENCE public.roles_roleid_seq TO authenticated;
 GRANT ALL ON SEQUENCE public.roles_roleid_seq TO service_role;
-
-
---
--- Name: TABLE user_roles; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.user_roles TO anon;
-GRANT ALL ON TABLE public.user_roles TO authenticated;
-GRANT ALL ON TABLE public.user_roles TO service_role;
 
 
 --
@@ -1843,5 +1663,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict zdFSyAS4pPFaXG7PBP4m7FbTcHDBXf8pdKPPmJ0FyB5gQY0dti9o8G990gfJA65
+\unrestrict 2T9MJqww0kRTzHnYwA0hdhvyyXyc6Zv4hrEBscZlBJw1NWYOgsGBmEeMtYTqHkZ
 
