@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwtUtils = require('../utils/jwtUtils');
 const { pool } = require('../config/database');
 
 class AuthService {
@@ -34,15 +35,21 @@ class AuthService {
             }
 
             // Başarılı giriş
+            const token = jwtUtils.generateToken({
+                id: user.userid,
+                username: user.username,
+                email: user.email,
+                role: user.role
+            });
+
             return {
                 success: true,
                 message: 'Giriş başarılı',
-                role: user.role || 'user',
+                token: token,  // JWT token buraya eklendi.
                 user: {
                     id: user.userid,
                     username: user.username,
                     email: user.email,
-                    fullName: user.full_name,
                     role: user.role
                 }
             };

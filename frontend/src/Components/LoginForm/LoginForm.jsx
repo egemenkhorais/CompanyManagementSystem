@@ -25,11 +25,16 @@ const LoginForm = ({ onLoginSuccess }) => {
             console.log('Backend Response:', response.data); // Debug için
 
             if (response.data.success) {
+                // Token ve kullanıcı bilgilerini localStorage'a kaydet
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+
                 alert("Giriş Başarılı! Hoşgeldin " + username);
 
-                // YENİ FORMAT: response.data.user.role
+                // Kullanıcının rolünü al
                 const userRole = response.data.user?.role || 'user';
 
+                // App.jsx'e bildir ve yönlendir
                 onLoginSuccess(userRole);
                 navigate('/home');
             } else {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './CreateJobPost.css';
+import axiosInstance from '../../../api/axiosInstance'; // Merkezi axios instance'ı dahil et
 
 const CreateJobPost = () => {
     const [departments, setDepartments] = useState([]);
@@ -10,29 +11,30 @@ const CreateJobPost = () => {
     const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Sayfa yüklendiğinde departmanları getir
     useEffect(() => {
         const fetchDepartments = async () => {
             setIsLoadingDepartments(true);
             setDepartmentError('');
 
             try {
-                const response = await fetch('http://127.0.0.1:5001/api/departments');
-                const result = await response.json();
+                // axiosInstance kullanıyoruz - token otomatik eklenir
+                const response = await axiosInstance.get('/departments');
 
-                if (!response.ok || !result.success) {
-                    throw new Error(result.message || 'Departmanlar yüklenemedi.');
+                if (response.data.success) {
+                    // Backend'den gelen veriyi düzenle
+                    const normalized = response.data.data.map((department) => ({
+                        id: department.departmentid,
+                        name: department.departmentname
+                    }));
+                    setDepartments(normalized);
+                } else {
+                    throw new Error(response.data.message || 'Departmanlar yüklenemedi.');
                 }
 
-                const normalized = Array.isArray(result.data)
-                    ? result.data.map((department) => ({
-                          id: department.departmentid,
-                          name: department.departmentname
-                      }))
-                    : [];
-
-                setDepartments(normalized);
             } catch (error) {
-                setDepartmentError(error.message);
+                // Hata mesajını göster
+                setDepartmentError(error.response?.data?.message || error.message);
             } finally {
                 setIsLoadingDepartments(false);
             }
@@ -41,10 +43,12 @@ const CreateJobPost = () => {
         fetchDepartments();
     }, []);
 
+    // Form gönderildiğinde çalışır
     const handleSubmit = async (event) => {
         event.preventDefault();
         setSubmitStatus({ type: '', message: '' });
 
+        // Departman seçilmemiş mi kontrol et
         if (!selectedDepartmentId) {
             setSubmitStatus({
                 type: 'error',
@@ -53,6 +57,7 @@ const CreateJobPost = () => {
             return;
         }
 
+        // Beklentiler boş mu kontrol et
         if (!expectations.trim()) {
             setSubmitStatus({
                 type: 'error',
@@ -64,33 +69,29 @@ const CreateJobPost = () => {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch('http://127.0.0.1:5001/api/jobposts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    departmentId: Number(selectedDepartmentId),
-                    expectations: expectations.trim()
-                })
+            // axiosInstance ile iş ilanı oluştur - token otomatik eklenir
+            const response = await axiosInstance.post('/jobposts', {
+                departmentId: Number(selectedDepartmentId),
+                expectations: expectations.trim()
             });
 
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-                throw new Error(result.message || 'İş ilanı oluşturulamadı.');
+            if (response.data.success) {
+                // Başarılı - formu temizle
+                setSubmitStatus({
+                    type: 'success',
+                    message: 'İlan başarıyla oluşturuldu.'
+                });
+                setSelectedDepartmentId('');
+                setExpectations('');
+            } else {
+                throw new Error(response.data.message || 'İş ilanı oluşturulamadı.');
             }
 
-            setSubmitStatus({
-                type: 'success',
-                message: 'İlan başarıyla oluşturuldu.'
-            });
-            setSelectedDepartmentId('');
-            setExpectations('');
         } catch (error) {
+            // Hata mesajını göster
             setSubmitStatus({
                 type: 'error',
-                message: error.message
+                message: error.response?.data?.message || error.message
             });
         } finally {
             setIsSubmitting(false);
@@ -155,4 +156,3 @@ const CreateJobPost = () => {
 };
 
 export default CreateJobPost;
-

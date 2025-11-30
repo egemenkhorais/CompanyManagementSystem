@@ -23,7 +23,7 @@ const CVAnalyze = () => {
     const handleAnalyze = () => {
         // Şimdilik sadece placeholder - backend bağlantısı sonra yapılacak
         if (!selectedJobPost) {
-            alert('Lütfen bir iş ilanı seçiniz.');
+            alert('Lütfn bir iş ilanı seçiniz.');
             return;
         }
         if (!selectedFile) {
