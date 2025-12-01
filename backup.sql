@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 2T9MJqww0kRTzHnYwA0hdhvyyXyc6Zv4hrEBscZlBJw1NWYOgsGBmEeMtYTqHkZ
+\restrict MsTwCbqigNDf7knEJfeceVgUvdo6XY6eCdsRgXChiPOmjA3ztUNkE164IkpZfLM
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -300,7 +300,8 @@ CREATE TABLE public.permissions (
     id integer NOT NULL,
     permission_code character varying(50) NOT NULL,
     permission_type character varying(10) NOT NULL,
-    description character varying(200)
+    description character varying(200),
+    parent_code character varying(50)
 );
 
 
@@ -728,24 +729,28 @@ COPY public.meetings (meetingid, companyroomid, meetingdate, meetingsubject, ise
 -- Data for Name: permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.permissions (id, permission_code, permission_type, description) FROM stdin;
-1	dashboard	menu	Ana Panel
-2	user_management	menu	Kullanıcı Yönetimi
-3	hr_operations	menu	İK İşlemleri
-4	meetings	menu	Toplantılar
-5	reports	menu	Raporlar
-6	settings	menu	Sistem Ayarları
-7	users:create	action	Kullanıcı oluşturma
-8	users:edit	action	Kullanıcı düzenleme
-9	users:delete	action	Kullanıcı silme
-10	jobs:create	action	İş ilanı oluşturma
-11	jobs:edit	action	İş ilanı düzenleme
-12	jobs:delete	action	İş ilanı silme
-13	salary:view	action	Maaş görüntüleme
-14	salary:edit	action	Maaş düzenleme
-15	meetings:create	action	Toplantı oluşturma
-16	meetings:delete	action	Toplantı silme
-17	requests:approve	action	Talep onaylama
+COPY public.permissions (id, permission_code, permission_type, description, parent_code) FROM stdin;
+18	dashboard	menu	Dashboard	\N
+19	admin:management	menu_group	Yönetim	\N
+20	admin:users	menu	Kullanıcı Yönetimi	admin:management
+21	admin:roles	menu	Rol & Yetki Yönetimi	admin:management
+22	admin:departments	menu	Departman Yönetimi	admin:management
+23	hr:operations	menu_group	İK İşlemleri	\N
+24	hr:job_post	menu	İş İlanı Oluştur	hr:operations
+25	hr:cv_analyze	menu	CV Analiz	hr:operations
+26	hr:applications	menu	Başvurular	hr:operations
+27	meetings	menu	Toplantılar	\N
+28	reports	menu	Raporlar	\N
+29	settings	menu	Sistem Ayarları	\N
+30	users:create	action	Kullanıcı oluşturma	\N
+31	users:edit	action	Kullanıcı düzenleme	\N
+32	users:delete	action	Kullanıcı silme	\N
+33	jobs:create	action	İş ilanı oluşturma	\N
+34	jobs:edit	action	İş ilanı düzenleme	\N
+35	jobs:delete	action	İş ilanı silme	\N
+36	meetings:create	action	Toplantı oluşturma	\N
+37	meetings:delete	action	Toplantı silme	\N
+38	requests:approve	action	Talep onaylama	\N
 \.
 
 
@@ -831,39 +836,59 @@ COPY public.requesttype (requesttypeid, requesttypename) FROM stdin;
 --
 
 COPY public.role_permissions (roleid, permission_id) FROM stdin;
-1	1
-1	2
-1	3
-1	4
-1	5
-1	6
-1	7
-1	8
-1	9
-1	10
-1	11
-1	12
-1	13
-1	14
-1	15
-1	16
-1	17
-2	1
-2	2
-2	3
-2	7
-2	8
-2	10
-2	11
-2	12
-2	17
-3	1
-3	4
-3	13
-3	15
-3	16
-3	17
-4	1
+2	18
+2	23
+2	24
+2	25
+2	26
+2	27
+2	33
+2	34
+2	35
+2	38
+6	18
+6	27
+6	28
+6	36
+6	38
+5	18
+5	27
+4	18
+4	27
+3	18
+3	27
+10	18
+10	27
+10	28
+10	36
+10	38
+9	18
+9	27
+8	18
+8	27
+7	18
+7	27
+1	18
+1	19
+1	20
+1	21
+1	22
+1	23
+1	24
+1	25
+1	26
+1	27
+1	28
+1	29
+1	30
+1	31
+1	32
+1	33
+1	34
+1	35
+1	36
+1	37
+1	38
 \.
 
 
@@ -872,10 +897,16 @@ COPY public.role_permissions (roleid, permission_id) FROM stdin;
 --
 
 COPY public.roles (roleid, rolename) FROM stdin;
-1	Admin
-2	İK
-3	Yönetici
-4	Çalışan
+1	admin
+2	hr
+3	backend_junior
+4	backend_mid
+5	backend_senior
+6	backend_lead
+7	qa_junior
+8	qa_mid
+9	qa_senior
+10	qa_lead
 \.
 
 
@@ -944,9 +975,9 @@ COPY public.users (userid, username, password, roleid) FROM stdin;
 26	mert.bulut	Sifre123!	\N
 27	deniz.karaca	Sifre123!	\N
 28	selin.yaman	Sifre123!	\N
-1	ahmet_yilmaz	sifre123	1
 2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2
-3	mehmet_demir	sifre789	4
+1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1
+3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3
 \.
 
 
@@ -1003,7 +1034,7 @@ SELECT pg_catalog.setval('public.meetings_meetingid_seq', 2, true);
 -- Name: permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.permissions_id_seq', 17, true);
+SELECT pg_catalog.setval('public.permissions_id_seq', 38, true);
 
 
 --
@@ -1038,7 +1069,7 @@ SELECT pg_catalog.setval('public.requesttype_requesttypeid_seq', 3, true);
 -- Name: roles_roleid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.roles_roleid_seq', 4, true);
+SELECT pg_catalog.setval('public.roles_roleid_seq', 10, true);
 
 
 --
@@ -1663,5 +1694,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 2T9MJqww0kRTzHnYwA0hdhvyyXyc6Zv4hrEBscZlBJw1NWYOgsGBmEeMtYTqHkZ
+\unrestrict MsTwCbqigNDf7knEJfeceVgUvdo6XY6eCdsRgXChiPOmjA3ztUNkE164IkpZfLM
 
