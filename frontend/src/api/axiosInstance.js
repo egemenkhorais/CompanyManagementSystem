@@ -5,9 +5,9 @@ const API_URL = 'http://127.0.0.1:5001/api';
 // Özelleştirilmiş axios oluştur
 const axiosInstance = axios.create({
     baseURL: API_URL,
-    timeout: 10000,  // 10 saniye bekle, cevap gelmezse hata ver
+    timeout: 60000,  // 60 saniye timeout (dosya yükleme için yeterli süre)
     headers: {
-        'Content-Type': 'application/json' // JSON gönderiyoruz
+        'Content-Type': 'application/json' // JSON gönderiyoruz (multipart/form-data için axios otomatik ayarlar)
     }
 });
 

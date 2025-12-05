@@ -8,12 +8,14 @@ const { pool } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const jobPostRoutes = require('./routes/jobPostRoutes');
+const cvRoutes = require('./routes/cvRoutes');
 
 const app = express();
 
 // Middleware tanımlamaları
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // JSON body limiti
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // URL encoded body limiti
 
 // İstek loglama middleware
 app.use((req, res, next) => {
@@ -48,6 +50,7 @@ app.get('/api/pool-test', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/jobposts', jobPostRoutes);
+app.use('/api/cv', cvRoutes);
 
 // Geriye dönük uyumluluk için eski endpoint'ler
 const authController = require('./controllers/authController');
