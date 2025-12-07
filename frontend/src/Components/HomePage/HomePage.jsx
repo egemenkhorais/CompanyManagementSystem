@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import './HomePage.css';
 import CreateJobPost from './JobPosts/CreateJobPost';
 import CVAnalyze from './CVAnalyze/CVAnalyze';
+import RoomManagement from './Rooms/RoomManagement';
+import RoomView from './Rooms/RoomView';
+import MeetingManagement from './Meetings/MeetingManagement';
+import MeetingView from './Meetings/MeetingView';
 import {
     Users,
     Settings,
@@ -14,7 +18,8 @@ import {
     Building,
     ChevronDown,
     ChevronRight,
-    FileCheck
+    FileCheck,
+    DoorOpen
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
@@ -36,7 +41,6 @@ const UserManagementView = () => (
     <div className="content-card">
         <h2>Kullanıcı Yönetimi</h2>
         <p>Kullanıcıları buradan yönetebilirsiniz.</p>
-        {/* DataTable gelecek */}
     </div>
 );
 
@@ -44,7 +48,6 @@ const RoleManagementView = () => (
     <div className="content-card">
         <h2>Rol & Yetki Yönetimi</h2>
         <p>Rolleri ve yetkileri buradan yönetebilirsiniz.</p>
-        {/* DataTable gelecek */}
     </div>
 );
 
@@ -52,7 +55,6 @@ const DepartmentManagementView = () => (
     <div className="content-card">
         <h2>Departman Yönetimi</h2>
         <p>Departmanları buradan yönetebilirsiniz.</p>
-        {/* DataTable gelecek */}
     </div>
 );
 
@@ -83,13 +85,6 @@ const ApplicationsView = () => (
     </div>
 );
 
-const MeetingsView = () => (
-    <div className="content-card">
-        <h2>Toplantılar</h2>
-        <p>Toplantılarınızı buradan yönetebilirsiniz.</p>
-    </div>
-);
-
 const ReportsView = () => (
     <div className="content-card">
         <h2>Raporlar</h2>
@@ -116,7 +111,12 @@ const ICON_MAP = {
     'hr:job_post': FileText,
     'hr:cv_analyze': FileCheck,
     'hr:applications': FileText,
+    'rooms': DoorOpen,
+    'rooms:view': DoorOpen,
+    'rooms:management': DoorOpen,
     'meetings': Calendar,
+    'meetings:view': Calendar,
+    'meetings:management': Calendar,
     'reports': FileText,
     'settings': Settings
 };
@@ -128,6 +128,7 @@ const HomePage = ({ onLogout }) => {
     const [expandedGroups, setExpandedGroups] = useState({});
     const [permissions, setPermissions] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
@@ -135,18 +136,15 @@ const HomePage = ({ onLogout }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // LocalStorage'dan kullanıcı bilgisi
                 const userData = JSON.parse(localStorage.getItem('user'));
                 setUser(userData);
 
-                // API'den yetkileri çek
                 const response = await axiosInstance.get('/auth/my-permissions');
                 if (response.data.success) {
                     setPermissions(response.data.permissions);
                 }
             } catch (error) {
                 console.error('Veri çekme hatası:', error);
-                // Token geçersizse login'e yönlendir
                 if (error.response?.status === 401) {
                     handleLogout();
                 }
@@ -179,6 +177,11 @@ const HomePage = ({ onLogout }) => {
         }));
     };
 
+    // Yetki kontrolü helper fonksiyonu
+    const hasPermission = (permissionCode) => {
+        return permissions.some(p => p.permission_code === permissionCode);
+    };
+
     // İçerik render
     const renderContent = () => {
         switch (activeTab) {
@@ -198,8 +201,22 @@ const HomePage = ({ onLogout }) => {
                 return <CVAnalyze />;
             case 'hr:applications':
                 return <ApplicationsView />;
+
+            // Oda - Yönetim yetkisi varsa Management, yoksa View
+            case 'rooms':
+            case 'rooms:view':
+            case 'rooms:management':
+                return hasPermission('rooms:management')
+                    ? <RoomManagement userPermissions={permissions} />
+                    : <RoomView />;
+
             case 'meetings':
-                return <MeetingsView />;
+            case 'meetings:view':
+            case 'meetings:management': // Eğer kullanıcının yönetici yetkisi varsa yönetimi, yoksa sadece görüntülemeyi aç
+                return hasPermission('meetings:management')
+                  ? <MeetingManagement userPermissions={permissions} />
+                  : <MeetingView />;
+
             case 'reports':
                 return <ReportsView />;
             case 'settings':
@@ -258,27 +275,22 @@ const HomePage = ({ onLogout }) => {
 
     // Sidebar render
     const renderSidebar = () => {
-        // Tekil menüler (parent_code null ve menu tipinde)
         const singleMenus = permissions.filter(
             p => p.permission_type === 'menu' && !p.parent_code
         );
 
-        // Grup menüler
         const menuGroups = permissions.filter(
             p => p.permission_type === 'menu_group'
         );
 
         return (
             <>
-                {/* Dashboard her zaman ilk */}
                 {singleMenus
                     .filter(m => m.permission_code === 'dashboard')
                     .map(renderMenuItem)}
 
-                {/* Grup menüler */}
                 {menuGroups.map(renderMenuGroup)}
 
-                {/* Diğer tekil menüler (dashboard hariç) */}
                 {singleMenus
                     .filter(m => m.permission_code !== 'dashboard')
                     .map(renderMenuItem)}

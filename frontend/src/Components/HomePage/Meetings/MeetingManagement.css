@@ -1,0 +1,131 @@
+/* MeetingManagement.css - Dark Purple Theme */
+
+.meetings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.meeting-card {
+    background: linear-gradient(135deg, rgba(22, 33, 62, 0.4), rgba(26, 10, 46, 0.4));
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.meeting-card:hover {
+    box-shadow: 0 8px 30px rgba(157, 78, 221, 0.3);
+    transform: translateY(-3px);
+    border-color: #9d4edd;
+}
+
+.meeting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(157, 78, 221, 0.2);
+}
+
+.meeting-title-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.meeting-title-section h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #fff;
+    background: linear-gradient(90deg, #9d4edd, #c77dff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.meeting-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.meeting-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #b8b8b8;
+    font-size: 14px;
+}
+
+.info-row svg {
+    flex-shrink: 0;
+    color: #9d4edd;
+}
+
+.meeting-description {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(157, 78, 221, 0.2);
+    color: #b8b8b8;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* Status Badge Styles (ek olarak) */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+.status-badge.pending {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ffa726;
+    border-color: rgba(255, 152, 0, 0.4);
+}
+
+.status-badge.approved {
+    background: rgba(76, 175, 80, 0.2);
+    color: #66bb6a;
+    border-color: rgba(76, 175, 80, 0.4);
+}
+
+.status-badge.cancelled {
+    background: rgba(244, 67, 54, 0.2);
+    color: #ef5350;
+    border-color: rgba(244, 67, 54, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .meeting-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .meeting-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .meeting-info {
+        grid-template-columns: 1fr;
+    }
+
+    .meeting-title-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}

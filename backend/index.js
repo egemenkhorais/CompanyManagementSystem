@@ -9,6 +9,10 @@ const authRoutes = require('./routes/authRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const jobPostRoutes = require('./routes/jobPostRoutes');
 const cvRoutes = require('./routes/cvRoutes');
+const meetingRoutes = require('./routes/meetingRoutes');
+const roomsRoutes = require('./routes/roomsRoutes');
+
+
 
 const app = express();
 
@@ -22,6 +26,8 @@ app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();
 });
+
+
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
@@ -51,6 +57,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/jobposts', jobPostRoutes);
 app.use('/api/cv', cvRoutes);
+app.use('/api/meetings', meetingRoutes);
+app.use('/api/rooms', roomsRoutes);
 
 // Geriye dönük uyumluluk için eski endpoint'ler
 const authController = require('./controllers/authController');
