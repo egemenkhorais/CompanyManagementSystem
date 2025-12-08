@@ -2,19 +2,23 @@ const { pool } = require('../config/database');
 
 const getMeetings = async (req, res) => {
     try {
-        // Artık pool.query çalışır
+        // RESİMLERE GÖRE DÜZELTİLDİ:
+        // meetings tablosu: meetingid, companyroomid, meetingdate, meetingsubject, isempty
+        // companyrooms tablosu: companyroomid, companyroomname
+
         const result = await pool.query(`
             SELECT
-                m.id, m.title, m.description, m.start_time, m.end_time,
-                m.participants, m.status,
+                m.meetingid as id,
+                m.meetingsubject as title,
+                m.meetingdate as start_time, -- Veritabanında sadece tek tarih alanı var
                 r.companyroomname as room_name,
-                r.id as room_id,
-                u.username as organizer
+                r.companyroomid as room_id,
+                m.isempty
             FROM meetings m
-            JOIN companyrooms r ON m.room_id = r.id
-            LEFT JOIN users u ON m.user_id = u.id
-            ORDER BY m.start_time DESC
+                     JOIN companyrooms r ON m.companyroomid = r.companyroomid
+            ORDER BY m.meetingdate DESC
         `);
+
         res.json({ success: true, data: result.rows });
     } catch (error) {
         console.error('Hata:', error.message);
@@ -25,31 +29,35 @@ const getMeetings = async (req, res) => {
 // Yeni Toplantı Oluştur
 const createMeeting = async (req, res) => {
     try {
-        const { room_id, title, description, meeting_date, start_time, end_time, participants } = req.body;
-        const userId = req.user.id;
+        // Frontend'den gelen veriler (Değişken isimleri React tarafıyla aynı kalabilir)
+        const { room_id, title, meeting_date, start_time } = req.body;
 
-        // Tarih birleştirme
-        const startDateTime = `${meeting_date} ${start_time}:00`;
-        const endDateTime = `${meeting_date} ${end_time}:00`;
+        // NOT: Veritabanı resminde 'description', 'end_time', 'participants', 'user_id' sütunları GÖRÜNMÜYOR.
+        // Bu yüzden sadece resimde olan sütunlara insert yapıyoruz.
 
-        // Çakışma Kontrolü (Conflict Check)
+        // Tarih ve saati birleştirip timestamp formatına çeviriyoruz
+        const fullDateTime = `${meeting_date} ${start_time}:00`;
+
+        /* Çakışma Kontrolü (Conflict Check)
+           Not: End_time olmadığı için sadece o saatte başka kayıt var mı diye tam eşleşme bakabiliriz
+           veya veritabanına end_time sütunu eklemelisin. Şimdilik basit kontrol:
+        */
         const conflict = await pool.query(`
             SELECT * FROM meetings
-            WHERE room_id = $1
-            AND status != 'cancelled'
-            AND (
-                (start_time < $3 AND end_time > $2)
-            )
-        `, [room_id, startDateTime, endDateTime]);
+            WHERE companyroomid = $1
+              AND meetingdate = $2
+        `, [room_id, fullDateTime]);
 
         if (conflict.rows.length > 0) {
-            return res.status(400).json({ success: false, message: 'Bu saat aralığında oda dolu!' });
+            return res.status(400).json({ success: false, message: 'Bu tarih ve saatte oda dolu!' });
         }
 
+        // INSERT işlemi (Sütun isimleri resimdeki gibi güncellendi)
         const result = await pool.query(
-            `INSERT INTO meetings (room_id, user_id, title, description, start_time, end_time, participants, status)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING *`,
-            [room_id, userId, title, description, startDateTime, endDateTime, participants]
+            `INSERT INTO meetings (companyroomid, meetingsubject, meetingdate, isempty)
+             VALUES ($1, $2, $3, $4)
+                 RETURNING *`,
+            [room_id, title, fullDateTime, false]
         );
 
         res.json({ success: true, data: result.rows[0] });
@@ -59,20 +67,32 @@ const createMeeting = async (req, res) => {
     }
 };
 
-// Toplantı Güncelle
-const updateMeeting = async (req, res) => {
+// Toplantı Sil
+const deleteMeeting = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, meeting_date, start_time, end_time, participants, room_id } = req.body;
+        // id -> meetingid olarak güncellendi
+        await pool.query('DELETE FROM meetings WHERE meetingid = $1', [id]);
+        res.json({ success: true, message: 'Silindi' });
+    } catch (error) {
+        console.error('Silme hatası:', error.message);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
-        const startDateTime = `${meeting_date} ${start_time}:00`;
-        const endDateTime = `${meeting_date} ${end_time}:00`;
+// Toplantı Güncelle (Basitleştirilmiş)
+const updateMeeting = async (req, res) => {
+    try {
+        const { id } = req.params; // Bu meetingid olacak
+        const { title, meeting_date, start_time, room_id } = req.body;
+
+        const fullDateTime = `${meeting_date} ${start_time}:00`;
 
         const result = await pool.query(
             `UPDATE meetings
-             SET title=$1, description=$2, start_time=$3, end_time=$4, participants=$5, room_id=$6
-             WHERE id=$7 RETURNING *`,
-            [title, description, startDateTime, endDateTime, participants, room_id, id]
+             SET meetingsubject=$1, meetingdate=$2, companyroomid=$3
+             WHERE meetingid=$4 RETURNING *`,
+            [title, fullDateTime, room_id, id]
         );
 
         res.json({ success: true, data: result.rows[0] });
@@ -82,39 +102,9 @@ const updateMeeting = async (req, res) => {
     }
 };
 
-// Toplantı Sil
-const deleteMeeting = async (req, res) => {
-    try {
-        const { id } = req.params;
-        await pool.query('DELETE FROM meetings WHERE id = $1', [id]);
-        res.json({ success: true, message: 'Silindi' });
-    } catch (error) {
-        console.error('Silme hatası:', error.message);
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// Durum Güncelle
-const updateStatus = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status } = req.body;
-
-        const result = await pool.query(
-            'UPDATE meetings SET status = $1 WHERE id = $2 RETURNING *',
-            [status, id]
-        );
-        res.json({ success: true, data: result.rows[0] });
-    } catch (error) {
-        console.error('Durum güncelleme hatası:', error.message);
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
 module.exports = {
     getMeetings,
     createMeeting,
     updateMeeting,
     deleteMeeting,
-    updateStatus
 };
