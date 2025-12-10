@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict RUGnu8lOtlbQPDMAH3CwY09jrCkEatFDFoy5L9dG9M6PJPNgzLmg8VIfhFd5y3z
+\restrict wds5ogwJi8cvZjel8eLNhIHQzzN98MCLBduk7XqjfjlCqdRw6z95R1seqH8sCXX
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -843,7 +843,6 @@ COPY public.permissions (id, permission_code, permission_type, description, pare
 37	meetings:delete	action	Toplantı silme	\N
 38	requests:approve	action	Talep onaylama	\N
 47	rooms:view	menu	Odaları Görüntüle	\N
-48	meetings:view	menu	Toplantıları Görüntüle	\N
 49	rooms:management	menu	Oda Yönetimi	\N
 50	meetings:management	menu	Toplantı Yönetimi	\N
 51	rooms:create	action	Oda oluşturma	\N
@@ -997,6 +996,14 @@ COPY public.role_permissions (roleid, permission_id) FROM stdin;
 1	36
 1	37
 1	38
+1	47
+1	49
+1	50
+1	51
+1	52
+1	53
+1	55
+1	57
 \.
 
 
@@ -1892,5 +1899,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict RUGnu8lOtlbQPDMAH3CwY09jrCkEatFDFoy5L9dG9M6PJPNgzLmg8VIfhFd5y3z
+\unrestrict wds5ogwJi8cvZjel8eLNhIHQzzN98MCLBduk7XqjfjlCqdRw6z95R1seqH8sCXX
 
