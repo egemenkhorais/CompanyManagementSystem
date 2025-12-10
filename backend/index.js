@@ -11,6 +11,7 @@ const jobPostRoutes = require('./routes/jobPostRoutes');
 const cvRoutes = require('./routes/cvRoutes');
 const meetingRoutes = require('./routes/meetingRoutes');
 const roomsRoutes = require('./routes/roomsRoutes');
+const managementRoutes = require('./routes/managementRoutes');
 
 
 
@@ -59,6 +60,7 @@ app.use('/api/jobposts', jobPostRoutes);
 app.use('/api/cv', cvRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/rooms', roomsRoutes);
+app.use('/api/management', managementRoutes);
 
 // Geriye dönük uyumluluk için eski endpoint'ler
 const authController = require('./controllers/authController');

@@ -6,6 +6,8 @@ import RoomManagement from './Rooms/RoomManagement';
 import RoomView from './Rooms/RoomView';
 import MeetingManagement from './Meetings/MeetingManagement';
 import MeetingView from './Meetings/MeetingView';
+import UserManagementView from './UserManagement/UserManagementView';
+
 import {
     Users,
     Settings,
@@ -37,12 +39,6 @@ const DashboardView = () => (
     </div>
 );
 
-const UserManagementView = () => (
-    <div className="content-card">
-        <h2>Kullanıcı Yönetimi</h2>
-        <p>Kullanıcıları buradan yönetebilirsiniz.</p>
-    </div>
-);
 
 const RoleManagementView = () => (
     <div className="content-card">
