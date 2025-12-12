@@ -76,14 +76,79 @@
     box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.2);
 }
 
+.cv-select-trigger {
+    width: 100%;
+    padding: 16px 45px 16px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(157, 78, 221, 0.35);
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.cv-select-trigger:hover {
+    border-color: rgba(199, 125, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.cv-select-trigger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .cv-analyze-select .select-arrow {
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
     font-size: 12px;
     color: #c77dff;
+    transition: transform 0.3s ease;
+}
+
+.cv-analyze-select .select-arrow.open {
+    transform: rotate(180deg);
+}
+
+.cv-select-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, rgba(22, 33, 62, 0.95), rgba(26, 10, 46, 0.95));
+    border: 1px solid rgba(157, 78, 221, 0.35);
+    border-radius: 14px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+.cv-select-option {
+    padding: 12px 18px;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(157, 78, 221, 0.1);
+}
+
+.cv-select-option:last-child {
+    border-bottom: none;
+}
+
+.cv-select-option:hover {
+    background: rgba(157, 78, 221, 0.2);
+    color: #e0b3ff;
+}
+
+.cv-select-option.selected {
+    background: rgba(157, 78, 221, 0.3);
+    color: #fff;
+    font-weight: 600;
 }
 
 .cv-analyze-file-upload {
@@ -408,6 +473,25 @@
 }
 
 .cv-table-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #7b2cbf, #5a189a);
+}
+
+/* Dropdown scrollbar */
+.cv-select-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cv-select-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.cv-select-dropdown::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #9d4edd, #7b2cbf);
+    border-radius: 10px;
+}
+
+.cv-select-dropdown::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, #7b2cbf, #5a189a);
 }
 

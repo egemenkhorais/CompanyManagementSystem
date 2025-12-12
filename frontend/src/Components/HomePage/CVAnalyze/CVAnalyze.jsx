@@ -10,6 +10,7 @@ const CVAnalyze = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [analyzing, setAnalyzing] = useState(false);
+    const [isJobPostDropdownOpen, setIsJobPostDropdownOpen] = useState(false);
     const [aiModalData, setAiModalData] = useState({
         open: false,
         applicant: '',
@@ -29,6 +30,20 @@ const CVAnalyze = () => {
             setCvList([]);
         }
     }, [selectedJobPost]);
+
+    // Dropdown dışına tıklandığında kapat
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isJobPostDropdownOpen && !event.target.closest('.cv-analyze-select')) {
+                setIsJobPostDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isJobPostDropdownOpen]);
 
     const loadJobPosts = async () => {
         try {
@@ -277,6 +292,15 @@ const CVAnalyze = () => {
         }));
     };
 
+    const toggleJobPostDropdown = () => {
+        setIsJobPostDropdownOpen(prev => !prev);
+    };
+
+    const handleJobPostSelect = (jobPostId) => {
+        setSelectedJobPost(jobPostId);
+        setIsJobPostDropdownOpen(false);
+    };
+
     return (
         <div className="cv-analyze-container">
             <div className="cv-analyze-header">
@@ -289,19 +313,37 @@ const CVAnalyze = () => {
                     <div className="cv-analyze-section">
                         <label className="cv-analyze-label">Aktif İş İlanları Seçiniz:</label>
                         <div className="cv-analyze-select">
-                            <select
-                                value={selectedJobPost}
-                                onChange={(e) => setSelectedJobPost(e.target.value)}
+                            <div 
+                                className="cv-select-trigger"
+                                onClick={toggleJobPostDropdown}
                                 disabled={loading}
                             >
-                                <option value="">İş İlanları</option>
-                                {jobPosts.map((post) => (
-                                    <option key={post.jobpostid} value={post.jobpostid}>
-                                        {post.jobpostname || `İş İlanı #${post.jobpostid}`}
-                                    </option>
-                                ))}
-                            </select>
-                            <span className="select-arrow">▼</span>
+                                <span>
+                                    {selectedJobPost 
+                                        ? jobPosts.find(p => p.jobpostid === selectedJobPost)?.jobpostname || `İş İlanı #${selectedJobPost}`
+                                        : 'İş İlanları'}
+                                </span>
+                                <span className={`select-arrow ${isJobPostDropdownOpen ? 'open' : ''}`}>▼</span>
+                            </div>
+                            {isJobPostDropdownOpen && (
+                                <div className="cv-select-dropdown">
+                                    <div 
+                                        className={`cv-select-option ${!selectedJobPost ? 'selected' : ''}`}
+                                        onClick={() => handleJobPostSelect('')}
+                                    >
+                                        İş İlanları
+                                    </div>
+                                    {jobPosts.map((post) => (
+                                        <div
+                                            key={post.jobpostid}
+                                            className={`cv-select-option ${selectedJobPost === post.jobpostid ? 'selected' : ''}`}
+                                            onClick={() => handleJobPostSelect(post.jobpostid)}
+                                        >
+                                            {post.jobpostname || `İş İlanı #${post.jobpostid}`}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 

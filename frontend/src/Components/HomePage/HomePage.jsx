@@ -21,7 +21,9 @@ import {
     ChevronDown,
     ChevronRight,
     FileCheck,
-    DoorOpen
+    DoorOpen,
+    Menu,
+    X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
@@ -126,6 +128,7 @@ const HomePage = ({ onLogout }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [user, setUser] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const navigate = useNavigate();
 
     // Kullanıcı bilgisi ve yetkilerini çek
@@ -171,6 +174,11 @@ const HomePage = ({ onLogout }) => {
             ...prev,
             [groupCode]: !prev[groupCode]
         }));
+    };
+
+    // Sidebar açma/kapama
+    const toggleSidebar = () => {
+        setIsSidebarOpen(prev => !prev);
     };
 
     // Yetki kontrolü helper fonksiyonu
@@ -308,14 +316,19 @@ const HomePage = ({ onLogout }) => {
         <div className="home-page-wrapper">
             <div className="home-container">
                 <header className="main-header">
-                    <div className="logo-area">Şirket Yönetim Sistemi</div>
+                    <div className="header-left">
+                        <button className="menu-toggle-btn" onClick={toggleSidebar}>
+                            {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                        <div className="logo-area">Şirket Yönetim Sistemi</div>
+                    </div>
                     <div className="user-info">
                         <span>Hoşgeldin, {user?.username || 'Kullanıcı'}</span>
                     </div>
                 </header>
 
                 <div className="main-body">
-                    <aside className="sidebar">
+                    <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
                         <div className="menu-title">MENÜ</div>
 
                         {renderSidebar()}

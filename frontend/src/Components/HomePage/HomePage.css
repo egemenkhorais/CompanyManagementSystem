@@ -48,6 +48,32 @@ body {
     z-index: 10;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.menu-toggle-btn {
+    background: rgba(157, 78, 221, 0.2);
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    color: #c77dff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.menu-toggle-btn:hover {
+    background: rgba(157, 78, 221, 0.3);
+    border-color: rgba(157, 78, 221, 0.6);
+    color: #fff;
+    transform: scale(1.05);
+}
+
 .logo-area {
     font-size: 24px;
     font-weight: 700;
@@ -85,12 +111,31 @@ body {
 /* YAN MENÜ (SIDEBAR) */
 .sidebar {
     width: 280px;
+    min-width: 280px;
     background: linear-gradient(180deg, #16213e 0%, #1a0a2e 100%);
     padding: 30px 20px;
     display: flex;
     flex-direction: column;
     border-right: 2px solid rgba(138, 43, 226, 0.3);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease, min-width 0.3s ease;
+    overflow: hidden;
+}
+
+.sidebar.open {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidebar.closed {
+    transform: translateX(-100%);
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    min-width: 0;
+    padding: 0;
+    border-right: none;
 }
 
 .menu-title {
