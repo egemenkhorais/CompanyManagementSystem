@@ -6,7 +6,7 @@ class JobPostService {
      */
     async createJobPost(jobPostData) {
         try {
-            const { departmentId, expectations, companyId = null, createdByUser = null } = jobPostData;
+            const { departmentId, expectations, companyId = null, createdByUser = null, jobPostName } = jobPostData;
 
             // Validasyon
             if (!departmentId || !expectations || !expectations.trim()) {
@@ -16,12 +16,26 @@ class JobPostService {
                 };
             }
 
+            if (!jobPostName || !jobPostName.trim()) {
+                return {
+                    success: false,
+                    message: 'İş ilanı adı (jobPostName) zorunludur.'
+                };
+            }
+
+            if (!createdByUser) {
+                return {
+                    success: false,
+                    message: 'Geçerli kullanıcı bilgisi bulunamadı.'
+                };
+            }
+
             // Yeni iş ilanı ekle ve eklenen kaydı geri döndür
             const result = await pool.query(`
-                INSERT INTO jobposts (expectations, departmentid, companyid, createdbyuser) 
-                VALUES ($1, $2, $3, $4) 
+                INSERT INTO jobposts (expectations, departmentid, companyid, createdbyuser, jobpostname) 
+                VALUES ($1, $2, $3, $4, $5) 
                 RETURNING * 
-            `, [expectations.trim(), departmentId, companyId, createdByUser]);//trim komutu baştaki ve sondaki boslukları siler
+            `, [expectations.trim(), departmentId, companyId, createdByUser, jobPostName.trim()]);//trim komutu baştaki ve sondaki boslukları siler
 
             const jobPost = result.rows[0];
 
@@ -40,13 +54,14 @@ class JobPostService {
     /**
      * Tüm iş ilanlarını getir
      */
-    async getAllJobPosts() {
+    async getAllJobPosts() { 
         try {
             console.log('JobPostService.getAllJobPosts - Starting query');
             const result = await pool.query(`
                 SELECT 
                     jobpostid,
                     expectations,
+                    jobpostname,
                     departmentid,
                     companyid,
                     createdbyuser
@@ -80,6 +95,7 @@ class JobPostService {
                 SELECT 
                     jobpostid,
                     expectations,
+                    jobpostname,
                     departmentid,
                     companyid,
                     createdbyuser

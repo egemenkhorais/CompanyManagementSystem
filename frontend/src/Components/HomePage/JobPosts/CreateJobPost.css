@@ -45,6 +45,27 @@
     box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.2);
 }
 
+.job-post-input {
+    width: 100%;
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(157, 78, 221, 0.35);
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+}
+
+.job-post-input::placeholder {
+    color: #cfc7da;
+    opacity: 0.8;
+}
+
+.job-post-input:focus {
+    border-color: #c77dff;
+    box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.2);
+}
+
 .select-arrow {
     position: absolute;
     right: 18px;

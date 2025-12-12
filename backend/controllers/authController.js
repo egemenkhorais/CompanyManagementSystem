@@ -4,7 +4,7 @@ class AuthController {
     /**
      * Login İşlemi
      */
-    async login(req, res) {
+    async login(req, res) { 
         try {
             const { username, password } = req.body;
 

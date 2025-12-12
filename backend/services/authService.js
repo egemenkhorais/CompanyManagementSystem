@@ -57,7 +57,7 @@ class AuthService {
             console.error('AuthService Login Error:', error);
             throw error;
         }
-    }
+    } 
 
     /**
      * Kullanıcının yetkilerini getir

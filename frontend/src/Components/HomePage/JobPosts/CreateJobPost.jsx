@@ -6,6 +6,7 @@ const CreateJobPost = () => {
     const [departments, setDepartments] = useState([]);
     const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
     const [expectations, setExpectations] = useState('');
+    const [jobPostName, setJobPostName] = useState('');
     const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
     const [departmentError, setDepartmentError] = useState('');
     const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
@@ -66,13 +67,22 @@ const CreateJobPost = () => {
             return;
         }
 
+        if (!jobPostName.trim()) {
+            setSubmitStatus({
+                type: 'error',
+                message: 'İş ilanı adı boş bırakılamaz.'
+            });
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
             // axiosInstance ile iş ilanı oluştur - token otomatik eklenir
             const response = await axiosInstance.post('/jobposts', {
                 departmentId: Number(selectedDepartmentId),
-                expectations: expectations.trim()
+                expectations: expectations.trim(),
+                jobPostName: jobPostName.trim()
             });
 
             if (response.data.success) {
@@ -83,6 +93,7 @@ const CreateJobPost = () => {
                 });
                 setSelectedDepartmentId('');
                 setExpectations('');
+                setJobPostName('');
             } else {
                 throw new Error(response.data.message || 'İş ilanı oluşturulamadı.');
             }
@@ -127,6 +138,17 @@ const CreateJobPost = () => {
                     <span className="select-arrow">v</span>
                 </div>
                 {departmentError && <small className="job-post-hint error">{departmentError}</small>}
+            </div>
+
+            <div className="job-post-section">
+                <label className="job-post-label">İlan Adı</label>
+                <input
+                    type="text"
+                    className="job-post-input"
+                    value={jobPostName}
+                    onChange={(event) => setJobPostName(event.target.value)}
+                    placeholder="Örn: Senior Yazılım Mühendisi"
+                />
             </div>
 
             <div className="job-post-section">

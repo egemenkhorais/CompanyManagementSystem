@@ -7,13 +7,17 @@ class JobPostController {
      */
     async createJobPost(req, res) {
         try {
-            const { departmentId, expectations, companyId, createdByUser } = req.body;
+            const { departmentId, expectations, companyId, jobPostName } = req.body;
+
+            // createdByUser her zaman oturum açmış kullanıcının kimliği olmalı
+            const createdByUser = req.user?.id;
 
             const result = await jobPostService.createJobPost({
                 departmentId,
                 expectations,
                 companyId,
-                createdByUser
+                createdByUser,
+                jobPostName
             });
 
             if (!result.success) {

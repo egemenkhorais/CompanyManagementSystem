@@ -259,7 +259,7 @@ const CVAnalyze = () => {
                                 <option value="">İş İlanları</option>
                                 {jobPosts.map((post) => (
                                     <option key={post.jobpostid} value={post.jobpostid}>
-                                        İş İlanı #{post.jobpostid} - Departman: {post.departmentid}
+                                        {post.jobpostname || `İş İlanı #${post.jobpostid}`} - Departman: {post.departmentid}
                                     </option>
                                 ))}
                             </select>
