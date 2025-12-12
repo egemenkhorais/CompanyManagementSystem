@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict cZgI7aOqqtz3boYZQFgoAFnlQd9nth7az8gLtCbCAGTkhAnTHELGXFcd4ZyRpU4
+\restrict lzWuHVzy2rfPhV2Js8Qy4rrbjhNurghAVfJ44hP1lFczggKHw7eaGov9BmL9iqd
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -230,7 +230,8 @@ CREATE TABLE public.jobposts (
     expectations character varying,
     departmentid integer,
     companyid integer,
-    createdbyuser integer
+    createdbyuser integer,
+    jobpostname character varying
 );
 
 
@@ -801,9 +802,13 @@ COPY public.departments (departmentid, departmentname) FROM stdin;
 -- Data for Name: jobposts; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.jobposts (jobpostid, expectations, departmentid, companyid, createdbyuser) FROM stdin;
-1	- İleri Seviye Java\n- Etkili İletişim\n- 3+ yıl sektör deneyimi	1	\N	\N
-2	İletişim kabiliyeti yüksek\nİleri seviye ingilizce bilen	1	\N	\N
+COPY public.jobposts (jobpostid, expectations, departmentid, companyid, createdbyuser, jobpostname) FROM stdin;
+1	- İleri Seviye Java\n- Etkili İletişim\n- 3+ yıl sektör deneyimi	1	\N	\N	\N
+2	İletişim kabiliyeti yüksek\nİleri seviye ingilizce bilen	1	\N	\N	\N
+6	xyz	1	\N	\N	\N
+7	abc	4	\N	\N	deneme2
+8	obl	3	\N	\N	deneme3
+9	ert	7	\N	\N	deneme4
 \.
 
 
@@ -1154,7 +1159,7 @@ SELECT pg_catalog.setval('public.departments_departmentid_seq', 2, true);
 -- Name: jobpost_jobpostid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 5, true);
+SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 9, true);
 
 
 --
@@ -1910,5 +1915,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict cZgI7aOqqtz3boYZQFgoAFnlQd9nth7az8gLtCbCAGTkhAnTHELGXFcd4ZyRpU4
+\unrestrict lzWuHVzy2rfPhV2Js8Qy4rrbjhNurghAVfJ44hP1lFczggKHw7eaGov9BmL9iqd
 
