@@ -66,5 +66,14 @@ router.post('/analyze-single/:cvId', authMiddleware, (req, res) => {
     cvController.analyzeSingleCV(req, res);
 });
 
+/**
+ * GET /api/cv/view/:cvId
+ * CV dosyasını tarayıcıda görüntüle (indirme değil)
+ * Middleware: authMiddleware (token gerekli)
+ */
+router.get('/view/:cvId', authMiddleware, (req, res) => {
+    cvController.viewCV(req, res);
+});
+
 module.exports = router;
 

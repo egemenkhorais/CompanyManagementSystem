@@ -115,6 +115,38 @@ class CVController {
             });
         }
     }
+
+    /**
+     * GET /api/cv/view/:cvId
+     * CV dosyasını tarayıcıda görüntüle (indirme değil)
+     */
+    async viewCV(req, res) {
+        try {
+            const { cvId } = req.params;
+
+            const result = await cvService.getCVFile(cvId);
+
+            if (!result.success) {
+                return res.status(404).json(result);
+            }
+
+            // Content-Disposition: inline ile tarayıcıda görüntüleme
+            res.set({
+                'Content-Type': result.mimeType,
+                'Content-Disposition': `inline; filename="${encodeURIComponent(result.fileName)}"`,
+                'Content-Length': result.fileBuffer.length
+            });
+
+            return res.send(result.fileBuffer);
+
+        } catch (error) {
+            console.error('CVController ViewCV Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'CV görüntülenirken hata oluştu: ' + error.message
+            });
+        }
+    }
 }
 
 module.exports = new CVController();

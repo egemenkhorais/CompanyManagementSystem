@@ -10,6 +10,11 @@ const CVAnalyze = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [analyzing, setAnalyzing] = useState(false);
+    const [aiModalData, setAiModalData] = useState({
+        open: false,
+        applicant: '',
+        content: ''
+    });
 
     // İş ilanlarını yükle
     useEffect(() => {
@@ -239,6 +244,39 @@ const CVAnalyze = () => {
         });
     };
 
+    const handleOpenCV = async (cvId, applicantName) => {
+        try {
+            const response = await axiosInstance.get(`/cv/view/${cvId}`, {
+                responseType: 'blob'
+            });
+
+            const fileBlob = new Blob([response.data], {
+                type: response.headers['content-type'] || 'application/pdf'
+            });
+            const fileURL = window.URL.createObjectURL(fileBlob);
+            window.open(fileURL, '_blank', 'noopener,noreferrer');
+        } catch (error) {
+            console.error('CV dosyası görüntülenirken hata:', error);
+            alert(`${applicantName || 'Başvuru'} için CV dosyası görüntülenemedi.`);
+        }
+    };
+
+    const handleOpenAIComment = (comment, applicantName) => {
+        if (!comment) return;
+        setAiModalData({
+            open: true,
+            applicant: applicantName || '',
+            content: comment
+        });
+    };
+
+    const handleCloseAIComment = () => {
+        setAiModalData((prev) => ({
+            ...prev,
+            open: false
+        }));
+    };
+
     return (
         <div className="cv-analyze-container">
             <div className="cv-analyze-header">
@@ -259,7 +297,7 @@ const CVAnalyze = () => {
                                 <option value="">İş İlanları</option>
                                 {jobPosts.map((post) => (
                                     <option key={post.jobpostid} value={post.jobpostid}>
-                                        {post.jobpostname || `İş İlanı #${post.jobpostid}`} - Departman: {post.departmentid}
+                                        {post.jobpostname || `İş İlanı #${post.jobpostid}`}
                                     </option>
                                 ))}
                             </select>
@@ -328,18 +366,19 @@ const CVAnalyze = () => {
                                     </th>
                                     <th>Durum</th>
                                     <th>AI Yorumu</th>
+                                    <th> </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="5" className="empty-state">
+                                        <td colSpan="6" className="empty-state">
                                             Yükleniyor...
                                         </td>
                                     </tr>
                                 ) : cvList.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="empty-state">
+                                        <td colSpan="6" className="empty-state">
                                             {selectedJobPost 
                                                 ? 'Bu iş ilanı için henüz CV yüklenmemiş. Sol panelden CV yükleyip analiz edin.'
                                                 : 'Lütfen bir iş ilanı seçiniz.'}
@@ -348,7 +387,14 @@ const CVAnalyze = () => {
                                 ) : (
                                     cvList.map((cv) => (
                                         <tr key={cv.cvid}>
-                                            <td>{cv.cvsenderinfo || '-'}</td>
+                                            <td>
+                                                <button
+                                                    className="cv-sender-link"
+                                                    onClick={() => handleOpenCV(cv.cvid, cv.cvsenderinfo)}
+                                                >
+                                                    {cv.cvsenderinfo || '-'}
+                                                </button>
+                                            </td>
                                             <td>{formatDate(cv.cvdate)}</td>
                                             <td>{cv.cvscore !== null ? cv.cvscore : '-'}</td>
                                             <td>
@@ -359,11 +405,21 @@ const CVAnalyze = () => {
                                             <td className="ai-context-cell">
                                                 {cv.aicontext ? (
                                                     <div className="ai-context" title={cv.aicontext}>
-                                                        {cv.aicontext.length > 50 
-                                                            ? cv.aicontext.substring(0, 50) + '...' 
+                                                        {cv.aicontext.length > 50
+                                                            ? cv.aicontext.substring(0, 50) + '...'
                                                             : cv.aicontext}
                                                     </div>
                                                 ) : '-'}
+                                            </td>
+                                            <td className="actions-cell">
+                                                {cv.aicontext && (
+                                                    <button
+                                                        className="ai-open-button"
+                                                        onClick={() => handleOpenAIComment(cv.aicontext, cv.cvsenderinfo)}
+                                                    >
+                                                        AI Yorumunu Aç
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))
@@ -373,6 +429,21 @@ const CVAnalyze = () => {
                     </div>
                 </div>
             </div>
+            {aiModalData.open && (
+                <div className="ai-modal-backdrop" onClick={handleCloseAIComment}>
+                    <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="ai-modal-header">
+                            <h4>AI Yorumu {aiModalData.applicant ? `- ${aiModalData.applicant}` : ''}</h4>
+                            <button className="ai-modal-close" onClick={handleCloseAIComment}>
+                                ×
+                            </button>
+                        </div>
+                        <div className="ai-modal-body">
+                            <p>{aiModalData.content}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

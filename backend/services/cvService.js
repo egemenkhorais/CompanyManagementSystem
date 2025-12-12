@@ -534,6 +534,82 @@ Sadece JSON formatında cevap ver, başka bir şey ekleme.`;
             throw new Error('CV listesi getirilirken hata oluştu: ' + error.message);
         }
     }
+
+    /**
+     * CV dosyasını veritabanından al (görüntüleme için)
+     */
+    async getCVFile(cvId) {
+        try {
+            if (!cvId) {
+                return {
+                    success: false,
+                    message: 'CV ID gerekli.'
+                };
+            }
+
+            const result = await pool.query(`
+                SELECT 
+                    cvid,
+                    cvsenderinfo,
+                    cvitself
+                FROM cv
+                WHERE cvid = $1
+            `, [cvId]);
+
+            if (result.rows.length === 0) {
+                return {
+                    success: false,
+                    message: 'CV bulunamadı.'
+                };
+            }
+
+            const cv = result.rows[0];
+            const buffer = cv.cvitself;
+
+            if (!buffer) {
+                return {
+                    success: false,
+                    message: 'CV dosyası bulunamadı.'
+                };
+            }
+
+            // Dosya tipini buffer'dan tespit et
+            const bufferStart = buffer.slice(0, 4).toString();
+            let mimeType = 'application/pdf'; // Varsayılan PDF
+            let extension = 'pdf';
+
+            if (bufferStart === '%PDF') {
+                mimeType = 'application/pdf';
+                extension = 'pdf';
+            } else if (bufferStart === 'PK\x03\x04') {
+                // DOCX dosyası
+                mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                extension = 'docx';
+            } else {
+                // Varsayılan olarak PDF kabul et
+                mimeType = 'application/pdf';
+                extension = 'pdf';
+            }
+
+            // Dosya adını oluştur
+            let fileName = cv.cvsenderinfo || 'cv';
+            // Eğer uzantı yoksa ekle
+            if (!fileName.match(/\.(pdf|docx|doc)$/i)) {
+                fileName = `${fileName}.${extension}`;
+            }
+
+            return {
+                success: true,
+                fileBuffer: buffer,
+                fileName: fileName,
+                mimeType: mimeType
+            };
+
+        } catch (error) {
+            console.error('CVService GetCVFile Error:', error);
+            throw new Error('CV dosyası getirilirken hata oluştu: ' + error.message);
+        }
+    }
 }
 
 module.exports = new CVService();

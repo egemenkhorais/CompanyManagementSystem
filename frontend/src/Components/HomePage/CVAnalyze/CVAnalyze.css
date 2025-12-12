@@ -309,6 +309,20 @@
     border-right: none;
 }
 
+.cv-sender-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #cdd7ff;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.cv-sender-link:hover {
+    color: #e2d8ff;
+}
+
 .cv-table td.empty-state {
     text-align: center;
     color: #888;
@@ -337,14 +351,44 @@
 }
 
 .ai-context-cell {
-    max-width: 300px;
+    max-width: 250px;
 }
 
 .ai-context {
     color: #e5e5e5;
     font-size: 13px;
     line-height: 1.4;
-    cursor: help;
+    cursor: default;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.actions-cell {
+    text-align: center;
+    min-width: 140px;
+}
+
+.ai-open-button {
+    padding: 8px 12px;
+    background: rgba(157, 78, 221, 0.15);
+    color: #e5e5e5;
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.ai-open-button:hover {
+    background: rgba(157, 78, 221, 0.25);
+    border-color: rgba(199, 125, 255, 0.6);
+    color: #fff;
 }
 
 /* Scrollbar */
@@ -381,5 +425,66 @@
     .cv-analyze-right-panel {
         min-height: 400px;
     }
+}
+
+.ai-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.ai-modal {
+    background: #0f172a;
+    border-radius: 16px;
+    max-width: 720px;
+    width: 100%;
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.ai-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(157, 78, 221, 0.2);
+}
+
+.ai-modal-header h4 {
+    margin: 0;
+    color: #fff;
+    font-size: 16px;
+}
+
+.ai-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.ai-modal-close:hover {
+    color: #c77dff;
+}
+
+.ai-modal-body {
+    padding: 18px 20px 22px;
+    max-height: 60vh;
+    overflow: auto;
+}
+
+.ai-modal-body p {
+    margin: 0;
+    white-space: pre-wrap;
+    color: #e5e5e5;
+    line-height: 1.6;
+    font-size: 14px;
 }
 
