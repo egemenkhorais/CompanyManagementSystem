@@ -206,17 +206,24 @@ const HomePage = ({ onLogout }) => {
             case 'hr:applications':
                 return <ApplicationsView />;
 
-            // Oda - Yönetim yetkisi varsa Management, yoksa View
-            case 'rooms':
-            case 'rooms:view':
-            case 'rooms:management':
-                return hasPermission('rooms:management')
-                    ? <RoomManagement userPermissions={permissions} />
-                    : <RoomView />;
+
+            case 'rooms': // Menü ana başlığı
+            case 'rooms:view': // Alt menü: Görüntüle
+                return <RoomView />;
+
+            case 'rooms:management': // Alt menü: Yönetim
+                return <RoomManagement userPermissions={permissions} />;
+
+            case 'meetings:view':
+                // Kullanıcı özellikle "Görüntüle"ye bastıysa, yetkisi olsa bile View aç
+                return <MeetingView />;
+
+            case 'meetings:management':
+                // Yönetim butonuna bastıysa Management aç
+                return <MeetingManagement userPermissions={permissions} />;
 
             case 'meetings':
-            case 'meetings:view':
-            case 'meetings:management': // Eğer kullanıcının yönetici yetkisi varsa yönetimi, yoksa sadece görüntülemeyi aç
+                // Eğer menüde direkt ana başlığa (meetings) tıklanıyorsa varsayılan davranış:
                 return hasPermission('meetings:management')
                   ? <MeetingManagement userPermissions={permissions} />
                   : <MeetingView />;

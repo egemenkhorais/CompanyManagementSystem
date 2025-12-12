@@ -1,90 +1,84 @@
-const pool = require('../config/database');
+const roomService = require('../services/roomService');
+// Veritabanı sorgusu atacağımız için pool'u import etmemiz şart
+const { pool } = require('../config/database');
 
-// Odaları Getir
+// Yardımcı Fonksiyon: Kullanıcının Şirket ID'sini (roomid olarak geçiyor) bul
+const getCompanyIdFromUser = async (user) => {
+    // 1. Önce token'da (req.user içinde) hazır var mı diye bak
+    if (user && (user.roomid || user.companyid)) {
+        return user.roomid || user.companyid;
+    }
+
+    // 2. Yoksa veritabanından 'userdetails' tablosundan çek
+    if (user && user.id) {
+        try {
+            const query = 'SELECT companyid FROM userdetails WHERE userid = $1';
+            const result = await pool.query(query, [user.id]);
+
+            if (result.rows.length > 0) {
+                // Tabloda companyid olarak geçiyor ama biz bunu roomlogic'te roomid (şirket id) olarak kullanıyoruz
+                return result.rows[0].companyid;
+            }
+        } catch (error) {
+            console.error('Şirket bilgisi çekilirken hata:', error);
+            return null;
+        }
+    }
+    return null;
+};
+
 const getRooms = async (req, res) => {
     try {
-        // user_id'den şirketi bulup sadece o şirketin odalarını getirmek istersen:
-        // const userId = req.user.id;
-        // ... user'ın şirketini bulma kodu ...
+        // Dinamik şirket ID bulma
+        const companyId = await getCompanyIdFromUser(req.user);
 
-        // Şimdilik tüm odaları listeliyoruz (Senin tablo sütun isimlerine göre)
-        const result = await pool.query(`
-            SELECT
-                id,
-                companyroomname as name,      -- Frontend 'name' bekliyor
-                companyroomtype as type,      -- Frontend 'type' bekliyor
-                companyroomdepartment as features, -- Frontend 'features' bekliyor
-                roomid as company_id          -- Senin 'roomid' sütunun
-            FROM companyrooms
-            ORDER BY id ASC
-        `);
+        if (!companyId) {
+            return res.status(400).json({ success: false, message: 'Kullanıcıya ait şirket bilgisi bulunamadı.' });
+        }
 
-        res.json({ success: true, data: result.rows });
+        const rooms = await roomService.getAllRooms(companyId);
+        res.json({ success: true, data: rooms });
     } catch (error) {
-        console.error('Odalar getirilirken hata:', error.message);
-        res.status(500).json({ success: false, message: 'Veritabanı hatası: ' + error.message });
+        console.error('Odalar çekilemedi:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Oda Oluştur
 const createRoom = async (req, res) => {
     try {
-        const { name, type, features } = req.body;
+        // HATA ÇÖZÜMÜ: Otomatik 1 yerine veritabanından gerçek ID'yi buluyoruz
+        const companyId = await getCompanyIdFromUser(req.user);
 
-        // "roomid" sütunu şirketi belirtiyor demiştin.
-        // Normalde bunu req.user'dan alırız. Test için 1 veriyoruz.
-        const companyId = req.user ? req.user.companyId : 1;
+        console.log("Oda Oluşturuluyor - Şirket ID:", companyId);
 
-        const result = await pool.query(
-            `INSERT INTO companyrooms (roomid, companyroomname, companyroomtype, companyroomdepartment)
-             VALUES ($1, $2, $3, $4)
-             RETURNING *`,
-            [companyId, name, type, features]
-        );
+        if (!companyId) {
+            return res.status(400).json({ success: false, message: 'Şirket (roomid) bilgisi bulunamadı, işlem yapılamaz.' });
+        }
 
-        res.status(201).json({ success: true, data: result.rows[0] });
+        const result = await roomService.createRoom(req.body, companyId);
+        res.status(201).json({ success: true, data: result });
     } catch (error) {
-        console.error('Oda oluşturulurken hata:', error.message);
+        console.error("Oda oluşturma hatası:", error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Oda Güncelle
 const updateRoom = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { name, type, features } = req.body;
-
-        const result = await pool.query(
-            `UPDATE companyrooms
-             SET companyroomname = $1, companyroomtype = $2, companyroomdepartment = $3
-             WHERE id = $4
-             RETURNING *`,
-            [name, type, features, id]
-        );
-
-        res.json({ success: true, data: result.rows[0] });
+        const result = await roomService.updateRoom(req.params.id, req.body);
+        res.json({ success: true, data: result });
     } catch (error) {
-        console.error('Oda güncellenirken hata:', error.message);
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Oda Sil
 const deleteRoom = async (req, res) => {
     try {
-        const { id } = req.params;
-        await pool.query('DELETE FROM companyrooms WHERE id = $1', [id]);
-        res.json({ success: true, message: 'Oda silindi' });
+        await roomService.deleteRoom(req.params.id);
+        res.json({ success: true, message: 'Silindi' });
     } catch (error) {
-        console.error('Oda silinirken hata:', error.message);
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-module.exports = {
-    getRooms,
-    createRoom,
-    updateRoom,
-    deleteRoom
-};
+module.exports = { getRooms, createRoom, updateRoom, deleteRoom };

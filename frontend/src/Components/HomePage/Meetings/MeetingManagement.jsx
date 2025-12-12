@@ -10,7 +10,6 @@ const MeetingManagement = ({ userPermissions = [] }) => {
     const [showModal, setShowModal] = useState(false);
     const [editingMeeting, setEditingMeeting] = useState(null);
 
-    // Form verileri (Backend createMeeting controller'ına uygun yapıda)
     const [formData, setFormData] = useState({
         room_id: '',
         title: '',
@@ -310,17 +309,17 @@ const MeetingManagement = ({ userPermissions = [] }) => {
 
                             <div className="form-group">
                                 <label>Tarih *</label>
-                                <input type="date" name="meeting_date" value={formData.meeting_date} onChange={handleInputChange} required />
+                                <input type="date" name="meetingstartdate" value={formData.meeting_date} onChange={handleInputChange} required />
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Başlangıç *</label>
-                                    <input type="time" name="start_time" value={formData.start_time} onChange={handleInputChange} required />
+                                    <input type="time" name="meetingstartdate" value={formData.start_time} onChange={handleInputChange} required />
                                 </div>
                                 <div className="form-group">
                                     <label>Bitiş *</label>
-                                    <input type="time" name="end_time" value={formData.end_time} onChange={handleInputChange} required />
+                                    <input type="time" name="meetingenddate" value={formData.end_time} onChange={handleInputChange} required />
                                 </div>
                             </div>
 

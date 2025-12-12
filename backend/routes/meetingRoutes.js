@@ -3,6 +3,7 @@ const router = express.Router();
 const meetingController = require('../controllers/meetingController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
+// Rotalar
 router.get('/', authMiddleware, meetingController.getMeetings);
 router.post('/', authMiddleware, meetingController.createMeeting);
 router.put('/:id', authMiddleware, meetingController.updateMeeting);
