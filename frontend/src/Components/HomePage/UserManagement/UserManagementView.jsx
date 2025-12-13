@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Edit2, Trash2, X, Search, Building, Briefcase } from 'lucide-react';
+import { Users, Edit2, Trash2, X, Search, Building, Briefcase, Plus } from 'lucide-react';
 import axiosInstance from '../../../api/axiosInstance';
 import './UserManagementView.css';
 
@@ -8,12 +8,15 @@ const UserManagementView = () => {
     const [roles, setRoles] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [positions, setPositions] = useState([]);
+    const [filteredPositions, setFilteredPositions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const [isNewUser, setIsNewUser] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
+        password: '',
         roleid: '',
         fullname: '',
         departmentid: '',
@@ -29,6 +32,15 @@ const UserManagementView = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Departman değiştiğinde pozisyonları filtrele
+    useEffect(() => {
+        if (formData.departmentid) {
+            fetchPositionsByDepartment(formData.departmentid);
+        } else {
+            setFilteredPositions(positions);
+        }
+    }, [formData.departmentid]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -51,6 +63,7 @@ const UserManagementView = () => {
             }
             if (posRes.data.success) {
                 setPositions(posRes.data.data);
+                setFilteredPositions(posRes.data.data);
             }
         } catch (error) {
             console.error('Veri yüklenirken hata:', error);
@@ -60,27 +73,29 @@ const UserManagementView = () => {
         }
     };
 
-    // Modal aç (düzenleme)
-    const handleOpenModal = (user) => {
-        setEditingUser(user);
-        setFormData({
-            username: user.username || '',
-            roleid: user.roleid || '',
-            fullname: user.fullname || '',
-            departmentid: user.departmentid || '',
-            positionid: user.positionid || '',
-            usersalary: user.usersalary || '',
-            yearsworked: user.yearsworked || ''
-        });
-        setShowModal(true);
+    // Departmana göre pozisyonları getir
+    const fetchPositionsByDepartment = async (departmentId) => {
+        try {
+            const response = await axiosInstance.get(`/management/positions/${departmentId}`);
+            if (response.data.success && response.data.data.length > 0) {
+                setFilteredPositions(response.data.data);
+            } else {
+                // Departmana özel pozisyon yoksa tüm pozisyonları göster
+                setFilteredPositions(positions);
+            }
+        } catch (error) {
+            console.error('Pozisyonlar yüklenirken hata:', error);
+            setFilteredPositions(positions);
+        }
     };
 
-    // Modal kapat
-    const handleCloseModal = () => {
-        setShowModal(false);
+    // Yeni kullanıcı modal aç
+    const handleOpenAddModal = () => {
+        setIsNewUser(true);
         setEditingUser(null);
         setFormData({
             username: '',
+            password: '',
             roleid: '',
             fullname: '',
             departmentid: '',
@@ -88,39 +103,123 @@ const UserManagementView = () => {
             usersalary: '',
             yearsworked: ''
         });
+        setFilteredPositions(positions);
+        setShowModal(true);
+    };
+
+    // Düzenleme modal aç
+    const handleOpenEditModal = (user) => {
+        setIsNewUser(false);
+        setEditingUser(user);
+        setFormData({
+            username: user.username || '',
+            password: '',
+            roleid: user.roleid || '',
+            fullname: user.fullname || '',
+            departmentid: user.departmentid || '',
+            positionid: user.positionid || '',
+            usersalary: user.usersalary || '',
+            yearsworked: user.yearsworked || ''
+        });
+
+        // Departmana göre pozisyonları yükle
+        if (user.departmentid) {
+            fetchPositionsByDepartment(user.departmentid);
+        } else {
+            setFilteredPositions(positions);
+        }
+
+        setShowModal(true);
+    };
+
+    // Modal kapat
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditingUser(null);
+        setIsNewUser(false);
+        setFormData({
+            username: '',
+            password: '',
+            roleid: '',
+            fullname: '',
+            departmentid: '',
+            positionid: '',
+            usersalary: '',
+            yearsworked: ''
+        });
+        setFilteredPositions(positions);
     };
 
     // Form değişiklik
     const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+        // Departman değiştiğinde pozisyonu sıfırla
+        if (name === 'departmentid') {
+            setFormData(prev => ({
+                ...prev,
+                departmentid: value,
+                positionid: ''
+            }));
+        }
     };
 
-    // Kullanıcı güncelle
+    // Form gönder (Yeni ekle veya güncelle)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const response = await axiosInstance.put(`/management/users/${editingUser.userid}`, {
-                username: formData.username,
-                roleid: parseInt(formData.roleid),
-                fullname: formData.fullname,
-                departmentid: formData.departmentid ? parseInt(formData.departmentid) : null,
-                positionid: formData.positionid ? parseInt(formData.positionid) : null,
-                usersalary: formData.usersalary ? parseFloat(formData.usersalary) : null,
-                yearsworked: formData.yearsworked ? parseInt(formData.yearsworked) : null
-            });
+            if (isNewUser) {
+                // Yeni kullanıcı oluştur
+                if (!formData.password) {
+                    alert('Şifre zorunludur!');
+                    return;
+                }
 
-            if (response.data.success) {
-                alert('Kullanıcı başarıyla güncellendi!');
-                fetchData();
-                handleCloseModal();
+                const response = await axiosInstance.post('/management/users', {
+                    username: formData.username,
+                    password: formData.password,
+                    roleid: parseInt(formData.roleid),
+                    fullname: formData.fullname,
+                    departmentid: formData.departmentid ? parseInt(formData.departmentid) : null,
+                    positionid: formData.positionid ? parseInt(formData.positionid) : null,
+                    usersalary: formData.usersalary ? parseFloat(formData.usersalary) : null,
+                    yearsworked: formData.yearsworked ? parseInt(formData.yearsworked) : null
+                });
+
+                if (response.data.success) {
+                    alert('Kullanıcı başarıyla oluşturuldu!');
+                    fetchData();
+                    handleCloseModal();
+                } else {
+                    alert(response.data.message || 'Bir hata oluştu!');
+                }
+            } else {
+                // Kullanıcı güncelle
+                const response = await axiosInstance.put(`/management/users/${editingUser.userid}`, {
+                    username: formData.username,
+                    roleid: parseInt(formData.roleid),
+                    fullname: formData.fullname,
+                    departmentid: formData.departmentid ? parseInt(formData.departmentid) : null,
+                    positionid: formData.positionid ? parseInt(formData.positionid) : null,
+                    usersalary: formData.usersalary ? parseFloat(formData.usersalary) : null,
+                    yearsworked: formData.yearsworked ? parseInt(formData.yearsworked) : null
+                });
+
+                if (response.data.success) {
+                    alert('Kullanıcı başarıyla güncellendi!');
+                    fetchData();
+                    handleCloseModal();
+                }
             }
         } catch (error) {
-            console.error('Güncelleme hatası:', error);
-            alert(error.response?.data?.message || 'Güncelleme başarısız!');
+            console.error('İşlem hatası:', error);
+            alert(error.response?.data?.message || 'İşlem başarısız!');
         }
     };
 
@@ -210,6 +309,10 @@ const UserManagementView = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+                    <button className="add-user-btn" onClick={handleOpenAddModal}>
+                        <Plus size={18} />
+                        <span>Yeni Kullanıcı</span>
+                    </button>
                 </div>
             </div>
 
@@ -313,7 +416,7 @@ const UserManagementView = () => {
                                         <div className="action-buttons">
                                             <button
                                                 className="icon-btn edit-btn"
-                                                onClick={() => handleOpenModal(user)}
+                                                onClick={() => handleOpenEditModal(user)}
                                                 title="Düzenle"
                                             >
                                                 <Edit2 size={16} />
@@ -337,12 +440,12 @@ const UserManagementView = () => {
                 </table>
             </div>
 
-            {/* Düzenleme Modal */}
+            {/* Modal (Yeni Ekle / Düzenle) */}
             {showModal && (
                 <div className="modal-overlay" onClick={handleCloseModal}>
                     <div className="modal-content modal-large" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h3>Kullanıcı Düzenle</h3>
+                            <h3>{isNewUser ? 'Yeni Kullanıcı Ekle' : 'Kullanıcı Düzenle'}</h3>
                             <button className="close-btn" onClick={handleCloseModal}>
                                 <X size={20} />
                             </button>
@@ -351,26 +454,44 @@ const UserManagementView = () => {
                         <form onSubmit={handleSubmit}>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Ad Soyad</label>
+                                    <label>Ad Soyad *</label>
                                     <input
                                         type="text"
                                         name="fullname"
                                         value={formData.fullname}
                                         onChange={handleInputChange}
                                         placeholder="Ad Soyad"
+                                        required
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Kullanıcı Adı</label>
+                                    <label>Kullanıcı Adı *</label>
                                     <input
                                         type="text"
                                         name="username"
                                         value={formData.username}
                                         onChange={handleInputChange}
+                                        placeholder="kullanici_adi"
                                         required
                                     />
                                 </div>
                             </div>
+
+                            {/* Şifre alanı - sadece yeni kullanıcı için */}
+                            {isNewUser && (
+                                <div className="form-group">
+                                    <label>Şifre *</label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        placeholder="Minimum 6 karakter"
+                                        required
+                                        minLength={6}
+                                    />
+                                </div>
+                            )}
 
                             <div className="form-row">
                                 <div className="form-group">
@@ -394,11 +515,14 @@ const UserManagementView = () => {
                                         name="positionid"
                                         value={formData.positionid}
                                         onChange={handleInputChange}
+                                        disabled={!formData.departmentid}
                                     >
-                                        <option value="">Pozisyon Seçin</option>
-                                        {positions.map(pos => (
+                                        <option value="">
+                                            {formData.departmentid ? 'Pozisyon Seçin' : 'Önce departman seçin'}
+                                        </option>
+                                        {filteredPositions.map(pos => (
                                             <option key={pos.id} value={pos.id}>
-                                                {pos.display_name}
+                                                {pos.display_name || `${pos.position_name} - ${pos.level}`}
                                             </option>
                                         ))}
                                     </select>
@@ -407,7 +531,7 @@ const UserManagementView = () => {
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Sistem Rolü</label>
+                                    <label>Sistem Rolü *</label>
                                     <select
                                         name="roleid"
                                         value={formData.roleid}
@@ -431,7 +555,7 @@ const UserManagementView = () => {
                                         onChange={handleInputChange}
                                         placeholder="0"
                                         min="0"
-                                        step="100"
+
                                     />
                                 </div>
                             </div>
@@ -459,7 +583,7 @@ const UserManagementView = () => {
                                     İptal
                                 </button>
                                 <button type="submit" className="save-btn">
-                                    Kaydet
+                                    {isNewUser ? 'Kullanıcı Oluştur' : 'Kaydet'}
                                 </button>
                             </div>
                         </form>

@@ -33,6 +33,7 @@
 .header-right {
     display: flex;
     gap: 15px;
+    align-items: center;
 }
 
 /* SEARCH BOX */
@@ -61,6 +62,31 @@
 
 .search-box input::placeholder {
     color: #888;
+}
+
+/* ADD USER BUTTON */
+.add-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #9d4edd, #7b2cbf);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-user-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(157, 78, 221, 0.4);
+}
+
+.add-user-btn svg {
+    color: #fff;
 }
 
 /* STATS ROW */
@@ -384,6 +410,12 @@
     box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.2);
 }
 
+.form-group input:disabled,
+.form-group select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .form-group select option {
     background: #1e1e2d;
     color: #e5e5e5;
@@ -455,6 +487,24 @@
         gap: 15px;
     }
 
+    .header-right {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .search-box input {
+        width: 100%;
+    }
+
+    .add-user-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
     .stats-row {
         flex-wrap: wrap;
     }
@@ -462,10 +512,6 @@
     .stat-item {
         flex: 1;
         min-width: 100px;
-    }
-
-    .search-box input {
-        width: 200px;
     }
 
     .modal-content {

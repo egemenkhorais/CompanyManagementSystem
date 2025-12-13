@@ -100,6 +100,34 @@ const getAllPositions = async (req, res) => {
     }
 };
 
+// Yeni kullanıcı oluştur
+const createUser = async (req, res) => {
+    try {
+        const result = await userManagementService.createUser(req.body);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        res.status(201).json(result);
+    } catch (error) {
+        console.error('Controller createUser Error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası!' });
+    }
+};
+
+// Departmana göre pozisyonları getir
+const getPositionsByDepartment = async (req, res) => {
+    try {
+        const { departmentId } = req.params;
+        const result = await userManagementService.getPositionsByDepartment(departmentId);
+        res.json(result);
+    } catch (error) {
+        console.error('Controller getPositionsByDepartment Error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası!' });
+    }
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -107,5 +135,7 @@ module.exports = {
     deleteUser,
     getAllRoles,
     getAllDepartments,
-    getAllPositions
+    getAllPositions,
+    createUser,
+    getPositionsByDepartment
 };

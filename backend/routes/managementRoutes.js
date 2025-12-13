@@ -12,6 +12,10 @@ router.get('/users/:userId', userManagementController.getUserById);
 router.put('/users/:userId', userManagementController.updateUser);
 router.delete('/users/:userId', userManagementController.deleteUser);
 
+
+router.post('/users', userManagementController.createUser);
+router.get('/positions/:departmentId', userManagementController.getPositionsByDepartment);
+
 // Dropdown verileri
 router.get('/roles', userManagementController.getAllRoles);
 router.get('/departments', userManagementController.getAllDepartments);

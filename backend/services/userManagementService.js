@@ -239,6 +239,87 @@ class UserManagementService {
             throw error;
         }
     }
+
+    /**
+     * Departmana göre pozisyonları getir
+     */
+    async getPositionsByDepartment(departmentId) {
+        try {
+            const result = await pool.query(`
+                SELECT pn.id, pn.position_name, pn.level,
+                       pn.position_name || ' - ' || pn.level as display_name
+                FROM positions p
+                JOIN positionnames pn ON p.position_name_id = pn.id
+                WHERE p.departmentid = $1 AND p.is_active = true AND pn.is_active = true
+                ORDER BY pn.position_name, pn.level
+            `, [departmentId]);
+
+            return { success: true, data: result.rows };
+        } catch (error) {
+            console.error('UserManagementService getPositionsByDepartment Error:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Yeni kullanıcı oluştur
+     */
+    async createUser(userData) {
+        const client = await pool.connect();
+        const bcrypt = require('bcrypt');
+
+        try {
+            await client.query('BEGIN');
+
+            const { username, password, roleid, fullname, departmentid, positionid, usersalary, yearsworked } = userData;
+
+            // Username kontrolü
+            const userCheck = await client.query(
+                'SELECT userid FROM users WHERE username = $1',
+                [username]
+            );
+
+            if (userCheck.rows.length > 0) {
+                await client.query('ROLLBACK');
+                return { success: false, message: 'Bu kullanıcı adı zaten kullanılıyor!' };
+            }
+
+            // Şifreyi hashle
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Users tablosuna ekle
+            const userResult = await client.query(
+                `INSERT INTO users (username, password, roleid) 
+                 VALUES ($1, $2, $3) 
+                 RETURNING userid`,
+                [username, hashedPassword, roleid]
+            );
+
+            const newUserId = userResult.rows[0].userid;
+
+            // Userdetails tablosuna ekle
+            await client.query(
+                `INSERT INTO userdetails (userid, name, departmentid, positionnames_id, usersalary, yearsworked, companyid)
+                 VALUES ($1, $2, $3, $4, $5, $6, 1)`,
+                [newUserId, fullname, departmentid, positionid, usersalary || 0, yearsworked || 0]
+            );
+
+            await client.query('COMMIT');
+
+            return {
+                success: true,
+                message: 'Kullanıcı başarıyla oluşturuldu',
+                data: { userid: newUserId, username, fullname }
+            };
+
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('UserManagementService createUser Error:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
 }
 
 module.exports = new UserManagementService();
