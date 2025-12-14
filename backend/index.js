@@ -14,6 +14,8 @@ const roomsRoutes = require('./routes/roomsRoutes');
 const managementRoutes = require('./routes/managementRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const roleManagementRoutes = require('./routes/roleManagementRoutes');
+
 
 
 
@@ -65,6 +67,7 @@ app.use('/api/rooms', roomsRoutes);
 app.use('/api/management', managementRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/role-management', roleManagementRoutes);
 
 // Geriye dönük uyumluluk için eski endpoint'ler
 const authController = require('./controllers/authController');

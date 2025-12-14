@@ -10,6 +10,9 @@ import UserManagementView from './UserManagement/UserManagementView';
 import ProjectManagement from './Projects/ProjectManagement';
 import Tasks from './Projects/Tasks';
 import DepartmentManagement from './DepartmentManagement/DepartmentManagement';
+import RoleManagement from './RoleManagement/RoleManagement';
+import PermissionManagement from './PermissionManagement/PermissionManagement';
+
 import {
     Users,
     Settings,
@@ -30,6 +33,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
 
+
 // ==================== VIEW COMPONENTS ====================
 
 const DashboardView = () => (
@@ -44,12 +48,6 @@ const DashboardView = () => (
 );
 
 
-const RoleManagementView = () => (
-    <div className="content-card">
-        <h2>Rol & Yetki Yönetimi</h2>
-        <p>Rolleri ve yetkileri buradan yönetebilirsiniz.</p>
-    </div>
-);
 
 const HROperationsView = ({ onNavigate }) => (
     <div className="content-card">
@@ -192,7 +190,9 @@ const HomePage = ({ onLogout }) => {
             case 'admin:users':
                 return <UserManagementView />;
             case 'admin:roles':
-                return <RoleManagementView />;
+                return <RoleManagement />;
+            case 'admin:permissions':
+                return <PermissionManagement />;
             case 'admin:departments':
                 return <DepartmentManagement />;
             case 'hr:operations':

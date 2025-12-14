@@ -200,33 +200,29 @@ const DepartmentManagement = () => {
 
     return (
         <div className="dept-management">
-            {/* Sol Panel - Departmanlar */}
-            <div className="dept-panel">
-                <div className="dept-header">
-                    <h2>Departmanlar</h2>
-                    <button className="btn-add" onClick={() => setShowAddDepartment(true)}>
-                        <Plus size={18} /> Ekle
-                    </button>
-                </div>
+            <div className="dept-content">
+                {/* Sol Panel - Departmanlar */}
+                <div className="dept-sidebar">
+                    <div className="sidebar-header">
+                        <h3>Departmanlar</h3>
+                        <button className="add-dept-btn" onClick={() => setShowAddDepartment(true)}>
+                            <Plus size={18} />
+                            <span>Ekle</span>
+                        </button>
+                    </div>
 
-                <table className="dept-table">
-                    <thead>
-                    <tr>
-                        <th>Departman Adı</th>
-                        <th>İşlemler</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {departments.map(dept => (
-                        <tr
-                            key={dept.departmentid}
-                            className={selectedDepartment?.departmentid === dept.departmentid ? 'active' : ''}
-                            onClick={() => handleSelectDepartment(dept)}
-                        >
-                            <td>{dept.departmentname}</td>
-                            <td>
+                    <div className="dept-list">
+                        {departments.map(dept => (
+                            <div
+                                key={dept.departmentid}
+                                className={`dept-item ${selectedDepartment?.departmentid === dept.departmentid ? 'active' : ''}`}
+                                onClick={() => handleSelectDepartment(dept)}
+                            >
+                                <div className="dept-info">
+                                    <div className="dept-name">{dept.departmentname}</div>
+                                </div>
                                 <button
-                                    className="btn-icon btn-edit"
+                                    className="edit-dept-icon"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setDepartmentForm({ name: dept.departmentname });
@@ -236,95 +232,100 @@ const DepartmentManagement = () => {
                                     <Edit2 size={16} />
                                 </button>
                                 <button
-                                    className="btn-icon btn-delete"
+                                    className="delete-dept-icon"
                                     onClick={(e) => handleDeleteDepartment(dept.departmentid, e)}
                                 >
                                     <Trash2 size={16} />
                                 </button>
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Sağ Panel - Pozisyonlar */}
-            <div className="pos-panel">
-                {selectedDepartment ? (
-                    <>
-                        <div className="pos-header">
-                            <h2>{selectedDepartment.departmentname} - Pozisyonlar</h2>
-                            <button className="btn-add" onClick={() => setShowAddPosition(true)}>
-                                <Plus size={18} /> Ekle
-                            </button>
-                        </div>
-
-                        <table className="pos-table">
-                            <thead>
-                            <tr>
-                                <th>Pozisyon</th>
-                                <th>Seviye</th>
-                                <th>Kontenjan</th>
-                                <th>Mevcut</th>
-                                <th>İşlemler</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {positions.length > 0 ? positions.map(pos => (
-                                <tr key={pos.id}>
-                                    <td>{pos.position_name}</td>
-                                    <td>{pos.level}</td>
-                                    <td>{pos.quota}</td>
-                                    <td>{pos.current_count || 0}</td>
-                                    <td>
-                                        <button
-                                            className="btn-icon btn-edit"
-                                            onClick={() => {
-                                                setPositionForm({
-                                                    id: pos.id,
-                                                    position_name_id: pos.position_name_id,
-                                                    position_name: pos.position_name,
-                                                    level: pos.level,
-                                                    description: pos.description || '',
-                                                    quota: pos.quota
-                                                });
-                                                setShowEditPosition(true);
-                                            }}
-                                        >
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button
-                                            className="btn-icon btn-delete"
-                                            onClick={() => handleDeletePosition(pos.id)}
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="5" className="empty">Pozisyon bulunamadı</td>
-                                </tr>
-                            )}
-                            </tbody>
-                        </table>
-                    </>
-                ) : (
-                    <div className="no-selection">
-                        <p>Pozisyonları görmek için bir departman seçin</p>
+                            </div>
+                        ))}
                     </div>
-                )}
+                </div>
+
+                {/* Sağ Panel - Pozisyonlar */}
+                <div className="pos-details">
+                    {selectedDepartment ? (
+                        <>
+                            <div className="pos-header">
+                                <h3>{selectedDepartment.departmentname} - Pozisyonlar</h3>
+                                <button className="add-pos-btn" onClick={() => setShowAddPosition(true)}>
+                                    <Plus size={18} /> Ekle
+                                </button>
+                            </div>
+
+                            <div className="pos-table-container">
+                                <table className="pos-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Pozisyon</th>
+                                        <th>Seviye</th>
+                                        <th>Kontenjan</th>
+                                        <th>Mevcut</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {positions.length > 0 ? positions.map(pos => (
+                                        <tr key={pos.id}>
+                                            <td>{pos.position_name}</td>
+                                            <td>{pos.level}</td>
+                                            <td>{pos.quota}</td>
+                                            <td>{pos.current_count || 0}</td>
+                                            <td>
+                                                <div className="pos-actions">
+                                                    <button
+                                                        className="edit-pos-icon"
+                                                        onClick={() => {
+                                                            setPositionForm({
+                                                                id: pos.id,
+                                                                position_name_id: pos.position_name_id,
+                                                                position_name: pos.position_name,
+                                                                level: pos.level,
+                                                                description: pos.description || '',
+                                                                quota: pos.quota
+                                                            });
+                                                            setShowEditPosition(true);
+                                                        }}
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button
+                                                        className="delete-pos-icon"
+                                                        onClick={() => handleDeletePosition(pos.id)}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="5" className="empty">Pozisyon bulunamadı</td>
+                                        </tr>
+                                    )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="empty-state">
+                            <p>Pozisyonları görmek için bir departman seçin</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Add Department Modal */}
             {showAddDepartment && (
                 <div className="modal-overlay" onClick={() => setShowAddDepartment(false)}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>Yeni Departman</h3>
-                            <button onClick={() => setShowAddDepartment(false)}><X /></button>
+                            <button className="close-btn" onClick={() => setShowAddDepartment(false)}>
+                                <X size={20} />
+                            </button>
                         </div>
-                        <div className="modal-body">
+                        <div className="form-group">
                             <label>Departman Adı</label>
                             <input
                                 type="text"
@@ -333,9 +334,9 @@ const DepartmentManagement = () => {
                                 placeholder="Departman adı"
                             />
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowAddDepartment(false)}>İptal</button>
-                            <button className="btn-save" onClick={handleAddDepartment}>
+                        <div className="modal-actions">
+                            <button className="cancel-btn" onClick={() => setShowAddDepartment(false)}>İptal</button>
+                            <button className="save-btn" onClick={handleAddDepartment}>
                                 <Save size={16} /> Kaydet
                             </button>
                         </div>
@@ -346,12 +347,14 @@ const DepartmentManagement = () => {
             {/* Edit Department Modal */}
             {showEditDepartment && (
                 <div className="modal-overlay" onClick={() => setShowEditDepartment(false)}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>Departman Düzenle</h3>
-                            <button onClick={() => setShowEditDepartment(false)}><X /></button>
+                            <button className="close-btn" onClick={() => setShowEditDepartment(false)}>
+                                <X size={20} />
+                            </button>
                         </div>
-                        <div className="modal-body">
+                        <div className="form-group">
                             <label>Departman Adı</label>
                             <input
                                 type="text"
@@ -359,9 +362,9 @@ const DepartmentManagement = () => {
                                 onChange={(e) => setDepartmentForm({ name: e.target.value })}
                             />
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowEditDepartment(false)}>İptal</button>
-                            <button className="btn-save" onClick={handleEditDepartment}>
+                        <div className="modal-actions">
+                            <button className="cancel-btn" onClick={() => setShowEditDepartment(false)}>İptal</button>
+                            <button className="save-btn" onClick={handleEditDepartment}>
                                 <Save size={16} /> Güncelle
                             </button>
                         </div>
@@ -372,12 +375,15 @@ const DepartmentManagement = () => {
             {/* Add Position Modal */}
             {showAddPosition && (
                 <div className="modal-overlay" onClick={() => setShowAddPosition(false)}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>Pozisyon Ekle - {selectedDepartment.departmentname}</h3>
-                            <button onClick={() => setShowAddPosition(false)}><X /></button>
+                            <button className="close-btn" onClick={() => setShowAddPosition(false)}>
+                                <X size={20} />
+                            </button>
                         </div>
-                        <div className="modal-body">
+
+                        <div className="form-group">
                             <label>Pozisyon Adı *</label>
                             <input
                                 type="text"
@@ -385,7 +391,9 @@ const DepartmentManagement = () => {
                                 onChange={(e) => setPositionForm({...positionForm, position_name: e.target.value})}
                                 placeholder="Örn: Backend Developer"
                             />
+                        </div>
 
+                        <div className="form-group">
                             <label>Seviye *</label>
                             <input
                                 type="text"
@@ -393,7 +401,9 @@ const DepartmentManagement = () => {
                                 onChange={(e) => setPositionForm({...positionForm, level: e.target.value})}
                                 placeholder="Örn: Junior, Mid, Senior, Lead"
                             />
+                        </div>
 
+                        <div className="form-group">
                             <label>Açıklama (Opsiyonel)</label>
                             <textarea
                                 value={positionForm.description || ''}
@@ -401,7 +411,9 @@ const DepartmentManagement = () => {
                                 placeholder="Pozisyon açıklaması"
                                 rows="3"
                             />
+                        </div>
 
+                        <div className="form-group">
                             <label>Kontenjan *</label>
                             <input
                                 type="number"
@@ -410,12 +422,13 @@ const DepartmentManagement = () => {
                                 onChange={(e) => setPositionForm({...positionForm, quota: parseInt(e.target.value) || 1})}
                             />
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => {
+
+                        <div className="modal-actions">
+                            <button className="cancel-btn" onClick={() => {
                                 setShowAddPosition(false);
                                 setPositionForm({});
                             }}>İptal</button>
-                            <button className="btn-save" onClick={handleAddPosition}>
+                            <button className="save-btn" onClick={handleAddPosition}>
                                 <Save size={16} /> Ekle
                             </button>
                         </div>
@@ -426,12 +439,15 @@ const DepartmentManagement = () => {
             {/* Edit Position Modal */}
             {showEditPosition && (
                 <div className="modal-overlay" onClick={() => setShowEditPosition(false)}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>Pozisyon Düzenle</h3>
-                            <button onClick={() => setShowEditPosition(false)}><X /></button>
+                            <button className="close-btn" onClick={() => setShowEditPosition(false)}>
+                                <X size={20} />
+                            </button>
                         </div>
-                        <div className="modal-body">
+
+                        <div className="form-group">
                             <label>Pozisyon Adı *</label>
                             <input
                                 type="text"
@@ -439,7 +455,9 @@ const DepartmentManagement = () => {
                                 onChange={(e) => setPositionForm({...positionForm, position_name: e.target.value})}
                                 placeholder="Pozisyon adı"
                             />
+                        </div>
 
+                        <div className="form-group">
                             <label>Seviye *</label>
                             <input
                                 type="text"
@@ -447,7 +465,9 @@ const DepartmentManagement = () => {
                                 onChange={(e) => setPositionForm({...positionForm, level: e.target.value})}
                                 placeholder="Seviye"
                             />
+                        </div>
 
+                        <div className="form-group">
                             <label>Açıklama</label>
                             <textarea
                                 value={positionForm.description || ''}
@@ -455,7 +475,9 @@ const DepartmentManagement = () => {
                                 placeholder="Açıklama"
                                 rows="3"
                             />
+                        </div>
 
+                        <div className="form-group">
                             <label>Kontenjan *</label>
                             <input
                                 type="number"
@@ -464,9 +486,10 @@ const DepartmentManagement = () => {
                                 onChange={(e) => setPositionForm({...positionForm, quota: parseInt(e.target.value) || 1})}
                             />
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setShowEditPosition(false)}>İptal</button>
-                            <button className="btn-save" onClick={handleEditPosition}>
+
+                        <div className="modal-actions">
+                            <button className="cancel-btn" onClick={() => setShowEditPosition(false)}>İptal</button>
+                            <button className="save-btn" onClick={handleEditPosition}>
                                 <Save size={16} /> Güncelle
                             </button>
                         </div>
