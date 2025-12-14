@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict jaK4mAnLolAirXdeqmc0WUKGnXovP9Rcg3tmqwtAbHTRZWwB4BOK16aoEANi6Q3
+\restrict PBHohsxevAGbYEW7BCi4ttunveWFpOwdWZAm3OcAgrIHcwu07ohChYLscxQGLcR
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -418,7 +418,16 @@ ALTER SEQUENCE public.positions_id_seq OWNED BY public.positions.id;
 
 CREATE TABLE public.projects (
     projectid integer NOT NULL,
-    projectname character varying
+    seniorid integer,
+    yoneticiid integer,
+    projectname character varying,
+    deadline date,
+    budget integer,
+    startdate date,
+    enddate date,
+    "desc" character varying,
+    teamid integer,
+    teamselected boolean
 );
 
 
@@ -568,7 +577,13 @@ ALTER SEQUENCE public.roles_roleid_seq OWNED BY public.roles.roleid;
 
 CREATE TABLE public.tasks (
     taskid integer NOT NULL,
-    projectid integer
+    projectid integer,
+    userid integer,
+    title character varying,
+    "desc" character varying,
+    status character varying,
+    priorty character varying,
+    deudate date
 );
 
 
@@ -594,6 +609,41 @@ ALTER SEQUENCE public.tasks_taskid_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.tasks_taskid_seq OWNED BY public.tasks.taskid;
+
+
+--
+-- Name: teamforproject; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.teamforproject (
+    teamid integer NOT NULL,
+    projectid integer,
+    userid integer
+);
+
+
+ALTER TABLE public.teamforproject OWNER TO postgres;
+
+--
+-- Name: teamforproject_teamid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.teamforproject_teamid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.teamforproject_teamid_seq OWNER TO postgres;
+
+--
+-- Name: teamforproject_teamid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.teamforproject_teamid_seq OWNED BY public.teamforproject.teamid;
 
 
 --
@@ -735,6 +785,13 @@ ALTER TABLE ONLY public.tasks ALTER COLUMN taskid SET DEFAULT nextval('public.ta
 
 
 --
+-- Name: teamforproject teamid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.teamforproject ALTER COLUMN teamid SET DEFAULT nextval('public.teamforproject_teamid_seq'::regclass);
+
+
+--
 -- Name: userdetails userdetailsid; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -830,6 +887,7 @@ COPY public.meetings (meetingid, companyroomid, meetingstartdate, meetingsubject
 1	1	2024-11-25 14:00:00+00	Haftalık Sprint Toplantısı	f	\N
 2	2	2024-11-26 10:00:00+00	Stajyer Oryantasyonu	f	\N
 3	8	2025-12-12 18:30:00+00	Deneme	f	2025-12-12 19:30:00+00
+4	4	2025-12-13 12:30:00+00	fakan	f	2025-12-13 14:30:00+00
 \.
 
 
@@ -869,6 +927,10 @@ COPY public.permissions (id, permission_code, permission_type, description, pare
 27	meetings	menu_group	Toplantılar	\N
 59	meetings:view	menu	Toplantıları Görüntüle	meetings
 50	meetings:management	menu	Toplantı Yönetimi	meetings
+60	project:management	menu_group	Projeler	\N
+61	project:view	menu	Proje Yönetim	project:management
+62	project:senior	action	Proje Team ve Task Atama	\N
+63	project:task	menu	Görevler	project:management
 \.
 
 
@@ -932,7 +994,9 @@ COPY public.positions (id, position_name_id, departmentid, quota, is_active, cre
 -- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.projects (projectid, projectname) FROM stdin;
+COPY public.projects (projectid, seniorid, yoneticiid, projectname, deadline, budget, startdate, enddate, "desc", teamid, teamselected) FROM stdin;
+1	\N	\N	deneme	2025-12-31	50000	2025-12-13	\N	Proje çokemelli	\N	\N
+2	9	1	deneme3	2025-12-31	100000	2025-12-13	\N	çokomelli	\N	\N
 \.
 
 
@@ -1054,6 +1118,8 @@ COPY public.role_permissions (roleid, permission_id) FROM stdin;
 10	59
 8	58
 5	47
+1	61
+1	60
 \.
 
 
@@ -1079,7 +1145,15 @@ COPY public.roles (roleid, rolename) FROM stdin;
 -- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tasks (taskid, projectid) FROM stdin;
+COPY public.tasks (taskid, projectid, userid, title, "desc", status, priorty, deudate) FROM stdin;
+\.
+
+
+--
+-- Data for Name: teamforproject; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.teamforproject (teamid, projectid, userid) FROM stdin;
 \.
 
 
@@ -1090,8 +1164,9 @@ COPY public.tasks (taskid, projectid) FROM stdin;
 COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, usersalary, yearsworked, positionnames_id) FROM stdin;
 2	2	Ayşe Kaya	2	1	38500.00	5	19
 1	1	Ahmet Yılmaz	1	1	45000.50	3	2
-3	3	Mehmet Demir	1	2	25000.00	2	5
+3	3	Mehmet Demir	1	2	24000.00	2	5
 4	4	Ahmet Yılmaz	5	1	64648.00	3	12
+29	30	Batuhan	4	1	4500.00	\N	1
 5	5	Ayşe Demir	1	1	63300.00	3	1
 6	6	Mehmet Kaya	3	1	26912.00	8	1
 7	7	Fatma Çelik	5	1	80684.00	6	16
@@ -1128,8 +1203,6 @@ COPY public.users (userid, username, password, roleid) FROM stdin;
 6	mehmet.kaya	Sifre123!	\N
 7	fatma.celik	Sifre123!	\N
 8	mustafa.ozkan	Sifre123!	\N
-9	zeynep.sahin	Sifre123!	\N
-10	emre.yildiz	Sifre123!	\N
 11	elif.koc	Sifre123!	\N
 12	burak.aydin	Sifre123!	\N
 13	hande.ozdemir	Sifre123!	\N
@@ -1151,6 +1224,9 @@ COPY public.users (userid, username, password, roleid) FROM stdin;
 1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1
 2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2
 3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3
+9	zeynep.sahin	Sifre123!	5
+10	emre.yildiz	Sifre123!	5
+30	Karanfil	$2b$10$Y9lKB1QZBkj3xQ5IAKbuQOyNJTAOb/qkHEh.lV964WVyV2OqtvwZK	3
 \.
 
 
@@ -1158,7 +1234,7 @@ COPY public.users (userid, username, password, roleid) FROM stdin;
 -- Name: User_userid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_userid_seq"', 28, true);
+SELECT pg_catalog.setval('public."User_userid_seq"', 31, true);
 
 
 --
@@ -1200,14 +1276,14 @@ SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 10, true);
 -- Name: meetings_meetingid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.meetings_meetingid_seq', 3, true);
+SELECT pg_catalog.setval('public.meetings_meetingid_seq', 4, true);
 
 
 --
 -- Name: permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.permissions_id_seq', 59, true);
+SELECT pg_catalog.setval('public.permissions_id_seq', 65, true);
 
 
 --
@@ -1228,7 +1304,7 @@ SELECT pg_catalog.setval('public.positions_id_seq', 1, false);
 -- Name: projects_projectid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.projects_projectid_seq', 1, false);
+SELECT pg_catalog.setval('public.projects_projectid_seq', 2, true);
 
 
 --
@@ -1260,10 +1336,17 @@ SELECT pg_catalog.setval('public.tasks_taskid_seq', 1, false);
 
 
 --
+-- Name: teamforproject_teamid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.teamforproject_teamid_seq', 1, false);
+
+
+--
 -- Name: userdetails_userdetailsid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.userdetails_userdetailsid_seq', 27, true);
+SELECT pg_catalog.setval('public.userdetails_userdetailsid_seq', 30, true);
 
 
 --
@@ -1419,6 +1502,14 @@ ALTER TABLE ONLY public.tasks
 
 
 --
+-- Name: teamforproject teamforproject_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.teamforproject
+    ADD CONSTRAINT teamforproject_pkey PRIMARY KEY (teamid);
+
+
+--
 -- Name: userdetails userdetails_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1491,6 +1582,30 @@ ALTER TABLE ONLY public.positions
 
 
 --
+-- Name: projects projects_seniorid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_seniorid_fkey FOREIGN KEY (seniorid) REFERENCES public.users(userid);
+
+
+--
+-- Name: projects projects_teamid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_teamid_fkey FOREIGN KEY (teamid) REFERENCES public.teamforproject(teamid) NOT VALID;
+
+
+--
+-- Name: projects projects_yoneticiid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_yoneticiid_fkey FOREIGN KEY (yoneticiid) REFERENCES public.users(userid);
+
+
+--
 -- Name: request request_recieveruserid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1536,6 +1651,30 @@ ALTER TABLE ONLY public.role_permissions
 
 ALTER TABLE ONLY public.tasks
     ADD CONSTRAINT tasks_projectid_fkey FOREIGN KEY (projectid) REFERENCES public.projects(projectid);
+
+
+--
+-- Name: tasks tasks_userid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_userid_fkey FOREIGN KEY (userid) REFERENCES public.users(userid);
+
+
+--
+-- Name: teamforproject teamforproject_projectid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.teamforproject
+    ADD CONSTRAINT teamforproject_projectid_fkey FOREIGN KEY (projectid) REFERENCES public.projects(projectid);
+
+
+--
+-- Name: teamforproject teamforproject_userid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.teamforproject
+    ADD CONSTRAINT teamforproject_userid_fkey FOREIGN KEY (userid) REFERENCES public.users(userid);
 
 
 --
@@ -1868,6 +2007,24 @@ GRANT ALL ON SEQUENCE public.tasks_taskid_seq TO service_role;
 
 
 --
+-- Name: TABLE teamforproject; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.teamforproject TO anon;
+GRANT ALL ON TABLE public.teamforproject TO authenticated;
+GRANT ALL ON TABLE public.teamforproject TO service_role;
+
+
+--
+-- Name: SEQUENCE teamforproject_teamid_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.teamforproject_teamid_seq TO anon;
+GRANT ALL ON SEQUENCE public.teamforproject_teamid_seq TO authenticated;
+GRANT ALL ON SEQUENCE public.teamforproject_teamid_seq TO service_role;
+
+
+--
 -- Name: TABLE userdetails; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1949,5 +2106,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict jaK4mAnLolAirXdeqmc0WUKGnXovP9Rcg3tmqwtAbHTRZWwB4BOK16aoEANi6Q3
+\unrestrict PBHohsxevAGbYEW7BCi4ttunveWFpOwdWZAm3OcAgrIHcwu07ohChYLscxQGLcR
 
