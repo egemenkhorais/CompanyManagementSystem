@@ -766,10 +766,9 @@ class ProjectService {
                     "desc",
                     status,
                     priority,
-                    deudate,
-                    iscompleted
+                    deudate
                 )
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING *
             `, [
                 projectId,
@@ -778,8 +777,7 @@ class ProjectService {
                 desc || null,
                 'pending', // Varsayılan status
                 priority || 'medium',
-                deudate || null,
-                false // iscompleted varsayılan false
+                deudate || null
             ]);
 
             return {
@@ -854,6 +852,7 @@ class ProjectService {
                     t.status,
                     t.priority,
                     t.deudate,
+                    t.updates,
                     u.username,
                     ud.name as fullname
                 FROM tasks t
@@ -939,7 +938,7 @@ class ProjectService {
                 updateValues.push(title.trim());
             }
             if (desc !== undefined) {
-                updateFields.push(`desc = $${paramIndex++}`);
+                updateFields.push(`"desc" = $${paramIndex++}`);
                 updateValues.push(desc || null);
             }
             if (userid !== undefined) {
@@ -998,6 +997,83 @@ class ProjectService {
         } catch (error) {
             console.error('ProjectService UpdateTask Error:', error);
             throw new Error('Task güncellenirken hata oluştu: ' + error.message);
+        }
+    }
+
+    /**
+     * Task sil
+     */
+    async deleteTask(projectId, taskId, userId, userRoleId) {
+        try {
+            // Task'ı kontrol et
+            const taskResult = await pool.query(
+                'SELECT * FROM tasks WHERE taskid = $1 AND projectid = $2',
+                [taskId, projectId]
+            );
+
+            if (taskResult.rows.length === 0) {
+                return {
+                    success: false,
+                    message: 'Task bulunamadı.'
+                };
+            }
+
+            // Projeyi kontrol et
+            const projectResult = await pool.query(
+                'SELECT * FROM projects WHERE projectid = $1',
+                [projectId]
+            );
+
+            if (projectResult.rows.length === 0) {
+                return {
+                    success: false,
+                    message: 'Proje bulunamadı.'
+                };
+            }
+
+            const project = projectResult.rows[0];
+
+            // Kullanıcının bu projede task silme yetkisi var mı kontrol et
+            const roleResult = await pool.query(
+                'SELECT rolename FROM roles WHERE roleid = $1',
+                [userRoleId]
+            );
+
+            const roleName = roleResult.rows[0]?.rolename;
+
+            // Admin, yönetici veya senior kontrolü
+            const isAuthorized = roleName === 'admin' || 
+                                project.yoneticiid === userId || 
+                                project.seniorid === userId;
+
+            if (!isAuthorized) {
+                return {
+                    success: false,
+                    message: 'Bu projede task silme yetkiniz yok.'
+                };
+            }
+
+            // Task'ı sil
+            const deleteResult = await pool.query(
+                'DELETE FROM tasks WHERE taskid = $1 AND projectid = $2 RETURNING taskid',
+                [taskId, projectId]
+            );
+
+            if (deleteResult.rows.length === 0) {
+                return {
+                    success: false,
+                    message: 'Task silinirken bir hata oluştu.'
+                };
+            }
+
+            return {
+                success: true,
+                message: 'Task başarıyla silindi.'
+            };
+
+        } catch (error) {
+            console.error('ProjectService DeleteTask Error:', error);
+            throw new Error('Task silinirken hata oluştu: ' + error.message);
         }
     }
 }

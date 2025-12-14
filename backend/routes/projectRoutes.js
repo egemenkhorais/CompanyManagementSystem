@@ -77,6 +77,14 @@ router.get('/:projectId/tasks', authMiddleware, checkPermission('project:view'),
 router.put('/:projectId/tasks/:taskId', authMiddleware, checkPermission('project:senior'), (req, res) => projectController.updateTask(req, res));
 
 /**
+ * DELETE /api/projects/:projectId/tasks/:taskId
+ * Task sil
+ * project:senior permission'ı gereklidir
+ * Bu route'u /:projectId'den ÖNCE tanımlamak önemli!
+ */
+router.delete('/:projectId/tasks/:taskId', authMiddleware, checkPermission('project:senior'), (req, res) => projectController.deleteTask(req, res));
+
+/**
  * GET /api/projects/:projectId
  * ID'ye göre proje getir
  * project:view permission'ı gereklidir

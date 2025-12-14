@@ -8,6 +8,7 @@ import MeetingManagement from './Meetings/MeetingManagement';
 import MeetingView from './Meetings/MeetingView';
 import UserManagementView from './UserManagement/UserManagementView';
 import ProjectManagement from './Projects/ProjectManagement';
+import Tasks from './Projects/Tasks';
 
 import {
     Users,
@@ -234,6 +235,9 @@ const HomePage = ({ onLogout }) => {
 
             case 'project:view':
                 return <ProjectManagement userPermissions={permissions} user={user} />;
+
+            case 'project:task':
+                return <Tasks user={user} />;
 
             case 'reports':
                 return <ReportsView />;

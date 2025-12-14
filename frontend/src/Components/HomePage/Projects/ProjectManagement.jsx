@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Calendar, DollarSign, Users, X, Clock, FileText, CheckCircle, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Calendar, DollarSign, Users, X, Clock, FileText, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Trash2, Edit } from 'lucide-react';
 import axiosInstance from '../../../api/axiosInstance';
 import './ProjectManagement.css';
 
@@ -16,6 +16,15 @@ const ProjectManagement = ({ userPermissions = [], user }) => {
     const [selectedTeamMembers, setSelectedTeamMembers] = useState([]);
     const [editingTeam, setEditingTeam] = useState(false);
     const [expandedMembers, setExpandedMembers] = useState({});
+    const [editingTask, setEditingTask] = useState(null);
+    const [editingTaskData, setEditingTaskData] = useState({
+        title: '',
+        desc: '',
+        userid: '',
+        status: '',
+        priority: '',
+        deudate: ''
+    });
     const [loadingTeam, setLoadingTeam] = useState(false);
     const [loadingTasks, setLoadingTasks] = useState(false);
 
@@ -194,6 +203,73 @@ const ProjectManagement = ({ userPermissions = [], user }) => {
 
     const getTasksByMember = (userId) => {
         return tasks.filter(task => task.userid === userId);
+    };
+
+    const handleEditTask = (task) => {
+        setEditingTask(task.taskid);
+        setEditingTaskData({
+            title: task.title || '',
+            desc: task.desc || '',
+            userid: task.userid || '',
+            status: task.status || '',
+            priority: task.priority || '',
+            deudate: task.deudate || ''
+        });
+    };
+
+    const handleCancelEditTask = () => {
+        setEditingTask(null);
+        setEditingTaskData({
+            title: '',
+            desc: '',
+            userid: '',
+            status: '',
+            priority: '',
+            deudate: ''
+        });
+    };
+
+    const handleUpdateTask = async (taskId) => {
+        try {
+            const response = await axiosInstance.put(`/projects/${selectedProject.projectid}/tasks/${taskId}`, editingTaskData);
+            if (response.data.success) {
+                alert('Task başarıyla güncellendi!');
+                setEditingTask(null);
+                setEditingTaskData({
+                    title: '',
+                    desc: '',
+                    userid: '',
+                    status: '',
+                    priority: '',
+                    deudate: ''
+                });
+                fetchTasks(selectedProject.projectid);
+            } else {
+                alert(response.data.message || 'Task güncellenirken bir hata oluştu!');
+            }
+        } catch (error) {
+            console.error('Task güncellenirken hata:', error);
+            alert(error.response?.data?.message || 'Task güncellenirken bir hata oluştu!');
+        }
+    };
+
+    const handleDeleteTask = async (taskId) => {
+        if (!window.confirm('Bu task\'i silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.delete(`/projects/${selectedProject.projectid}/tasks/${taskId}`);
+            if (response.data.success) {
+                alert('Task başarıyla silindi!');
+                fetchTasks(selectedProject.projectid);
+            } else {
+                alert(response.data.message || 'Task silinirken bir hata oluştu!');
+            }
+        } catch (error) {
+            console.error('Task silinirken hata:', error);
+            alert(error.response?.data?.message || 'Task silinirken bir hata oluştu!');
+        }
     };
 
     const handleAddTeamMembers = async (e) => {
@@ -762,38 +838,145 @@ const ProjectManagement = ({ userPermissions = [], user }) => {
                                                                 <div className="member-tasks-list">
                                                                     {memberTasks.map(task => (
                                                                         <div key={task.taskid} className="task-card">
-                                                                            <div className="task-header">
-                                                                                <h5>{task.title}</h5>
-                                                                                <div className="task-badges">
-                                                                                    <span 
-                                                                                        className="status-badge"
-                                                                                        style={{ backgroundColor: getStatusColor(task.status) }}
-                                                                                    >
-                                                                                        {task.status === 'pending' ? 'Beklemede' : 
-                                                                                         task.status === 'in_progress' ? 'Devam Ediyor' : 
-                                                                                         task.status === 'completed' ? 'Tamamlandı' : task.status}
-                                                                                    </span>
-                                                                                    <span 
-                                                                                        className="priority-badge"
-                                                                                        style={{ backgroundColor: getPriorityColor(task.priority) }}
-                                                                                    >
-                                                                                        {task.priority === 'high' ? 'Yüksek' : 
-                                                                                         task.priority === 'medium' ? 'Orta' : 
-                                                                                         task.priority === 'low' ? 'Düşük' : task.priority}
-                                                                                    </span>
-                                                                                </div>
-                                                                            </div>
-                                                                            {task.desc && (
-                                                                                <p className="task-desc">{task.desc}</p>
-                                                                            )}
-                                                                            <div className="task-footer">
-                                                                                {task.deudate && (
-                                                                                    <div className="task-info">
-                                                                                        <Clock size={14} />
-                                                                                        <span>Son Tarih: {formatDate(task.deudate)}</span>
+                                                                            {editingTask === task.taskid ? (
+                                                                                <div className="task-edit-form">
+                                                                                    <div className="form-group">
+                                                                                        <label>Görev Başlığı *</label>
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            value={editingTaskData.title}
+                                                                                            onChange={e => setEditingTaskData({ ...editingTaskData, title: e.target.value })}
+                                                                                            required
+                                                                                        />
                                                                                     </div>
-                                                                                )}
-                                                                            </div>
+                                                                                    <div className="form-group">
+                                                                                        <label>Açıklama</label>
+                                                                                        <textarea
+                                                                                            value={editingTaskData.desc}
+                                                                                            onChange={e => setEditingTaskData({ ...editingTaskData, desc: e.target.value })}
+                                                                                            rows="3"
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div className="form-group">
+                                                                                        <label>Atanacak Kişi *</label>
+                                                                                        <select
+                                                                                            value={editingTaskData.userid}
+                                                                                            onChange={e => setEditingTaskData({ ...editingTaskData, userid: e.target.value })}
+                                                                                            required
+                                                                                        >
+                                                                                            <option value="">Takım üyesi seçin</option>
+                                                                                            {teamMembers.map(member => (
+                                                                                                <option key={member.userid} value={member.userid}>
+                                                                                                    {member.fullname || member.username}
+                                                                                                </option>
+                                                                                            ))}
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div className="form-row">
+                                                                                        <div className="form-group">
+                                                                                            <label>Durum</label>
+                                                                                            <select
+                                                                                                value={editingTaskData.status}
+                                                                                                onChange={e => setEditingTaskData({ ...editingTaskData, status: e.target.value })}
+                                                                                            >
+                                                                                                <option value="pending">Beklemede</option>
+                                                                                                <option value="in_progress">Devam Ediyor</option>
+                                                                                                <option value="completed">Tamamlandı</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div className="form-group">
+                                                                                            <label>Öncelik</label>
+                                                                                            <select
+                                                                                                value={editingTaskData.priority}
+                                                                                                onChange={e => setEditingTaskData({ ...editingTaskData, priority: e.target.value })}
+                                                                                            >
+                                                                                                <option value="low">Düşük</option>
+                                                                                                <option value="medium">Orta</option>
+                                                                                                <option value="high">Yüksek</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="form-group">
+                                                                                        <label>Son Tarih</label>
+                                                                                        <input
+                                                                                            type="date"
+                                                                                            value={editingTaskData.deudate}
+                                                                                            onChange={e => setEditingTaskData({ ...editingTaskData, deudate: e.target.value })}
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div className="task-actions">
+                                                                                        <button 
+                                                                                            className="ghost-btn"
+                                                                                            onClick={handleCancelEditTask}
+                                                                                        >
+                                                                                            İptal
+                                                                                        </button>
+                                                                                        <button 
+                                                                                            className="action-btn"
+                                                                                            onClick={() => handleUpdateTask(task.taskid)}
+                                                                                        >
+                                                                                            Kaydet
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <>
+                                                                                    <div className="task-header">
+                                                                                        <h5>{task.title}</h5>
+                                                                                        <div className="task-badges">
+                                                                                            <span 
+                                                                                                className="status-badge"
+                                                                                                style={{ backgroundColor: getStatusColor(task.status) }}
+                                                                                            >
+                                                                                                {task.status === 'pending' ? 'Beklemede' : 
+                                                                                                 task.status === 'in_progress' ? 'Devam Ediyor' : 
+                                                                                                 task.status === 'completed' ? 'Tamamlandı' : task.status}
+                                                                                            </span>
+                                                                                            <span 
+                                                                                                className="priority-badge"
+                                                                                                style={{ backgroundColor: getPriorityColor(task.priority) }}
+                                                                                            >
+                                                                                                {task.priority === 'high' ? 'Yüksek' : 
+                                                                                                 task.priority === 'medium' ? 'Orta' : 
+                                                                                                 task.priority === 'low' ? 'Düşük' : task.priority}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {task.desc && (
+                                                                                        <p className="task-desc">{task.desc}</p>
+                                                                                    )}
+                                                                                    {task.updates && (
+                                                                                        <div className="task-updates">
+                                                                                            <h6>Yapılanlar:</h6>
+                                                                                            <pre className="updates-content">{task.updates}</pre>
+                                                                                        </div>
+                                                                                    )}
+                                                                                    <div className="task-footer">
+                                                                                        {task.deudate && (
+                                                                                            <div className="task-info">
+                                                                                                <Clock size={14} />
+                                                                                                <span>Son Tarih: {formatDate(task.deudate)}</span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                        <div className="task-actions-buttons">
+                                                                                            <button 
+                                                                                                className="edit-task-btn"
+                                                                                                onClick={() => handleEditTask(task)}
+                                                                                            >
+                                                                                                <Edit size={14} />
+                                                                                                Düzenle
+                                                                                            </button>
+                                                                                            <button 
+                                                                                                className="delete-task-btn"
+                                                                                                onClick={() => handleDeleteTask(task.taskid)}
+                                                                                            >
+                                                                                                <Trash2 size={14} />
+                                                                                                Sil
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </>
+                                                                            )}
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -812,6 +995,15 @@ const ProjectManagement = ({ userPermissions = [], user }) => {
                                 setShowProjectModal(false);
                                 setSelectedTeamMembers([]);
                                 setEditingTeam(false);
+                                setEditingTask(null);
+                                setEditingTaskData({
+                                    title: '',
+                                    desc: '',
+                                    userid: '',
+                                    status: '',
+                                    priority: '',
+                                    deudate: ''
+                                });
                                 setTaskFormData({
                                     title: '',
                                     desc: '',

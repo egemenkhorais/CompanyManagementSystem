@@ -685,6 +685,132 @@
     color: #9d4edd;
 }
 
+.task-updates {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(157, 78, 221, 0.05);
+    border: 1px solid rgba(157, 78, 221, 0.1);
+    border-radius: 8px;
+}
+
+.task-updates h6 {
+    color: #9d4edd;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.updates-content {
+    color: #a0a0a0;
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: inherit;
+}
+
+.task-actions-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-task-btn,
+.delete-task-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+}
+
+.edit-task-btn {
+    background: rgba(157, 78, 221, 0.1);
+    color: #9d4edd;
+    border: 1px solid rgba(157, 78, 221, 0.3);
+}
+
+.edit-task-btn:hover {
+    background: rgba(157, 78, 221, 0.2);
+    border-color: rgba(157, 78, 221, 0.5);
+}
+
+.delete-task-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.delete-task-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.task-edit-form {
+    padding: 0;
+}
+
+.task-edit-form .form-group {
+    margin-bottom: 16px;
+}
+
+.task-edit-form .form-group label {
+    display: block;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.task-edit-form .form-group input,
+.task-edit-form .form-group select,
+.task-edit-form .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(20, 20, 30, 0.8);
+    border: 1px solid rgba(157, 78, 221, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.task-edit-form .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.task-edit-form .form-group input:focus,
+.task-edit-form .form-group select:focus,
+.task-edit-form .form-group textarea:focus {
+    outline: none;
+    border-color: rgba(157, 78, 221, 0.5);
+    box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.1);
+}
+
+.task-edit-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.task-edit-form .task-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(157, 78, 221, 0.1);
+}
+
 .empty-text {
     color: #666;
     font-style: italic;

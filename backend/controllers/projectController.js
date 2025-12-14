@@ -335,6 +335,40 @@ class ProjectController {
             });
         }
     }
+
+    /**
+     * DELETE /api/projects/:projectId/tasks/:taskId
+     * Task sil
+     */
+    async deleteTask(req, res) {
+        try {
+            const { projectId, taskId } = req.params;
+            const userId = req.user?.id;
+            const userRoleId = req.user?.roleid;
+
+            if (!userId || !userRoleId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bilgisi bulunamadı!'
+                });
+            }
+
+            const result = await projectService.deleteTask(projectId, taskId, userId, userRoleId);
+
+            if (!result.success) {
+                return res.status(400).json(result);
+            }
+
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error('ProjectController DeleteTask Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Task silinirken hata oluştu: ' + error.message
+            });
+        }
+    }
 }
 
 module.exports = new ProjectController();
