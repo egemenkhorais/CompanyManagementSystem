@@ -12,6 +12,7 @@ const cvRoutes = require('./routes/cvRoutes');
 const meetingRoutes = require('./routes/meetingRoutes');
 const roomsRoutes = require('./routes/roomsRoutes');
 const managementRoutes = require('./routes/managementRoutes');
+const projectRoutes = require('./routes/projectRoutes');
 
 
 
@@ -61,6 +62,7 @@ app.use('/api/cv', cvRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/rooms', roomsRoutes);
 app.use('/api/management', managementRoutes);
+app.use('/api/projects', projectRoutes);
 
 // Geriye dönük uyumluluk için eski endpoint'ler
 const authController = require('./controllers/authController');

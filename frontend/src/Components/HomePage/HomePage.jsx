@@ -7,6 +7,7 @@ import RoomView from './Rooms/RoomView';
 import MeetingManagement from './Meetings/MeetingManagement';
 import MeetingView from './Meetings/MeetingView';
 import UserManagementView from './UserManagement/UserManagementView';
+import ProjectManagement from './Projects/ProjectManagement';
 
 import {
     Users,
@@ -115,6 +116,9 @@ const ICON_MAP = {
     'meetings': Calendar,
     'meetings:view': Calendar,
     'meetings:management': Calendar,
+    'project:management': Briefcase,
+    'project:view': Briefcase,
+    'project:task': FileText,
     'reports': FileText,
     'settings': Settings
 };
@@ -227,6 +231,9 @@ const HomePage = ({ onLogout }) => {
                 return hasPermission('meetings:management')
                   ? <MeetingManagement userPermissions={permissions} />
                   : <MeetingView />;
+
+            case 'project:view':
+                return <ProjectManagement userPermissions={permissions} user={user} />;
 
             case 'reports':
                 return <ReportsView />;
