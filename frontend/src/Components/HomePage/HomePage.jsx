@@ -9,7 +9,7 @@ import MeetingView from './Meetings/MeetingView';
 import UserManagementView from './UserManagement/UserManagementView';
 import ProjectManagement from './Projects/ProjectManagement';
 import Tasks from './Projects/Tasks';
-
+import DepartmentManagement from './DepartmentManagement/DepartmentManagement';
 import {
     Users,
     Settings,
@@ -48,13 +48,6 @@ const RoleManagementView = () => (
     <div className="content-card">
         <h2>Rol & Yetki Yönetimi</h2>
         <p>Rolleri ve yetkileri buradan yönetebilirsiniz.</p>
-    </div>
-);
-
-const DepartmentManagementView = () => (
-    <div className="content-card">
-        <h2>Departman Yönetimi</h2>
-        <p>Departmanları buradan yönetebilirsiniz.</p>
     </div>
 );
 
@@ -201,7 +194,7 @@ const HomePage = ({ onLogout }) => {
             case 'admin:roles':
                 return <RoleManagementView />;
             case 'admin:departments':
-                return <DepartmentManagementView />;
+                return <DepartmentManagement />;
             case 'hr:operations':
                 return <HROperationsView onNavigate={handleMenuClick} />;
             case 'hr:job_post':
