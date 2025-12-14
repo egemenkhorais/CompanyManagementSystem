@@ -128,6 +128,17 @@ const getPositionsByDepartment = async (req, res) => {
     }
 };
 
+// Takım seçimi için kullanıcıları getir
+const getAllUsersForTeam = async (req, res) => {
+    try {
+        const result = await userManagementService.getAllUsersForTeam();
+        res.json(result);
+    } catch (error) {
+        console.error('Controller getAllUsersForTeam Error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası!' });
+    }
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -137,5 +148,6 @@ module.exports = {
     getAllDepartments,
     getAllPositions,
     createUser,
-    getPositionsByDepartment
+    getPositionsByDepartment,
+    getAllUsersForTeam
 };

@@ -320,6 +320,46 @@ class UserManagementService {
             client.release();
         }
     }
+
+    /**
+     * Takım seçimi için kullanıcıları getir
+     * Sadece belirli rolleri gösterir (backend_, frontend_, qa_ gibi)
+     * HR, admin gibi rolleri göstermez
+     */
+    async getAllUsersForTeam() {
+        try {
+            const result = await pool.query(`
+                SELECT 
+                    u.userid, 
+                    u.username, 
+                    u.roleid, 
+                    r.rolename,
+                    ud.name as fullname,
+                    ud.usersalary,
+                    ud.yearsworked,
+                    d.departmentid,
+                    d.departmentname,
+                    pn.id as positionid,
+                    pn.position_name,
+                    pn.level as position_level
+                FROM users u
+                JOIN roles r ON u.roleid = r.roleid
+                LEFT JOIN userdetails ud ON u.userid = ud.userid
+                LEFT JOIN departments d ON ud.departmentid = d.departmentid
+                LEFT JOIN positionnames pn ON ud.positionnames_id = pn.id
+                WHERE r.rolename LIKE 'backend_%' 
+                   OR r.rolename LIKE 'frontend_%' 
+                   OR r.rolename LIKE 'qa_%'
+                ORDER BY u.username ASC
+            `);
+
+            return { success: true, data: result.rows };
+
+        } catch (error) {
+            console.error('UserManagementService GetAllUsersForTeam Error:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = new UserManagementService();

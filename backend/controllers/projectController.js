@@ -127,6 +127,214 @@ class ProjectController {
             });
         }
     }
+
+    /**
+     * POST /api/projects/:projectId/team
+     * Projeye takım üyeleri ekle
+     */
+    async addTeamMembers(req, res) {
+        try {
+            const { projectId } = req.params;
+            const { userIds } = req.body;
+            const userId = req.user?.id;
+            const userRoleId = req.user?.roleid;
+
+            if (!userId || !userRoleId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bilgisi bulunamadı!'
+                });
+            }
+
+            const result = await projectService.addTeamMembers(projectId, userIds, userId, userRoleId);
+
+            if (!result.success) {
+                return res.status(400).json(result);
+            }
+
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error('ProjectController AddTeamMembers Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Takım üyeleri eklenirken hata oluştu: ' + error.message
+            });
+        }
+    }
+
+    /**
+     * PUT /api/projects/:projectId/team
+     * Projeye ait takım üyelerini güncelle (ekle/çıkar)
+     */
+    async updateTeamMembers(req, res) {
+        try {
+            const { projectId } = req.params;
+            const { userIds } = req.body;
+            const userId = req.user?.id;
+            const userRoleId = req.user?.roleid;
+
+            if (!userId || !userRoleId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bilgisi bulunamadı!'
+                });
+            }
+
+            const result = await projectService.updateTeamMembers(projectId, userIds, userId, userRoleId);
+
+            if (!result.success) {
+                return res.status(400).json(result);
+            }
+
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error('ProjectController UpdateTeamMembers Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Takım üyeleri güncellenirken hata oluştu: ' + error.message
+            });
+        }
+    }
+
+    /**
+     * GET /api/projects/:projectId/team
+     * Projeye ait takım üyelerini getir
+     */
+    async getTeamMembers(req, res) {
+        try {
+            const { projectId } = req.params;
+            const userId = req.user?.id;
+            const userRoleId = req.user?.roleid;
+
+            if (!userId || !userRoleId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bilgisi bulunamadı!'
+                });
+            }
+
+            const result = await projectService.getTeamMembers(projectId, userId, userRoleId);
+
+            if (!result.success) {
+                return res.status(400).json(result);
+            }
+
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error('ProjectController GetTeamMembers Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Takım üyeleri getirilirken hata oluştu: ' + error.message
+            });
+        }
+    }
+
+    /**
+     * POST /api/projects/:projectId/tasks
+     * Projeye task oluştur
+     */
+    async createTask(req, res) {
+        try {
+            const { projectId } = req.params;
+            const taskData = req.body;
+            const userId = req.user?.id;
+            const userRoleId = req.user?.roleid;
+
+            if (!userId || !userRoleId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bilgisi bulunamadı!'
+                });
+            }
+
+            const result = await projectService.createTask(projectId, taskData, userId, userRoleId);
+
+            if (!result.success) {
+                return res.status(400).json(result);
+            }
+
+            res.status(201).json(result);
+
+        } catch (error) {
+            console.error('ProjectController CreateTask Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Task oluşturulurken hata oluştu: ' + error.message
+            });
+        }
+    }
+
+    /**
+     * GET /api/projects/:projectId/tasks
+     * Projeye ait task'leri getir
+     */
+    async getTasks(req, res) {
+        try {
+            const { projectId } = req.params;
+            const userId = req.user?.id;
+            const userRoleId = req.user?.roleid;
+
+            if (!userId || !userRoleId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bilgisi bulunamadı!'
+                });
+            }
+
+            const result = await projectService.getTasks(projectId, userId, userRoleId);
+
+            if (!result.success) {
+                return res.status(400).json(result);
+            }
+
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error('ProjectController GetTasks Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Task\'ler getirilirken hata oluştu: ' + error.message
+            });
+        }
+    }
+
+    /**
+     * PUT /api/projects/:projectId/tasks/:taskId
+     * Task güncelle
+     */
+    async updateTask(req, res) {
+        try {
+            const { projectId, taskId } = req.params;
+            const taskData = req.body;
+            const userId = req.user?.id;
+            const userRoleId = req.user?.roleid;
+
+            if (!userId || !userRoleId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bilgisi bulunamadı!'
+                });
+            }
+
+            const result = await projectService.updateTask(projectId, taskId, taskData, userId, userRoleId);
+
+            if (!result.success) {
+                return res.status(400).json(result);
+            }
+
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error('ProjectController UpdateTask Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Task güncellenirken hata oluştu: ' + error.message
+            });
+        }
+    }
 }
 
 module.exports = new ProjectController();

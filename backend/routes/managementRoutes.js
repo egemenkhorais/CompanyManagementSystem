@@ -21,4 +21,7 @@ router.get('/roles', userManagementController.getAllRoles);
 router.get('/departments', userManagementController.getAllDepartments);
 router.get('/positions', userManagementController.getAllPositions);
 
+// Takım seçimi için kullanıcıları getir
+router.get('/users-for-team', userManagementController.getAllUsersForTeam);
+
 module.exports = router;
