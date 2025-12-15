@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict PBHohsxevAGbYEW7BCi4ttunveWFpOwdWZAm3OcAgrIHcwu07ohChYLscxQGLcR
+\restrict bpDdsWDohgFqau5DeECJpRIwANN7fjIkhldr7n59zo1G5bIhRxtCV10IHFXdISw
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -193,7 +193,8 @@ ALTER SEQUENCE public.cv_cvid_seq OWNED BY public.cv.cvid;
 
 CREATE TABLE public.departments (
     departmentid integer NOT NULL,
-    departmentname character varying(100)
+    departmentname character varying(100),
+    is_active boolean DEFAULT true
 );
 
 
@@ -582,8 +583,9 @@ CREATE TABLE public.tasks (
     title character varying,
     "desc" character varying,
     status character varying,
-    priorty character varying,
-    deudate date
+    priority character varying,
+    deudate date,
+    updates character varying
 );
 
 
@@ -853,14 +855,18 @@ COPY public.cv (cvid, cvsenderinfo, cvdate, cvitself, cvscore, jobpostid, checke
 -- Data for Name: departments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.departments (departmentid, departmentname) FROM stdin;
-1	IT Departmanı
-2	İnsan Kaynakları
-3	Frontend Development
-4	Backend Development
-6	Muhasebe Departmanı
-5	QA/Test Departmanı
-7	Yönetim Departmanı
+COPY public.departments (departmentid, departmentname, is_active) FROM stdin;
+1	IT Departmanı	t
+2	İnsan Kaynakları	t
+5	QA/Test Departmanı	t
+7	Yönetim Departmanı	t
+6	DenemeDEP	f
+8	de	f
+9	de	f
+4	Backend Development	t
+10	sadda	f
+3	Frontend Development	t
+11	cacsacsa	f
 \.
 
 
@@ -888,6 +894,7 @@ COPY public.meetings (meetingid, companyroomid, meetingstartdate, meetingsubject
 2	2	2024-11-26 10:00:00+00	Stajyer Oryantasyonu	f	\N
 3	8	2025-12-12 18:30:00+00	Deneme	f	2025-12-12 19:30:00+00
 4	4	2025-12-13 12:30:00+00	fakan	f	2025-12-13 14:30:00+00
+5	8	2025-12-14 20:00:00+00	Can Sıkıntısı	f	2025-12-14 21:00:00+00
 \.
 
 
@@ -931,6 +938,7 @@ COPY public.permissions (id, permission_code, permission_type, description, pare
 61	project:view	menu	Proje Yönetim	project:management
 62	project:senior	action	Proje Team ve Task Atama	\N
 63	project:task	menu	Görevler	project:management
+67	admin:permissions	menu	Yetki Yönetimi	admin:management
 \.
 
 
@@ -939,13 +947,11 @@ COPY public.permissions (id, permission_code, permission_type, description, pare
 --
 
 COPY public.positionnames (id, position_name, description, level, is_active, created_at, updated_at) FROM stdin;
-1	Backend Developer	\N	Junior	t	2025-11-26 09:13:54.314838	2025-11-26 09:13:54.314838
 2	Backend Developer	\N	Mid	t	2025-11-26 09:18:55.870945	2025-11-26 09:18:55.870945
 3	Backend Developer	\N	Senior	t	2025-11-26 09:19:29.723868	2025-11-26 09:19:29.723868
 4	Backend Developer	\N	Lead	t	2025-11-26 09:19:50.355926	2025-11-26 09:19:50.355926
 5	Project Manager	Manages the department	Manager	t	2025-11-26 09:20:45.210938	2025-11-26 09:20:45.210938
 6	Frontend Developer	\N	Junior	t	2025-11-26 09:21:16.283042	2025-11-26 09:21:16.283042
-7	Frontend Developer	\N	Mid	t	2025-11-26 09:21:48.181754	2025-11-26 09:21:48.181754
 8	Frontend Developer	\N	Senior	t	2025-11-26 09:22:10.948443	2025-11-26 09:22:10.948443
 9	Frontend Developer	\N	Lead	t	2025-11-26 09:22:29.234558	2025-11-26 09:22:29.234558
 10	DevOps Engineer	\N	Junior 	t	2025-11-26 20:08:49.200316	2025-11-26 20:08:49.200316
@@ -958,6 +964,10 @@ COPY public.positionnames (id, position_name, description, level, is_active, cre
 17	QA Engineer	\N	Senior	t	2025-11-26 20:17:01.578414	2025-11-26 20:17:01.578414
 18	QA Engineer	\N	Lead	t	2025-11-26 20:17:20.861125	2025-11-26 20:17:20.861125
 19	CTO	\N	Manager	t	2025-11-26 20:17:45.125406	2025-11-26 20:17:45.125406
+1	Backend Developer	\N	Junior	t	2025-11-26 09:13:54.314838	2025-12-14 13:00:55.378687
+7	Frontend Developer	\N	Mid	t	2025-11-26 09:21:48.181754	2025-12-14 13:15:36.765088
+23	f	f	f	f	2025-12-14 13:21:41.815411	2025-12-14 13:21:46.280135
+24	ik	falan	uzman	t	2025-12-14 13:33:27.336956	2025-12-14 13:33:27.336956
 \.
 
 
@@ -966,20 +976,17 @@ COPY public.positionnames (id, position_name, description, level, is_active, cre
 --
 
 COPY public.positions (id, position_name_id, departmentid, quota, is_active, created_at, updated_at) FROM stdin;
-1	1	4	1	t	2025-11-26 20:20:20.101851	2025-11-26 20:20:20.101851
 2	2	4	1	t	2025-11-26 20:20:44.820485	2025-11-26 20:20:44.820485
 3	3	4	1	t	2025-11-26 20:21:06.987593	2025-11-26 20:21:06.987593
 4	4	4	1	t	2025-11-26 20:21:22.506305	2025-11-26 20:21:22.506305
 5	5	4	1	t	2025-11-26 20:21:34.933348	2025-11-26 20:21:34.933348
 6	6	3	1	t	2025-11-26 20:21:56.530087	2025-11-26 20:21:56.530087
-7	7	3	1	t	2025-11-26 20:24:08.46831	2025-11-26 20:24:08.46831
 8	8	3	1	t	2025-11-26 20:24:17.832414	2025-11-26 20:24:17.832414
 9	9	3	1	t	2025-11-26 20:24:29.957814	2025-11-26 20:24:29.957814
 10	10	1	1	t	2025-11-26 20:25:00.806527	2025-11-26 20:25:00.806527
 11	11	1	1	t	2025-11-26 20:25:13.945172	2025-11-26 20:25:13.945172
 12	12	1	1	t	2025-11-26 20:25:23.471915	2025-11-26 20:25:23.471915
 13	13	1	1	t	2025-11-26 20:25:50.439624	2025-11-26 20:25:50.439624
-14	14	1	1	t	2025-11-26 20:26:12.781069	2025-11-26 20:26:12.781069
 15	15	5	1	t	2025-11-26 20:26:51.100715	2025-11-26 20:26:51.100715
 16	16	5	1	t	2025-11-26 20:27:03.277762	2025-11-26 20:27:03.277762
 17	17	5	1	t	2025-11-26 20:27:22.645196	2025-11-26 20:27:22.645196
@@ -987,6 +994,11 @@ COPY public.positions (id, position_name_id, departmentid, quota, is_active, cre
 19	19	7	1	t	2025-11-26 20:28:00.314595	2025-11-26 20:28:00.314595
 20	5	3	1	t	2025-11-26 20:28:28.106331	2025-11-26 20:28:28.106331
 21	5	1	1	t	2025-11-26 20:28:55.900883	2025-11-26 20:28:55.900883
+14	14	1	2	t	2025-11-26 20:26:12.781069	2025-12-14 12:18:03.172172
+1	1	4	1	t	2025-11-26 20:20:20.101851	2025-12-14 13:00:55.378687
+7	7	3	2	t	2025-11-26 20:24:08.46831	2025-12-14 13:15:36.765088
+23	23	5	1	f	2025-12-14 13:21:41.815411	2025-12-14 13:21:46.280135
+24	24	2	1	t	2025-12-14 13:33:27.336956	2025-12-14 13:33:27.336956
 \.
 
 
@@ -997,6 +1009,7 @@ COPY public.positions (id, position_name_id, departmentid, quota, is_active, cre
 COPY public.projects (projectid, seniorid, yoneticiid, projectname, deadline, budget, startdate, enddate, "desc", teamid, teamselected) FROM stdin;
 1	\N	\N	deneme	2025-12-31	50000	2025-12-13	\N	Proje çokemelli	\N	\N
 2	9	1	deneme3	2025-12-31	100000	2025-12-13	\N	çokomelli	\N	\N
+3	32	1	deneme3	2025-12-31	500000	2025-12-14	\N	deneme içindir	\N	t
 \.
 
 
@@ -1026,6 +1039,7 @@ COPY public.requesttype (requesttypeid, requesttypename) FROM stdin;
 --
 
 COPY public.role_permissions (roleid, permission_id) FROM stdin;
+1	67
 2	18
 2	23
 2	24
@@ -1058,37 +1072,6 @@ COPY public.role_permissions (roleid, permission_id) FROM stdin;
 8	27
 7	18
 7	27
-1	18
-1	19
-1	20
-1	21
-1	22
-1	23
-1	24
-1	25
-1	26
-1	27
-1	28
-1	29
-1	30
-1	31
-1	32
-1	33
-1	34
-1	35
-1	36
-1	37
-1	38
-1	47
-1	49
-1	50
-1	51
-1	52
-1	53
-1	55
-1	57
-1	58
-1	59
 2	58
 2	47
 2	49
@@ -1118,8 +1101,43 @@ COPY public.role_permissions (roleid, permission_id) FROM stdin;
 10	59
 8	58
 5	47
-1	61
+5	60
+5	61
+5	62
+5	63
+1	22
+1	19
+1	21
+1	20
+1	26
+1	25
+1	24
+1	23
+1	33
+1	35
+1	34
+1	27
+1	57
+1	36
+1	37
+1	55
+1	50
+1	59
 1	60
+1	61
+1	28
+1	38
+1	58
+1	51
+1	53
+1	52
+1	49
+1	47
+1	29
+1	30
+1	32
+1	31
+1	18
 \.
 
 
@@ -1128,16 +1146,17 @@ COPY public.role_permissions (roleid, permission_id) FROM stdin;
 --
 
 COPY public.roles (roleid, rolename) FROM stdin;
-1	admin
 2	hr
 3	backend_junior
 4	backend_mid
 5	backend_senior
-6	backend_lead
 7	qa_junior
 8	qa_mid
 9	qa_senior
 10	qa_lead
+1	admin
+6	backend_lead
+12	deneme
 \.
 
 
@@ -1145,7 +1164,11 @@ COPY public.roles (roleid, rolename) FROM stdin;
 -- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tasks (taskid, projectid, userid, title, "desc", status, priorty, deudate) FROM stdin;
+COPY public.tasks (taskid, projectid, userid, title, "desc", status, priority, deudate, updates) FROM stdin;
+1	3	3	Deneme	Deneme içindir.	pending	high	2025-12-14	\N
+6	3	32	deneme5	pop	completed	high	2025-12-08	Deneme yapıldı\nDeneme2 yapıldı\nDeneme3 yapıldı
+2	3	30	kj	kjhbjk	pending	high	2025-12-13	Projeye basladım
+3	3	30	bkjhb	bjkbjk	pending	medium	2025-12-13	\N
 \.
 
 
@@ -1154,6 +1177,11 @@ COPY public.tasks (taskid, projectid, userid, title, "desc", status, priorty, de
 --
 
 COPY public.teamforproject (teamid, projectid, userid) FROM stdin;
+13	3	10
+14	3	30
+15	3	3
+16	3	9
+17	3	32
 \.
 
 
@@ -1166,13 +1194,15 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 1	1	Ahmet Yılmaz	1	1	45000.50	3	2
 3	3	Mehmet Demir	1	2	24000.00	2	5
 4	4	Ahmet Yılmaz	5	1	64648.00	3	12
-29	30	Batuhan	4	1	4500.00	\N	1
 5	5	Ayşe Demir	1	1	63300.00	3	1
 6	6	Mehmet Kaya	3	1	26912.00	8	1
+31	32	Muhammet Batuhan Karanfil	4	1	100.00	7	3
 7	7	Fatma Çelik	5	1	80684.00	6	16
 8	8	Mustafa Özkan	5	1	73032.00	7	18
 9	9	Zeynep Şahin	4	1	55571.00	2	15
+32	33	egemen	5	1	13483.00	2	17
 10	10	Emre Yıldız	1	1	28456.00	7	14
+29	30	Batuhan	4	1	4500.00	2	1
 11	11	Elif Koç	1	1	70403.00	8	14
 12	12	Burak Aydın	5	1	58287.00	10	13
 13	13	Hande Özdemir	3	1	62452.00	4	13
@@ -1222,11 +1252,13 @@ COPY public.users (userid, username, password, roleid) FROM stdin;
 27	deniz.karaca	Sifre123!	\N
 28	selin.yaman	Sifre123!	\N
 1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1
-2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2
 3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3
 9	zeynep.sahin	Sifre123!	5
 10	emre.yildiz	Sifre123!	5
-30	Karanfil	$2b$10$Y9lKB1QZBkj3xQ5IAKbuQOyNJTAOb/qkHEh.lV964WVyV2OqtvwZK	3
+2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2
+32	batuhan_karanfil	$2b$10$L5J2RE1cwUSeuWWHHc.N.OP2QKVDabLuuZ1fZzxE5FaK5WJ4ChE8q	5
+33	keles	$2b$10$0nTY264vXz2kF5h5k9TYs.zoSNsoz/ILFoemsAiKNA49t6UcjCFwG	7
+30	Karanfil	$2b$10$Y9lKB1QZBkj3xQ5IAKbuQOyNJTAOb/qkHEh.lV964WVyV2OqtvwZK	5
 \.
 
 
@@ -1234,7 +1266,7 @@ COPY public.users (userid, username, password, roleid) FROM stdin;
 -- Name: User_userid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_userid_seq"', 31, true);
+SELECT pg_catalog.setval('public."User_userid_seq"', 33, true);
 
 
 --
@@ -1262,7 +1294,7 @@ SELECT pg_catalog.setval('public.cv_cvid_seq', 31, true);
 -- Name: departments_departmentid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.departments_departmentid_seq', 2, true);
+SELECT pg_catalog.setval('public.departments_departmentid_seq', 11, true);
 
 
 --
@@ -1276,35 +1308,35 @@ SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 10, true);
 -- Name: meetings_meetingid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.meetings_meetingid_seq', 4, true);
+SELECT pg_catalog.setval('public.meetings_meetingid_seq', 5, true);
 
 
 --
 -- Name: permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.permissions_id_seq', 65, true);
+SELECT pg_catalog.setval('public.permissions_id_seq', 70, true);
 
 
 --
 -- Name: positionnames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.positionnames_id_seq', 1, true);
+SELECT pg_catalog.setval('public.positionnames_id_seq', 24, true);
 
 
 --
 -- Name: positions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.positions_id_seq', 1, false);
+SELECT pg_catalog.setval('public.positions_id_seq', 24, true);
 
 
 --
 -- Name: projects_projectid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.projects_projectid_seq', 2, true);
+SELECT pg_catalog.setval('public.projects_projectid_seq', 3, true);
 
 
 --
@@ -1325,28 +1357,28 @@ SELECT pg_catalog.setval('public.requesttype_requesttypeid_seq', 3, true);
 -- Name: roles_roleid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.roles_roleid_seq', 10, true);
+SELECT pg_catalog.setval('public.roles_roleid_seq', 12, true);
 
 
 --
 -- Name: tasks_taskid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tasks_taskid_seq', 1, false);
+SELECT pg_catalog.setval('public.tasks_taskid_seq', 6, true);
 
 
 --
 -- Name: teamforproject_teamid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.teamforproject_teamid_seq', 1, false);
+SELECT pg_catalog.setval('public.teamforproject_teamid_seq', 17, true);
 
 
 --
 -- Name: userdetails_userdetailsid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.userdetails_userdetailsid_seq', 30, true);
+SELECT pg_catalog.setval('public.userdetails_userdetailsid_seq', 32, true);
 
 
 --
@@ -2106,5 +2138,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict PBHohsxevAGbYEW7BCi4ttunveWFpOwdWZAm3OcAgrIHcwu07ohChYLscxQGLcR
+\unrestrict bpDdsWDohgFqau5DeECJpRIwANN7fjIkhldr7n59zo1G5bIhRxtCV10IHFXdISw
 
