@@ -1,61 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { DoorOpen, Plus, Edit2, Trash2, X, Calendar, Clock, CheckCircle, Briefcase, Coffee, Monitor } from 'lucide-react';
-// DİKKAT: Dosya yolunu kendi proje yapınıza göre kontrol edin (örn: ../../api/axiosInstance)
 import axiosInstance from '../../../api/axiosInstance';
 import './RoomManagement.css';
 
 const RoomManagement = ({ userPermissions = [] }) => {
+    // --- Genel Veri State'leri ---
     const [rooms, setRooms] = useState([]);
-    const [allMeetings, setAllMeetings] = useState([]); // Timeline için tüm toplantılar
+    const [allMeetings, setAllMeetings] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // --- State: Oda Ekleme/Düzenleme (Admin) ---
+    // --- Yetki Kontrolleri ---
+    // Backend'den gelen listede ilgili yetki kodu varsa butonlar görünür.
+    const canCreate = userPermissions.some(p => p.permission_code === 'rooms:create' || p.permission_code === 'rooms:management');
+    const canEdit = userPermissions.some(p => p.permission_code === 'rooms:edit' || p.permission_code === 'rooms:management');
+    const canDelete = userPermissions.some(p => p.permission_code === 'rooms:delete' || p.permission_code === 'rooms:management');
+
+    // --- State: Admin İşlemleri (Ekle/Düzenle) ---
     const [showRoomModal, setShowRoomModal] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
-    // Veritabanı sütun isimleriyle birebir uyumlu state
     const [roomFormData, setRoomFormData] = useState({
         companyroomname: '',
         companyroomtype: '',
         companyroomdepartment: ''
     });
 
-    // --- State: Rezervasyon & Görselleştirme (Kullanıcı) ---
+    // --- State: Rezervasyon İşlemleri ---
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [selectedRoomForBooking, setSelectedRoomForBooking] = useState(null);
-    const [roomSchedule, setRoomSchedule] = useState([]); // Seçili odanın programı
+    const [roomSchedule, setRoomSchedule] = useState([]);
 
     const [bookingData, setBookingData] = useState({
         title: '',
-        date: new Date().toISOString().split('T')[0], // Bugünün tarihi
+        date: new Date().toISOString().split('T')[0], // Bugün YYYY-MM-DD
         startTime: '',
         endTime: ''
     });
-
-    // İzin Kontrolleri
-    const canCreate = userPermissions.some(p => p.permission_code === 'rooms:create' || p.permission_code === 'rooms:management');
-    const canEdit = userPermissions.some(p => p.permission_code === 'rooms:edit' || p.permission_code === 'rooms:management');
-    const canDelete = userPermissions.some(p => p.permission_code === 'rooms:delete' || p.permission_code === 'rooms:management');
 
     useEffect(() => {
         fetchData();
     }, []);
 
     const fetchData = async () => {
+        setLoading(true); // Yükleniyor başlat
+
+        // Odaları Çek
         try {
-            // Odaları ve Toplantıları paralel çekiyoruz
-            const [roomsRes, meetingsRes] = await Promise.all([
-                axiosInstance.get('/rooms'),
-                axiosInstance.get('/meetings')
-            ]);
-
-            if (roomsRes.data.success) setRooms(roomsRes.data.data);
-            if (meetingsRes.data.success) setAllMeetings(meetingsRes.data.data);
-
+            const roomsRes = await axiosInstance.get('/rooms');
+            if (roomsRes.data.success) {
+                setRooms(roomsRes.data.data);
+            }
         } catch (error) {
-            console.error('Veri yükleme hatası:', error);
-        } finally {
-            setLoading(false);
+            console.error('Odalar yüklenirken hata:', error);
         }
+
+        // Toplantıları Çek (Timeline için)
+        try {
+            const meetingsRes = await axiosInstance.get('/meetings');
+            if (meetingsRes.data.success) {
+                setAllMeetings(meetingsRes.data.data);
+            }
+        } catch (error) {
+            console.error('Toplantı verisi çekilemedi (Timeline boş görünecek):', error);
+        }
+
+        setLoading(false); // Yükleme bitti
     };
 
     // --- Helper: Timeline Güncelleme ---
@@ -63,14 +71,19 @@ const RoomManagement = ({ userPermissions = [] }) => {
         if (!roomId || !dateStr) return;
 
         const dailyMeetings = allMeetings.filter(m => {
-            const mDate = new Date(m.start_time).toISOString().split('T')[0];
-            // Backend'den dönen veri bazen join ile farklı isimlerde gelebilir, hepsini kontrol et
+            const meetingDateObj = new Date(m.start_time);
+
+            // Yerel tarih düzeltmesi (Timezone fix)
+            const year = meetingDateObj.getFullYear();
+            const month = String(meetingDateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(meetingDateObj.getDate()).padStart(2, '0');
+            const meetingDateStr = `${year}-${month}-${day}`;
+
             const mRoomId = m.room_id || m.companyroomid || m.roomid;
 
-            return String(mRoomId) === String(roomId) && mDate === dateStr;
+            return String(mRoomId) === String(roomId) && meetingDateStr === dateStr;
         });
 
-        // Saate göre sırala
         dailyMeetings.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
         setRoomSchedule(dailyMeetings);
     };
@@ -97,10 +110,8 @@ const RoomManagement = ({ userPermissions = [] }) => {
         e.preventDefault();
         try {
             if (editingRoom) {
-                // Update: companyroomid kullanılıyor
                 await axiosInstance.put(`/rooms/${editingRoom.companyroomid}`, roomFormData);
             } else {
-                // Create
                 await axiosInstance.post('/rooms', roomFormData);
             }
             alert('İşlem başarılı!');
@@ -124,15 +135,12 @@ const RoomManagement = ({ userPermissions = [] }) => {
 
     // ==================== REZERVASYON İŞLEMLERİ ====================
 
-    // Odaya tıklandığında
     const handleRoomClick = (room) => {
         setSelectedRoomForBooking(room);
-        // Modalı açarken o günün programını hesapla
         updateRoomSchedule(room.companyroomid, bookingData.date);
         setShowBookingModal(true);
     };
 
-    // Tarih değiştiğinde
     const handleDateChange = (e) => {
         const newDate = e.target.value;
         setBookingData(prev => ({ ...prev, date: newDate }));
@@ -147,24 +155,21 @@ const RoomManagement = ({ userPermissions = [] }) => {
             const payload = {
                 room_id: selectedRoomForBooking.companyroomid,
                 title: bookingData.title,
-                meetingstartdate: bookingData.date, // Controller bu ismi bekliyor
+                meetingstartdate: bookingData.date,
                 start_time: bookingData.startTime,
                 end_time: bookingData.endTime
             };
 
-            const response = await axiosInstance.post('/meetings', payload);
-            if (response.data.success) {
-                alert(`"${selectedRoomForBooking.companyroomname}" rezerve edildi!`);
-                setShowBookingModal(false);
-                setBookingData({ ...bookingData, title: '', startTime: '', endTime: '' });
-                fetchData(); // Listeyi yenile ki timeline güncellensin
-            }
+            await axiosInstance.post('/meetings', payload);
+            alert(`"${selectedRoomForBooking.companyroomname}" rezerve edildi!`);
+            setShowBookingModal(false);
+            setBookingData({ ...bookingData, title: '', startTime: '', endTime: '' });
+            fetchData();
         } catch (error) {
-            alert(error.response?.data?.message || 'Rezervasyon yapılamadı (Çakışma olabilir).');
+            alert(error.response?.data?.message || 'Rezervasyon yapılamadı.');
         }
     };
 
-    // Görsel Helper
     const getRoomStyle = (type) => {
         switch (type) {
             case 'Meeting': return { color: '#a78bfa', icon: <Briefcase size={20}/> };
@@ -180,17 +185,17 @@ const RoomManagement = ({ userPermissions = [] }) => {
         <div className="content-card">
             <div className="page-header">
                 <div>
-                    <h2>Ofis Planı & Yönetim</h2>
+                    <h2>Ofis Planı & Rezervasyon</h2>
                     <p className="page-subtitle">Odalara tıklayarak doluluk durumunu görün ve rezervasyon yapın.</p>
                 </div>
+                {/* YETKİ KONTROLÜ: Sadece yetkisi varsa buton görünür */}
                 {canCreate && (
-                    <button className="action-btn" onClick={() => handleOpenRoomModal()}>
+                    <button className="action-btn" onClick={(e) => handleOpenRoomModal(null, e)}>
                         <Plus size={20} /> Oda Ekle
                     </button>
                 )}
             </div>
 
-            {/* KROKİ / BLUEPRINT ALANI */}
             <div className="blueprint-container">
                 {rooms.length === 0 ? (
                     <div className="empty-state">Tanımlı oda yok.</div>
@@ -209,17 +214,16 @@ const RoomManagement = ({ userPermissions = [] }) => {
                                         <span className="room-dept-badge">{room.companyroomdepartment || 'Genel'}</span>
                                         <div style={{color: styleInfo.color}}>{styleInfo.icon}</div>
                                     </div>
-
                                     <div>
                                         <h3 className="bp-room-name">{room.companyroomname}</h3>
                                         <span style={{color: styleInfo.color, fontSize:'0.85rem'}}>{room.companyroomtype}</span>
                                     </div>
-
                                     <div className="hover-indicator">
                                         <CheckCircle size={16} /> Programı Gör / Rezerve Et
                                     </div>
                                 </div>
 
+                                {/* YETKİ KONTROLÜ: Edit ve Delete butonları */}
                                 {(canEdit || canDelete) && (
                                     <div className="bp-actions">
                                         {canEdit && (
@@ -240,7 +244,7 @@ const RoomManagement = ({ userPermissions = [] }) => {
                 )}
             </div>
 
-            {/* --- MODAL 1: ODA EKLE/DÜZENLE (ADMIN) --- */}
+            {/* ODA EKLEME MODALI */}
             {showRoomModal && (
                 <div className="modal-overlay" onClick={() => setShowRoomModal(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -276,7 +280,7 @@ const RoomManagement = ({ userPermissions = [] }) => {
                 </div>
             )}
 
-            {/* --- MODAL 2: REZERVASYON VE PROGRAM (SPLIT VIEW) --- */}
+            {/* REZERVASYON MODALI */}
             {showBookingModal && selectedRoomForBooking && (
                 <div className="modal-overlay" onClick={() => setShowBookingModal(false)}>
                     <div className="modal-content booking-modal" onClick={e => e.stopPropagation()}>
@@ -284,9 +288,7 @@ const RoomManagement = ({ userPermissions = [] }) => {
                             <h3>{selectedRoomForBooking.companyroomname}</h3>
                             <button className="close-btn" onClick={() => setShowBookingModal(false)}><X size={20}/></button>
                         </div>
-
                         <div className="modal-body-grid">
-                            {/* SOL: Form */}
                             <div className="booking-form-section">
                                 <form onSubmit={handleBookingSubmit} style={{padding:0}}>
                                     <div className="form-group">
@@ -312,12 +314,9 @@ const RoomManagement = ({ userPermissions = [] }) => {
                                     </div>
                                 </form>
                             </div>
-
-                            {/* SAĞ: Timeline */}
                             <div className="room-schedule-section">
                                 <div className="schedule-title">
-                                    <Calendar size={16}/>
-                                    {new Date(bookingData.date).toLocaleDateString('tr-TR')} Programı
+                                    <Calendar size={16}/> {new Date(bookingData.date).toLocaleDateString('tr-TR')} Programı
                                 </div>
                                 <div className="schedule-list">
                                     {roomSchedule.length === 0 ? (

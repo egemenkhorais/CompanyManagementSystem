@@ -1,5 +1,40 @@
-/* MeetingManagement.css - Dark Purple Theme */
+/* =========================================
+   1. GENEL DÜZEN VE HEADER
+   ========================================= */
+.content-card {
+    background: #100b18; /* Çok koyu mor/siyah zemin */
+    padding: 20px;
+    border-radius: 12px;
+    min-height: 80vh;
+    color: #fff;
+}
 
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 28px;
+    background: linear-gradient(90deg, #9d4edd, #e0aaff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.page-subtitle {
+    margin: 5px 0 0;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* =========================================
+   2. TOPLANTI KARTLARI (Sizin Kodunuz + İyileştirmeler)
+   ========================================= */
 .meetings-list {
     display: flex;
     flex-direction: column;
@@ -7,16 +42,29 @@
 }
 
 .meeting-card {
-    background: linear-gradient(135deg, rgba(22, 33, 62, 0.4), rgba(26, 10, 46, 0.4));
+    background: linear-gradient(135deg, rgba(30, 20, 50, 0.6), rgba(20, 10, 40, 0.8));
     border: 1px solid rgba(157, 78, 221, 0.3);
     border-radius: 16px;
     padding: 24px;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.meeting-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #9d4edd;
+    opacity: 0.7;
 }
 
 .meeting-card:hover {
-    box-shadow: 0 8px 30px rgba(157, 78, 221, 0.3);
+    box-shadow: 0 10px 40px rgba(157, 78, 221, 0.15);
     transform: translateY(-3px);
     border-color: #9d4edd;
 }
@@ -26,30 +74,16 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(157, 78, 221, 0.2);
-}
-
-.meeting-title-section {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .meeting-title-section h3 {
     margin: 0;
     font-size: 20px;
+    font-weight: 600;
     color: #fff;
-    background: linear-gradient(90deg, #9d4edd, #c77dff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.meeting-actions {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
+    margin-right: 15px;
 }
 
 .meeting-info {
@@ -62,52 +96,257 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #b8b8b8;
+    color: #cbd5e1;
     font-size: 14px;
 }
 
 .info-row svg {
-    flex-shrink: 0;
-    color: #9d4edd;
+    color: #c77dff; /* İkon rengi */
 }
 
-.meeting-description {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(157, 78, 221, 0.2);
-    color: #b8b8b8;
-    font-size: 14px;
-    line-height: 1.7;
-}
-
-/* Status Badge Styles (ek olarak) */
-.status-badge {
-    padding: 6px 14px;
-    border-radius: 12px;
-    font-size: 12px;
+/* =========================================
+   3. BUTONLAR VE AKSİYONLAR
+   ========================================= */
+.action-btn {
+    background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 600;
-    border: 1px solid;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(123, 44, 191, 0.3);
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, #9d4edd, #c77dff);
+    transform: translateY(-1px);
+}
+
+.ghost-btn {
+    background: transparent;
+    border: 1px solid rgba(157, 78, 221, 0.5);
+    color: #e0aaff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ghost-btn:hover {
+    background: rgba(157, 78, 221, 0.1);
+    border-color: #e0aaff;
+}
+/* İkonların Kesin Görünmesi İçin Ek Kurallar */
+.icon-btn svg {
+    display: block;       /* SVG'yi blok yap */
+    stroke-width: 2px;    /* Çizgileri kalınlaştır */
+    min-width: 18px;      /* Minimum genişlik zorla */
+    min-height: 18px;     /* Minimum yükseklik zorla */
+}
+
+/* Renkleri netleştirelim */
+.icon-btn {
+    color: #cbd5e1; /* Varsayılan gri-beyaz */
+}
+
+.icon-btn:hover {
+    color: #ffffff; /* Hoverda tam beyaz */
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Özel buton renkleri */
+.icon-btn.success { color: #4caf50; }
+.icon-btn.success:hover { background-color: rgba(76, 175, 80, 0.2); color: #66bb6a; }
+
+.icon-btn.danger { color: #ef5350; }
+.icon-btn.danger:hover { background-color: rgba(244, 67, 54, 0.2); color: #ff8a80; }
+
+.icon-btn.delete { color: #ef5350; } /* Çöp kutusu kırmızı olsun */
+/* =========================================
+   4. MODAL (AÇILIR PENCERE)
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Arka planı karartma */
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-content {
+    background: #1a0b2e; /* Koyu mor modal zemini */
+    width: 100%;
+    max-width: 500px;
+    border-radius: 16px;
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    padding: 24px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.3s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 16px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 20px;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+/* Modal Form Elemanları */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #e0aaff;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    color: #fff;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #9d4edd;
+    box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.1);
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================
+   5. DURUM ROZETLERİ (BADGES)
+   ========================================= */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .status-badge.pending {
-    background: rgba(255, 152, 0, 0.2);
-    color: #ffa726;
-    border-color: rgba(255, 152, 0, 0.4);
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
 }
 
 .status-badge.approved {
-    background: rgba(76, 175, 80, 0.2);
-    color: #66bb6a;
-    border-color: rgba(76, 175, 80, 0.4);
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .status-badge.cancelled {
-    background: rgba(244, 67, 54, 0.2);
+    background: rgba(244, 67, 54, 0.15);
     color: #ef5350;
-    border-color: rgba(244, 67, 54, 0.4);
+    border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
-/* Responsive */
+/* =========================================
+   6. BOŞ DURUM VE ANİMASYONLAR
+   ========================================= */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    text-align: center;
+    color: #6b7280;
+    border: 2px dashed rgba(157, 78, 221, 0.2);
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.empty-state p {
+    margin-top: 15px;
+    font-size: 16px;
+    color: #9ca3af;
+}
+
+/* Refresh Animasyonu */
+.spin-anim {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   7. RESPONSIVE
+   ========================================= */
 @media (max-width: 768px) {
     .meeting-header {
         flex-direction: column;
@@ -119,13 +358,8 @@
         justify-content: flex-end;
     }
 
-    .meeting-info {
-        grid-template-columns: 1fr;
-    }
-
-    .meeting-title-section {
+    .form-row {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+        gap: 0;
     }
 }

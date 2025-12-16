@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './HomePage.css';
 import CreateJobPost from './JobPosts/CreateJobPost';
 import CVAnalyze from './CVAnalyze/CVAnalyze';
+// RoomView SİLİNDİ, sadece bu kaldı:
 import RoomManagement from './Rooms/RoomManagement';
-import RoomView from './Rooms/RoomView';
 import MeetingManagement from './Meetings/MeetingManagement';
 import MeetingView from './Meetings/MeetingView';
 import UserManagementView from './UserManagement/UserManagementView';
@@ -46,8 +46,6 @@ const DashboardView = () => (
         </div>
     </div>
 );
-
-
 
 const HROperationsView = ({ onNavigate }) => (
     <div className="content-card">
@@ -97,6 +95,7 @@ const ICON_MAP = {
     'admin:management': Shield,
     'admin:users': Users,
     'admin:roles': Shield,
+    'admin:permissions': Shield, // Permission için ikon eklendi
     'admin:departments': Building,
     'hr:operations': Briefcase,
     'hr:job_post': FileText,
@@ -122,7 +121,7 @@ const HomePage = ({ onLogout }) => {
     const [expandedGroups, setExpandedGroups] = useState({});
     const [permissions, setPermissions] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState(null); // eslint-disable-line no-unused-vars
     const [user, setUser] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const navigate = useNavigate();
@@ -149,7 +148,7 @@ const HomePage = ({ onLogout }) => {
         };
 
         fetchData();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Çıkış
     const handleLogout = () => {
@@ -187,6 +186,8 @@ const HomePage = ({ onLogout }) => {
         switch (activeTab) {
             case 'dashboard':
                 return <DashboardView />;
+
+            // --- Admin Modülleri ---
             case 'admin:users':
                 return <UserManagementView />;
             case 'admin:roles':
@@ -195,6 +196,8 @@ const HomePage = ({ onLogout }) => {
                 return <PermissionManagement />;
             case 'admin:departments':
                 return <DepartmentManagement />;
+
+            // --- HR Modülleri ---
             case 'hr:operations':
                 return <HROperationsView onNavigate={handleMenuClick} />;
             case 'hr:job_post':
@@ -204,34 +207,31 @@ const HomePage = ({ onLogout }) => {
             case 'hr:applications':
                 return <ApplicationsView />;
 
-
-            case 'rooms': // Menü ana başlığı
-            case 'rooms:view': // Alt menü: Görüntüle
-                return <RoomView />;
-
-            case 'rooms:management': // Alt menü: Yönetim
+            // --- Oda Yönetimi (TEK BİLEŞEN) ---
+            // İster Görüntüle ister Yönetim olsun, aynı bileşene gider.
+            // Bileşen kendi içinde yetkiyi (userPermissions) kontrol edip buton gösterir/gizler.
+            case 'rooms':
+            case 'rooms:view':
+            case 'rooms:management':
                 return <RoomManagement userPermissions={permissions} />;
 
+            // --- Toplantı Yönetimi ---
             case 'meetings:view':
-                // Kullanıcı özellikle "Görüntüle"ye bastıysa, yetkisi olsa bile View aç
                 return <MeetingView />;
-
             case 'meetings:management':
-                // Yönetim butonuna bastıysa Management aç
                 return <MeetingManagement userPermissions={permissions} />;
-
             case 'meetings':
-                // Eğer menüde direkt ana başlığa (meetings) tıklanıyorsa varsayılan davranış:
                 return hasPermission('meetings:management')
-                  ? <MeetingManagement userPermissions={permissions} />
-                  : <MeetingView />;
+                    ? <MeetingManagement userPermissions={permissions} />
+                    : <MeetingView />;
 
+            // --- Proje Yönetimi ---
             case 'project:view':
                 return <ProjectManagement userPermissions={permissions} user={user} />;
-
             case 'project:task':
                 return <Tasks user={user} />;
 
+            // --- Diğer ---
             case 'reports':
                 return <ReportsView />;
             case 'settings':
