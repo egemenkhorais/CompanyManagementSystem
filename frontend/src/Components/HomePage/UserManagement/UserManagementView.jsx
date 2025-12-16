@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Edit2, Trash2, X, Search, Building, Briefcase, Plus } from 'lucide-react';
+import { Users, Edit2, Trash2, X, Search, Building, Briefcase, Plus, RefreshCw } from 'lucide-react';
 import axiosInstance from '../../../api/axiosInstance';
 import './UserManagementView.css';
 
@@ -73,6 +73,10 @@ const UserManagementView = () => {
         }
     };
 
+    const handleRefresh = () => {
+        fetchData();
+    };
+
     // Departmana göre pozisyonları getir
     const fetchPositionsByDepartment = async (departmentId) => {
         try {
@@ -80,7 +84,6 @@ const UserManagementView = () => {
             if (response.data.success && response.data.data.length > 0) {
                 setFilteredPositions(response.data.data);
             } else {
-                // Departmana özel pozisyon yoksa tüm pozisyonları göster
                 setFilteredPositions(positions);
             }
         } catch (error) {
@@ -122,7 +125,6 @@ const UserManagementView = () => {
             yearsworked: user.yearsworked || ''
         });
 
-        // Departmana göre pozisyonları yükle
         if (user.departmentid) {
             fetchPositionsByDepartment(user.departmentid);
         } else {
@@ -153,13 +155,11 @@ const UserManagementView = () => {
     // Form değişiklik
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
 
-        // Departman değiştiğinde pozisyonu sıfırla
         if (name === 'departmentid') {
             setFormData(prev => ({
                 ...prev,
@@ -169,13 +169,12 @@ const UserManagementView = () => {
         }
     };
 
-    // Form gönder (Yeni ekle veya güncelle)
+    // Form gönder
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             if (isNewUser) {
-                // Yeni kullanıcı oluştur
                 if (!formData.password) {
                     alert('Şifre zorunludur!');
                     return;
@@ -200,7 +199,6 @@ const UserManagementView = () => {
                     alert(response.data.message || 'Bir hata oluştu!');
                 }
             } else {
-                // Kullanıcı güncelle
                 const response = await axiosInstance.put(`/management/users/${editingUser.userid}`, {
                     username: formData.username,
                     roleid: parseInt(formData.roleid),
@@ -241,7 +239,6 @@ const UserManagementView = () => {
         }
     };
 
-    // Arama filtresi
     const filteredUsers = users.filter(user =>
         (user.username?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         (user.fullname?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -250,7 +247,6 @@ const UserManagementView = () => {
         (user.position_name?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
 
-    // Rol badge rengi
     const getRoleBadgeClass = (rolename) => {
         if (rolename === 'admin') return 'badge-admin';
         if (rolename === 'hr') return 'badge-hr';
@@ -259,7 +255,6 @@ const UserManagementView = () => {
         return 'badge-default';
     };
 
-    // Rol ismini güzelleştir
     const formatRoleName = (rolename) => {
         if (!rolename) return '-';
         return rolename
@@ -267,7 +262,6 @@ const UserManagementView = () => {
             .replace(/\b\w/g, l => l.toUpperCase());
     };
 
-    // Maaş formatla
     const formatSalary = (salary) => {
         if (!salary) return '-';
         return new Intl.NumberFormat('tr-TR', {
@@ -277,7 +271,6 @@ const UserManagementView = () => {
         }).format(salary);
     };
 
-    // Pozisyon gösterimi
     const formatPosition = (position_name, position_level) => {
         if (!position_name) return '-';
         return `${position_name} ${position_level ? `(${position_level})` : ''}`;
@@ -309,6 +302,14 @@ const UserManagementView = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+                    <button
+                        className="refresh-btn"
+                        onClick={handleRefresh}
+                        title="Listeyi Yenile"
+                        disabled={loading}
+                    >
+                        <RefreshCw size={18} className={loading ? 'icon-spin' : ''} />
+                    </button>
                     <button className="add-user-btn" onClick={handleOpenAddModal}>
                         <Plus size={18} />
                         <span>Yeni Kullanıcı</span>
@@ -341,8 +342,10 @@ const UserManagementView = () => {
                 <table className="user-table">
                     <thead>
                     <tr>
+                        {/* BAŞLIK SIRALAMASI: ID -> İSİM -> DURUM -> ... */}
                         <th>ID</th>
                         <th>İsim</th>
+                        <th>Durum</th>
                         <th>Kullanıcı Adı</th>
                         <th>Departman</th>
                         <th>Pozisyon</th>
@@ -355,92 +358,123 @@ const UserManagementView = () => {
                     <tbody>
                     {filteredUsers.length === 0 ? (
                         <tr>
-                            <td colSpan="9" className="empty-state">
+                            <td colSpan="10" className="empty-state">
                                 Kullanıcı bulunamadı
                             </td>
                         </tr>
                     ) : (
-                        filteredUsers.map(user => (
-                            <tr key={user.userid} className={user.userid === currentUser?.id ? 'current-user-row' : ''}>
-                                <td>{user.userid}</td>
-                                <td>
-                                    <span className="fullname-cell">
-                                        {user.fullname || '-'}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div className="username-cell">
-                                        {user.username}
-                                        {user.userid === currentUser?.id && (
-                                            <span className="you-badge">Sen</span>
-                                        )}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="department-cell">
-                                        {user.departmentname ? (
-                                            <>
-                                                <Building size={14} />
-                                                <span>{user.departmentname}</span>
-                                            </>
-                                        ) : '-'}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="position-cell">
-                                        {user.position_name ? (
-                                            <>
-                                                <Briefcase size={14} />
-                                                <span>{formatPosition(user.position_name, user.position_level)}</span>
-                                            </>
-                                        ) : '-'}
-                                    </div>
-                                </td>
-                                <td>
-                                    <span className={`role-badge ${getRoleBadgeClass(user.rolename)}`}>
-                                        {formatRoleName(user.rolename)}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span className="salary-cell">
-                                        {formatSalary(user.usersalary)}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span className="years-cell">
-                                        {user.yearsworked ? `${user.yearsworked} yıl` : '-'}
-                                    </span>
-                                </td>
-                                <td>
-                                    {user.userid !== currentUser?.id ? (
-                                        <div className="action-buttons">
-                                            <button
-                                                className="icon-btn edit-btn"
-                                                onClick={() => handleOpenEditModal(user)}
-                                                title="Düzenle"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                className="icon-btn delete-btn"
-                                                onClick={() => handleDelete(user.userid, user.username)}
-                                                title="Sil"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                        filteredUsers.map(user => {
+                            let tooltipText = 'Bilinmiyor';
+                            if (user.is_online) {
+                                tooltipText = 'Şu an Aktif';
+                            } else if (user.last_activity) {
+                                try {
+                                    const date = new Date(user.last_activity);
+                                    if (!isNaN(date.getTime())) {
+                                        tooltipText = `Son görülme: ${date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`;
+                                    }
+                                } catch (e) {
+                                    console.log("Tarih hatası:", e);
+                                }
+                            }
+
+                            return (
+                                <tr key={user.userid} className={user.userid === currentUser?.id ? 'current-user-row' : ''}>
+                                    {/* 1. SÜTUN: ID */}
+                                    <td>{user.userid}</td>
+
+                                    {/* 2. SÜTUN: İSİM (Önceki kodda burası Durum'du, şimdi düzeltildi) */}
+                                    <td>
+                                        <span className="fullname-cell">
+                                            {user.fullname || '-'}
+                                        </span>
+                                    </td>
+
+                                    {/* 3. SÜTUN: DURUM (Önceki kodda burası İsim'di, şimdi düzeltildi) */}
+                                    <td style={{ textAlign: 'center', width: '80px' }}>
+                                        <div className="status-cell" style={{ justifyContent: 'center' }}>
+                                            <span
+                                                className={`status-indicator ${user.is_online ? 'status-online' : 'status-offline'}`}
+                                                title={tooltipText}
+                                            ></span>
                                         </div>
-                                    ) : (
-                                        <span className="no-action">-</span>
-                                    )}
-                                </td>
-                            </tr>
-                        ))
+                                    </td>
+
+                                    {/* 4. SÜTUN: KULLANICI ADI */}
+                                    <td>
+                                        <div className="username-cell">
+                                            {user.username}
+                                            {user.userid === currentUser?.id && (
+                                                <span className="you-badge">Sen</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="department-cell">
+                                            {user.departmentname ? (
+                                                <>
+                                                    <Building size={14} />
+                                                    <span>{user.departmentname}</span>
+                                                </>
+                                            ) : '-'}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="position-cell">
+                                            {user.position_name ? (
+                                                <>
+                                                    <Briefcase size={14} />
+                                                    <span>{formatPosition(user.position_name, user.position_level)}</span>
+                                                </>
+                                            ) : '-'}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span className={`role-badge ${getRoleBadgeClass(user.rolename)}`}>
+                                            {formatRoleName(user.rolename)}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className="salary-cell">
+                                            {formatSalary(user.usersalary)}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className="years-cell">
+                                            {user.yearsworked ? `${user.yearsworked} yıl` : '-'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {user.userid !== currentUser?.id ? (
+                                            <div className="action-buttons">
+                                                <button
+                                                    className="icon-btn edit-btn"
+                                                    onClick={() => handleOpenEditModal(user)}
+                                                    title="Düzenle"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    className="icon-btn delete-btn"
+                                                    onClick={() => handleDelete(user.userid, user.username)}
+                                                    title="Sil"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <span className="no-action">-</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            );
+                        })
                     )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Modal (Yeni Ekle / Düzenle) */}
+            {/* Modal */}
             {showModal && (
                 <div className="modal-overlay" onClick={handleCloseModal}>
                     <div className="modal-content modal-large" onClick={e => e.stopPropagation()}>
@@ -477,7 +511,6 @@ const UserManagementView = () => {
                                 </div>
                             </div>
 
-                            {/* Şifre alanı - sadece yeni kullanıcı için */}
                             {isNewUser && (
                                 <div className="form-group">
                                     <label>Şifre *</label>
@@ -555,7 +588,6 @@ const UserManagementView = () => {
                                         onChange={handleInputChange}
                                         placeholder="0"
                                         min="0"
-
                                     />
                                 </div>
                             </div>
@@ -573,9 +605,7 @@ const UserManagementView = () => {
                                         max="50"
                                     />
                                 </div>
-                                <div className="form-group">
-                                    {/* Boş alan - düzen için */}
-                                </div>
+                                <div className="form-group"></div>
                             </div>
 
                             <div className="modal-actions">

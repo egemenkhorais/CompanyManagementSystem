@@ -480,6 +480,9 @@
     }
 }
 
+/* ... YUKARIDAKİ KODLAR AYNI KALACAK ... */
+
+/* RESPONSIVE - MOBİL AYARLARI */
 @media (max-width: 768px) {
     .page-header {
         flex-direction: column;
@@ -526,5 +529,142 @@
     .form-row {
         flex-direction: column;
         gap: 0;
+    }
+    } /* <--- MEDIA QUERY BURADA KAPATILMALIYDI */
+
+
+    /* --- BURADAN AŞAĞISI ARTIK TÜM EKRANLAR İÇİN GEÇERLİ OLACAK --- */
+
+    .status-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    /* --- GÜNCELLENMİŞ NEON GÖSTERGELER --- */
+
+    /* Yuvarlak Dairenin Temel Şekli */
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        /* DEĞİŞİKLİK 1: Çerçeve inceltildi (2px -> 1px) ve hafif şeffaflık verildi */
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        /* Temel bir parlama efekti */
+        box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        transition: all 0.3s ease; /* Geçişleri yumuşat */
+    }
+
+    /* Online (Yeşil - NEON PARLAKLIK) */
+    .status-online {
+        background-color: #22c55e; /* Ana yeşil renk */
+        /* DEĞİŞİKLİK 2: Katmanlı Neon Gölge Efekti */
+        box-shadow:
+            0 0 2px #fff,            /* En içteki beyazımsı parlama */
+            0 0 6px #22c55e,         /* Orta yoğunlukta yeşil halka */
+            0 0 12px rgba(34, 197, 94, 0.8), /* Geniş dış parlama */
+            0 0 20px rgba(34, 197, 94, 0.4); /* En dıştaki hafif huzme */
+    }
+
+    /* Offline (Kırmızı - NEON PARLAKLIK) */
+    .status-offline {
+        background-color: #ef4444; /* Ana kırmızı renk */
+        /* DEĞİŞİKLİK 3: Katmanlı Neon Gölge Efekti (Kırmızı için) */
+        box-shadow:
+            0 0 2px #fff,
+            0 0 6px #ef4444,
+            0 0 12px rgba(239, 68, 68, 0.8),
+            0 0 20px rgba(239, 68, 68, 0.4);
+    }
+    /* YEŞİL PULSE (NEFES ALMA) EFEKTİ */
+    @keyframes pulse-green {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+        }
+    }
+
+    /* --- REFRESH BUTTON --- */
+    .refresh-btn {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(157, 78, 221, 0.1);
+        border: 1px solid rgba(157, 78, 221, 0.3);
+        border-radius: 10px;
+        color: #e5e5e5;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    /* --- DÖNME ANİMASYONU --- */
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .refresh-btn {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0; /* ÖNEMLİ: Butonun sıkışıp kaybolmasını önler */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(157, 78, 221, 0.1);
+        border: 1px solid rgba(157, 78, 221, 0.3);
+        border-radius: 10px;
+        color: #e5e5e5; /* İkon rengi */
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        background: rgba(157, 78, 221, 0.2);
+        border-color: #9d4edd;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .refresh-btn:active {
+        transform: translateY(0);
+    }
+
+    .refresh-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        border-color: rgba(157, 78, 221, 0.1);
+    }
+
+    /* Yükleniyor durumundaki dönme animasyonu */
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .icon-spin {
+        animation: spin 1s linear infinite;
+        transform-origin: center;
+        display: block;
     }
 }

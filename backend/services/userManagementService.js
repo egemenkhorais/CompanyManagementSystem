@@ -3,58 +3,62 @@ const { pool } = require('../config/database');
 class UserManagementService {
     /**
      * Kullanıcının rolüne göre kullanıcıları getir (userdetails dahil)
+     * Online/Offline durumu burada hesaplanır.
      */
     async getAllUsers(currentUserRoleId) {
-        try {
-            // Kullanıcının rolünü bul
-            const roleResult = await pool.query(
-                'SELECT rolename FROM roles WHERE roleid = $1',
-                [currentUserRoleId]
-            );
-            const roleName = roleResult.rows[0]?.rolename;
+            try {
+                // Kullanıcının rolünü bul
+                const roleResult = await pool.query(
+                    'SELECT rolename FROM roles WHERE roleid = $1',
+                    [currentUserRoleId]
+                );
+                const roleName = roleResult.rows[0]?.rolename;
 
-            let query;
-            let baseQuery = `
-                SELECT 
-                    u.userid, 
-                    u.username, 
-                    u.roleid, 
-                    r.rolename,
-                    ud.name as fullname,
-                    ud.usersalary,
-                    ud.yearsworked,
-                    d.departmentid,
-                    d.departmentname,
-                    pn.id as positionid,
-                    pn.position_name,
-                    pn.level as position_level
-                FROM users u
-                JOIN roles r ON u.roleid = r.roleid
-                LEFT JOIN userdetails ud ON u.userid = ud.userid
-                LEFT JOIN departments d ON ud.departmentid = d.departmentid
-                LEFT JOIN positionnames pn ON ud.positionnames_id = pn.id
-            `;
+                let query;
+                // Yorum satırları kaldırıldı, syntax hatası riski yok
+                let baseQuery = `
+                    SELECT
+                        u.userid,
+                        u.username,
+                        u.roleid,
+                        r.rolename,
+                        ud.name as fullname,
+                        (u.last_activity > NOW() - INTERVAL '5 minutes') as is_online,
+                        u.last_activity,
+                        ud.usersalary,
+                        ud.yearsworked,
+                        d.departmentid,
+                        d.departmentname,
+                        pn.id as positionid,
+                        pn.position_name,
+                        pn.level as position_level
+                    FROM users u
+                    JOIN roles r ON u.roleid = r.roleid
+                    LEFT JOIN userdetails ud ON u.userid = ud.userid
+                    LEFT JOIN departments d ON ud.departmentid = d.departmentid
+                    LEFT JOIN positionnames pn ON ud.positionnames_id = pn.id
+                `;
 
-            if (roleName === 'admin' || roleName === 'hr') {
-                // Admin/HR: herkesi gör
-                query = baseQuery + ` ORDER BY u.userid`;
-            } else if (roleName.startsWith('backend_')) {
-                // Backend: sadece backend kullanıcıları
-                query = baseQuery + ` WHERE r.rolename LIKE 'backend_%' ORDER BY u.userid`;
-            } else if (roleName.startsWith('qa_')) {
-                // QA: sadece QA kullanıcıları
-                query = baseQuery + ` WHERE r.rolename LIKE 'qa_%' ORDER BY u.userid`;
-            } else {
-                return { success: false, message: 'Yetkiniz yok!' };
+                if (roleName === 'admin' || roleName === 'hr') {
+                    // Admin/HR: herkesi gör
+                    query = baseQuery + ` ORDER BY u.userid`;
+                } else if (roleName.startsWith('backend_')) {
+                    // Backend: sadece backend kullanıcıları
+                    query = baseQuery + ` WHERE r.rolename LIKE 'backend_%' ORDER BY u.userid`;
+                } else if (roleName.startsWith('qa_')) {
+                    // QA: sadece QA kullanıcıları
+                    query = baseQuery + ` WHERE r.rolename LIKE 'qa_%' ORDER BY u.userid`;
+                } else {
+                    return { success: false, message: 'Yetkiniz yok!' };
+                }
+
+                const result = await pool.query(query);
+                return { success: true, data: result.rows };
+
+            } catch (error) {
+                console.error('UserManagementService getAllUsers Error:', error);
+                throw error;
             }
-
-            const result = await pool.query(query);
-            return { success: true, data: result.rows };
-
-        } catch (error) {
-            console.error('UserManagementService getAllUsers Error:', error);
-            throw error;
-        }
     }
 
     /**
@@ -68,6 +72,8 @@ class UserManagementService {
                     u.username,
                     u.roleid,
                     r.rolename,
+                    (u.last_activity > NOW() - INTERVAL '5 minutes') as is_online,
+                    u.last_activity,
                     ud.userdetailsid,
                     ud.name as fullname,
                     ud.usersalary,
@@ -125,8 +131,8 @@ class UserManagementService {
                 // userdetails varsa güncelle
                 await client.query(`
                     UPDATE userdetails
-                    SET name = $1, 
-                        departmentid = $2, 
+                    SET name = $1,
+                        departmentid = $2,
                         positionnames_id = $3,
                         usersalary = $4,
                         yearsworked = $5
@@ -226,9 +232,9 @@ class UserManagementService {
     async getAllPositions() {
         try {
             const result = await pool.query(`
-                SELECT id, position_name, level, 
+                SELECT id, position_name, level,
                        position_name || ' - ' || level as display_name
-                FROM positionnames 
+                FROM positionnames
                 WHERE is_active = true
                 ORDER BY position_name, level
             `);
@@ -289,8 +295,8 @@ class UserManagementService {
 
             // Users tablosuna ekle
             const userResult = await client.query(
-                `INSERT INTO users (username, password, roleid) 
-                 VALUES ($1, $2, $3) 
+                `INSERT INTO users (username, password, roleid)
+                 VALUES ($1, $2, $3)
                  RETURNING userid`,
                 [username, hashedPassword, roleid]
             );
@@ -323,8 +329,7 @@ class UserManagementService {
 
     /**
      * Takım seçimi için kullanıcıları getir
-     * Sadece belirli rolleri gösterir (backend_, frontend_, qa_ gibi)
-     * HR, admin gibi rolleri göstermez
+     * Online durumu burada da hesaplanır
      */
     async getAllUsersForTeam() {
         try {
@@ -335,6 +340,8 @@ class UserManagementService {
                     u.roleid, 
                     r.rolename,
                     ud.name as fullname,
+                    (u.last_activity > NOW() - INTERVAL '5 minutes') as is_online,
+                    u.last_activity,
                     ud.usersalary,
                     ud.yearsworked,
                     d.departmentid,

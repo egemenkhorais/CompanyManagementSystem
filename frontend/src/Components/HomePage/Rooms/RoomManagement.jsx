@@ -4,18 +4,14 @@ import axiosInstance from '../../../api/axiosInstance';
 import './RoomManagement.css';
 
 const RoomManagement = ({ userPermissions = [] }) => {
-    // --- Genel Veri State'leri ---
     const [rooms, setRooms] = useState([]);
     const [allMeetings, setAllMeetings] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // --- Yetki Kontrolleri ---
-    // Backend'den gelen listede ilgili yetki kodu varsa butonlar görünür.
     const canCreate = userPermissions.some(p => p.permission_code === 'rooms:create' || p.permission_code === 'rooms:management');
     const canEdit = userPermissions.some(p => p.permission_code === 'rooms:edit' || p.permission_code === 'rooms:management');
     const canDelete = userPermissions.some(p => p.permission_code === 'rooms:delete' || p.permission_code === 'rooms:management');
 
-    // --- State: Admin İşlemleri (Ekle/Düzenle) ---
     const [showRoomModal, setShowRoomModal] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
     const [roomFormData, setRoomFormData] = useState({
@@ -24,14 +20,13 @@ const RoomManagement = ({ userPermissions = [] }) => {
         companyroomdepartment: ''
     });
 
-    // --- State: Rezervasyon İşlemleri ---
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [selectedRoomForBooking, setSelectedRoomForBooking] = useState(null);
     const [roomSchedule, setRoomSchedule] = useState([]);
 
     const [bookingData, setBookingData] = useState({
         title: '',
-        date: new Date().toISOString().split('T')[0], // Bugün YYYY-MM-DD
+        date: new Date().toISOString().split('T')[0],
         startTime: '',
         endTime: ''
     });
@@ -41,9 +36,8 @@ const RoomManagement = ({ userPermissions = [] }) => {
     }, []);
 
     const fetchData = async () => {
-        setLoading(true); // Yükleniyor başlat
+        setLoading(true);
 
-        // Odaları Çek
         try {
             const roomsRes = await axiosInstance.get('/rooms');
             if (roomsRes.data.success) {
@@ -53,7 +47,6 @@ const RoomManagement = ({ userPermissions = [] }) => {
             console.error('Odalar yüklenirken hata:', error);
         }
 
-        // Toplantıları Çek (Timeline için)
         try {
             const meetingsRes = await axiosInstance.get('/meetings');
             if (meetingsRes.data.success) {
@@ -63,17 +56,15 @@ const RoomManagement = ({ userPermissions = [] }) => {
             console.error('Toplantı verisi çekilemedi (Timeline boş görünecek):', error);
         }
 
-        setLoading(false); // Yükleme bitti
+        setLoading(false);
     };
 
-    // --- Helper: Timeline Güncelleme ---
     const updateRoomSchedule = (roomId, dateStr) => {
         if (!roomId || !dateStr) return;
 
         const dailyMeetings = allMeetings.filter(m => {
             const meetingDateObj = new Date(m.start_time);
 
-            // Yerel tarih düzeltmesi (Timezone fix)
             const year = meetingDateObj.getFullYear();
             const month = String(meetingDateObj.getMonth() + 1).padStart(2, '0');
             const day = String(meetingDateObj.getDate()).padStart(2, '0');
@@ -88,7 +79,7 @@ const RoomManagement = ({ userPermissions = [] }) => {
         setRoomSchedule(dailyMeetings);
     };
 
-    // ==================== ODA YÖNETİMİ (ADMIN) ====================
+    // ================= ODA YÖNETİMİ  =====
 
     const handleOpenRoomModal = (room = null, e) => {
         if (e) e.stopPropagation();
@@ -133,13 +124,13 @@ const RoomManagement = ({ userPermissions = [] }) => {
         }
     };
 
-    // ==================== REZERVASYON İŞLEMLERİ ====================
+    // =========== REZERVASYON İŞLEMLERİ =======
 
     const handleRoomClick = (room) => {
 
             if (room.companyroomtype === 'Meeting') {
                 alert("Toplantı odaları için lütfen 'Toplantı Yönetimi' menüsünü kullanın.");
-                return; // Fonksiyonu burada durdur, modalı açma.
+                return;
             }
 
 
