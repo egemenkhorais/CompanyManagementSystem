@@ -136,9 +136,16 @@ const RoomManagement = ({ userPermissions = [] }) => {
     // ==================== REZERVASYON İŞLEMLERİ ====================
 
     const handleRoomClick = (room) => {
-        setSelectedRoomForBooking(room);
-        updateRoomSchedule(room.companyroomid, bookingData.date);
-        setShowBookingModal(true);
+
+            if (room.companyroomtype === 'Meeting') {
+                alert("Toplantı odaları için lütfen 'Toplantı Yönetimi' menüsünü kullanın.");
+                return; // Fonksiyonu burada durdur, modalı açma.
+            }
+
+
+            setSelectedRoomForBooking(room);
+            updateRoomSchedule(room.companyroomid, bookingData.date);
+            setShowBookingModal(true);
     };
 
     const handleDateChange = (e) => {
@@ -292,7 +299,7 @@ const RoomManagement = ({ userPermissions = [] }) => {
                             <div className="booking-form-section">
                                 <form onSubmit={handleBookingSubmit} style={{padding:0}}>
                                     <div className="form-group">
-                                        <label>Toplantı Başlığı</label>
+                                        <label>Etkinlik Başlığı</label>
                                         <input type="text" value={bookingData.title} onChange={e => setBookingData({...bookingData, title: e.target.value})} required placeholder="Konu..." />
                                     </div>
                                     <div className="form-group">
@@ -320,7 +327,7 @@ const RoomManagement = ({ userPermissions = [] }) => {
                                 </div>
                                 <div className="schedule-list">
                                     {roomSchedule.length === 0 ? (
-                                        <div className="empty-schedule">Bu tarihte planlanmış toplantı yok.<br/>Tüm gün müsait.</div>
+                                        <div className="empty-schedule">Bu tarihte planlanmış etkinlik yok.<br/>Tüm gün müsait.</div>
                                     ) : (
                                         roomSchedule.map((meeting, index) => (
                                             <div key={index} className="schedule-item busy">

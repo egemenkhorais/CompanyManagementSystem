@@ -1076,6 +1076,21 @@ class ProjectService {
             throw new Error('Task silinirken hata oluştu: ' + error.message);
         }
     }
+    async getProjectsForDropdown() {
+            try {
+                const query = `
+                    SELECT projectid, projectname
+                    FROM projects
+                    WHERE enddate IS NULL OR enddate >= CURRENT_DATE
+                    ORDER BY projectid DESC
+                `;
+                const result = await pool.query(query);
+                return result.rows;
+            } catch (error) {
+                console.error('ProjectService GetProjectsForDropdown Error:', error);
+                throw new Error('Proje listesi alınırken hata oluştu.');
+            }
+    }
 }
 
 module.exports = new ProjectService();

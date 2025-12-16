@@ -266,7 +266,28 @@ class ProjectController {
             });
         }
     }
+/**
+     * GET /api/projects
+     * Toplantı modalı vb. için basit proje listesi (Dropdown)
+     */
+    async getAllProjects(req, res) {
+        try {
+            // Service katmanına eklediğin fonksiyonu çağırıyoruz
+            const projects = await projectService.getProjectsForDropdown();
 
+            res.status(200).json({
+                success: true,
+                data: projects
+            });
+
+        } catch (error) {
+            console.error('ProjectController GetAllProjects Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Projeler listelenirken hata oluştu: ' + error.message
+            });
+        }
+    }
     /**
      * GET /api/projects/:projectId/tasks
      * Projeye ait task'leri getir
