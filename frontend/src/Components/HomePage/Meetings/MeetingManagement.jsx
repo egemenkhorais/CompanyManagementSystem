@@ -14,7 +14,7 @@ const MeetingManagement = ({ userPermissions = [] }) => {
     const [projects, setProjects] = useState([]);
 
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false); // Manuel refresh animasyonu için
+    const [refreshing, setRefreshing] = useState(false);
 
     // --- MODAL STATE'LERİ ---
     const [showModal, setShowModal] = useState(false);
@@ -39,14 +39,12 @@ const MeetingManagement = ({ userPermissions = [] }) => {
     const canDelete = userPermissions.some(p => p.permission_code === 'meetings:delete' || p.permission_code === 'meetings:management');
     const canApprove = userPermissions.some(p => p.permission_code === 'meetings:approve' || p.permission_code === 'meetings:management');
 
-    // --- VERİ ÇEKME FONKSİYONU (useCallback ile sabitlendi) ---
+    // --- VERİ ÇEKME FONKSİYONU ---
     const fetchData = useCallback(async (isManual = false) => {
         if (isManual) setRefreshing(true);
         else setLoading(true);
 
         try {
-            // Paralel değil, sıralı ve güvenli çekim (Hata durumunda sayfa patlamasın diye)
-
             // 1. Toplantılar
             try {
                 const meetingsRes = await axiosInstance.get('/meetings');
@@ -61,13 +59,13 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                 if (roomsRes.data.success) setRooms(roomsRes.data.data);
             } catch (err) { console.error("Oda listesi hatası:", err); }
 
-            // 3. Departmanlar (Opsiyonel)
+            // 3. Departmanlar
             try {
                 const deptsRes = await axiosInstance.get('/departments');
                 if (deptsRes.data.success) setDepartments(deptsRes.data.data);
             } catch (err) { console.warn("Departmanlar çekilemedi."); }
 
-            // 4. Projeler (Opsiyonel)
+            // 4. Projeler
             try {
                 const projsRes = await axiosInstance.get('/projects');
                 if (projsRes.data.success) setProjects(projsRes.data.data);
@@ -81,7 +79,6 @@ const MeetingManagement = ({ userPermissions = [] }) => {
         }
     }, []);
 
-    // Sayfa ilk açıldığında çalışır
     useEffect(() => {
         fetchData();
     }, [fetchData]);
@@ -104,7 +101,7 @@ const MeetingManagement = ({ userPermissions = [] }) => {
         if (meeting) {
             setEditingMeeting(meeting);
             setFormData({
-                room_id: meeting.companyroomid || meeting.room_id || meeting.company_id, // ID kontrolü
+                room_id: meeting.companyroomid || meeting.room_id || meeting.company_id,
                 title: meeting.meetingsubject || meeting.title,
                 description: meeting.description || '',
                 meeting_date: extractDate(meeting.meetingstartdate || meeting.start_time),
@@ -151,8 +148,8 @@ const MeetingManagement = ({ userPermissions = [] }) => {
         }
 
         const payload = {
-            companyroomid: formData.room_id, // Backend bu ismi bekliyor olabilir (serviste roomId)
-            room_id: formData.room_id,       // Controller bu ismi bekliyor olabilir
+            companyroomid: formData.room_id,
+            room_id: formData.room_id,
             title: formData.title,
             description: formData.description,
             meetingstartdate: formData.meeting_date,
@@ -165,23 +162,21 @@ const MeetingManagement = ({ userPermissions = [] }) => {
 
         try {
             if (editingMeeting) {
-                // Update
                 const mId = editingMeeting.meetingid || editingMeeting.id;
                 const response = await axiosInstance.put(`/meetings/${mId}`, payload);
 
                 if (response.data.success) {
                     alert('Güncelleme başarılı!');
                     handleCloseModal();
-                    await fetchData(); // Listeyi yenilemeyi bekle
+                    await fetchData();
                 }
             } else {
-                // Create
                 const response = await axiosInstance.post('/meetings', payload);
 
                 if (response.data.success) {
                     alert('Toplantı oluşturuldu!');
                     handleCloseModal();
-                    await fetchData(); // Listeyi yenilemeyi bekle
+                    await fetchData();
                 }
             }
         } catch (error) {
@@ -192,22 +187,37 @@ const MeetingManagement = ({ userPermissions = [] }) => {
 
     // --- SİLME ---
     const handleDelete = async (id) => {
-        if(!window.confirm("Silmek istediğinize emin misiniz?")) return;
+        if(!window.confirm("Bu toplantıyı silmek istediğinize emin misiniz?")) return;
         try {
             await axiosInstance.delete(`/meetings/${id}`);
-            await fetchData(); // Silindikten sonra listeyi yenile
+            alert('Toplantı silindi!');
+            await fetchData();
         } catch(e){
-            alert("Silinemedi");
+            alert("Silinemedi!");
         }
     };
 
-    // --- DURUM GÜNCELLEME ---
+    // --- DURUM GÜNCELLEME (CONFIRM İLE) ---
     const handleStatusUpdate = async (id, status) => {
+        const confirmMessage = status === 'approved'
+            ? 'Bu toplantıyı onaylamak istediğinize emin misiniz?'
+            : 'Bu toplantıyı iptal etmek istediğinize emin misiniz?';
+
+        if (!window.confirm(confirmMessage)) {
+            return;
+        }
+
         try {
             await axiosInstance.patch(`/meetings/${id}/status`, {status});
-            await fetchData(); // Durum değiştikten sonra listeyi yenile
-        } catch(e){
-            alert("Durum güncellenemedi");
+
+            const successMessage = status === 'approved'
+                ? 'Toplantı onaylandı!'
+                : 'Toplantı iptal edildi!';
+            alert(successMessage);
+
+            await fetchData();
+        } catch(e) {
+            alert("Durum güncellenemedi!");
         }
     };
 
@@ -221,7 +231,6 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                     <p className="page-subtitle">Toplantıları planlayın ve yönetin.</p>
                 </div>
                 <div style={{display:'flex', gap:'10px'}}>
-                    {/* MANUEL REFRESH BUTONU */}
                     <button
                         className="action-btn"
                         style={{backgroundColor: '#6c757d', minWidth:'40px', padding:'0 10px'}}
@@ -248,7 +257,6 @@ const MeetingManagement = ({ userPermissions = [] }) => {
             ) : (
                 <div className="meetings-list">
                     {meetings.map(meeting => {
-                        // ID ve Veri Güvenliği
                         const mId = meeting.meetingid || meeting.id;
                         const mSubject = meeting.meetingsubject || meeting.title || 'Başlıksız';
                         const mDate = meeting.meetingstartdate || meeting.start_time;
@@ -271,12 +279,24 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                                     <div className="meeting-actions">
                                         {canApprove && (meeting.status === 'pending' || !meeting.status) && (
                                             <>
-                                                <button className="icon-btn success" onClick={() => handleStatusUpdate(mId, 'approved')} title="Onayla"><CheckCircle size={16}/></button>
-                                                <button className="icon-btn danger" onClick={() => handleStatusUpdate(mId, 'cancelled')} title="İptal Et"><XCircle size={16}/></button>
+                                                <button className="icon-btn success" onClick={() => handleStatusUpdate(mId, 'approved')} title="Onayla">
+                                                    <CheckCircle size={16}/>
+                                                </button>
+                                                <button className="icon-btn danger" onClick={() => handleStatusUpdate(mId, 'cancelled')} title="İptal Et">
+                                                    <XCircle size={16}/>
+                                                </button>
                                             </>
                                         )}
-                                        {canEdit && <button className="icon-btn" onClick={() => handleOpenModal(meeting)}><Edit2 size={16}/></button>}
-                                        {canDelete && <button className="icon-btn delete" onClick={() => handleDelete(mId)}><Trash2 size={16}/></button>}
+                                        {canEdit && (
+                                            <button className="icon-btn" onClick={() => handleOpenModal(meeting)}>
+                                                <Edit2 size={16}/>
+                                            </button>
+                                        )}
+                                        {canDelete && (
+                                            <button className="icon-btn delete" onClick={() => handleDelete(mId)}>
+                                                <Trash2 size={16}/>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="meeting-info">
@@ -290,17 +310,15 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                 </div>
             )}
 
-            {/* MODAL KODLARI AYNEN KORUNDU */}
+            {/* MODAL */}
             {showModal && (
                 <div className="modal-overlay" onClick={handleCloseModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h3>{editingMeeting ? 'Düzenle' : 'Yeni Toplantı'}</h3>
+                            <h3>{editingMeeting ? 'Toplantı Düzenle' : 'Yeni Toplantı'}</h3>
                             <button className="close-btn" onClick={handleCloseModal}><X size={20} /></button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            {/* Form içerikleri önceki kodla aynı, sadece kopyala yapıştır kolaylığı için kısaltıldı.
-                                 Önceki cevaptaki form yapısını aynen kullanabilirsiniz. */}
                             <div className="form-group">
                                 <label>Konu *</label>
                                 <input type="text" name="title" value={formData.title} onChange={handleInputChange} required />
@@ -333,18 +351,10 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label><Briefcase size={14}/> İlgili Departman</label>
-                                    <select
-                                        name="department_id"
-                                        value={formData.department_id}
-                                        onChange={handleInputChange}
-                                    >
+                                    <select name="department_id" value={formData.department_id} onChange={handleInputChange}>
                                         <option value="">(Opsiyonel) Seçiniz...</option>
-                                        {/* DÜZELTME: d.id YERİNE d.departmentid || d.id KULLANILDI */}
                                         {departments.map(d => (
-                                            <option
-                                                key={d.departmentid || d.id}
-                                                value={d.departmentid || d.id}
-                                            >
+                                            <option key={d.departmentid || d.id} value={d.departmentid || d.id}>
                                                 {d.departmentname || d.name}
                                             </option>
                                         ))}
@@ -353,18 +363,10 @@ const MeetingManagement = ({ userPermissions = [] }) => {
 
                                 <div className="form-group">
                                     <label><Building size={14}/> İlgili Proje</label>
-                                    <select
-                                        name="project_id"
-                                        value={formData.project_id}
-                                        onChange={handleInputChange}
-                                    >
+                                    <select name="project_id" value={formData.project_id} onChange={handleInputChange}>
                                         <option value="">(Opsiyonel) Seçiniz...</option>
-                                        {/* DÜZELTME: p.id YERİNE p.projectid || p.id KULLANILDI */}
                                         {projects.map(p => (
-                                            <option
-                                                key={p.projectid || p.id}
-                                                value={p.projectid || p.id}
-                                            >
+                                            <option key={p.projectid || p.id} value={p.projectid || p.id}>
                                                 {p.projectname || p.name}
                                             </option>
                                         ))}
@@ -373,7 +375,7 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                             </div>
                             <div className="form-group">
                                 <label>Katılımcılar</label>
-                                <input type="text" name="participants" value={formData.participants} onChange={handleInputChange} />
+                                <input type="text" name="participants" value={formData.participants} onChange={handleInputChange} placeholder="Örn: Ahmet, Ayşe, Mehmet" />
                             </div>
                             <div className="form-group">
                                 <label>Açıklama</label>
