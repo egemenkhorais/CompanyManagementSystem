@@ -342,7 +342,6 @@ const UserManagementView = () => {
                 <table className="user-table">
                     <thead>
                     <tr>
-                        {/* BAŞLIK SIRALAMASI: ID -> İSİM -> DURUM -> ... */}
                         <th>ID</th>
                         <th>İsim</th>
                         <th>Durum</th>
@@ -380,17 +379,14 @@ const UserManagementView = () => {
 
                             return (
                                 <tr key={user.userid} className={user.userid === currentUser?.id ? 'current-user-row' : ''}>
-                                    {/* 1. SÜTUN: ID */}
                                     <td>{user.userid}</td>
 
-                                    {/* 2. SÜTUN: İSİM (Önceki kodda burası Durum'du, şimdi düzeltildi) */}
                                     <td>
                                         <span className="fullname-cell">
                                             {user.fullname || '-'}
                                         </span>
                                     </td>
 
-                                    {/* 3. SÜTUN: DURUM (Önceki kodda burası İsim'di, şimdi düzeltildi) */}
                                     <td style={{ textAlign: 'center', width: '80px' }}>
                                         <div className="status-cell" style={{ justifyContent: 'center' }}>
                                             <span
@@ -400,7 +396,6 @@ const UserManagementView = () => {
                                         </div>
                                     </td>
 
-                                    {/* 4. SÜTUN: KULLANICI ADI */}
                                     <td>
                                         <div className="username-cell">
                                             {user.username}
@@ -445,26 +440,22 @@ const UserManagementView = () => {
                                         </span>
                                     </td>
                                     <td>
-                                        {user.userid !== currentUser?.id ? (
-                                            <div className="action-buttons">
-                                                <button
-                                                    className="icon-btn edit-btn"
-                                                    onClick={() => handleOpenEditModal(user)}
-                                                    title="Düzenle"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button
-                                                    className="icon-btn delete-btn"
-                                                    onClick={() => handleDelete(user.userid, user.username)}
-                                                    title="Sil"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <span className="no-action">-</span>
-                                        )}
+                                        <div className="action-buttons">
+                                            <button
+                                                className="icon-btn edit-btn"
+                                                onClick={() => handleOpenEditModal(user)}
+                                                title="Düzenle"
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                className="icon-btn delete-btn"
+                                                onClick={() => handleDelete(user.userid, user.username)}
+                                                title="Sil"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             );
