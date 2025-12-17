@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict uPc3y2u7rt80cGwfy3jFUO4CZLYiasphdjEimqTu9t2kRY2jzbGKbxyUv9Gxy2t
+\restrict yIJZKPKC8kqUQGrBVQh83KujBHyRvLWnfm7Beam1GqW75O0VjwnyJGewbQmyiiZ
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -35,6 +35,63 @@ ALTER SCHEMA public OWNER TO pg_database_owner;
 COMMENT ON SCHEMA public IS 'standard public schema';
 
 
+--
+-- Name: update_user_email(integer, character varying); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.update_user_email(IN p_user_id integer, IN p_new_email character varying)
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_old_email VARCHAR;
+BEGIN
+    -- Eski email'i al
+    SELECT email INTO v_old_email FROM users WHERE userid = p_user_id;
+    
+    -- Yeni email güncelle
+    UPDATE users SET email = p_new_email WHERE userid = p_user_id;
+    
+    -- Bilgilendirme
+    RAISE NOTICE 'User % email updated from % to %', p_user_id, v_old_email, p_new_email;
+    
+    COMMIT;
+END;
+$$;
+
+
+ALTER PROCEDURE public.update_user_email(IN p_user_id integer, IN p_new_email character varying) OWNER TO postgres;
+
+--
+-- Name: update_user_salary(integer, numeric); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.update_user_salary(IN p_user_id integer, IN p_increase_percent numeric)
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_old_salary NUMERIC;
+    v_new_salary NUMERIC;
+BEGIN
+    -- Eski maaşı al
+    SELECT usersalary INTO v_old_salary 
+    FROM userdetails 
+    WHERE userid = p_user_id;
+    
+    -- Yeni maaşı hesapla
+    v_new_salary := v_old_salary + (v_old_salary * p_increase_percent / 100);
+    
+    -- Maaşı güncelle
+    UPDATE userdetails 
+    SET usersalary = v_new_salary 
+    WHERE userid = p_user_id;
+    
+    -- COMMIT kaldırıldı, otomatik olur
+END;
+$$;
+
+
+ALTER PROCEDURE public.update_user_salary(IN p_user_id integer, IN p_increase_percent numeric) OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -47,7 +104,8 @@ CREATE TABLE public.users (
     userid integer NOT NULL,
     username character varying(100) NOT NULL,
     password character varying(100) NOT NULL,
-    roleid integer
+    roleid integer,
+    last_activity timestamp with time zone DEFAULT now()
 );
 
 
@@ -270,11 +328,30 @@ CREATE TABLE public.meetings (
     meetingstartdate timestamp with time zone,
     meetingsubject character varying(255),
     isempty boolean,
-    meetingenddate timestamp with time zone
+    meetingenddate timestamp with time zone,
+    meetingdepartmentid integer,
+    relatedprojectid integer,
+    description text,
+    participants text,
+    status text
 );
 
 
 ALTER TABLE public.meetings OWNER TO postgres;
+
+--
+-- Name: COLUMN meetings.meetingdepartmentid; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.meetings.meetingdepartmentid IS 'related department of the meeting';
+
+
+--
+-- Name: COLUMN meetings.relatedprojectid; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.meetings.relatedprojectid IS 'related project of the meeting';
+
 
 --
 -- Name: meetings_meetingid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -549,6 +626,37 @@ CREATE TABLE public.roles (
 
 
 ALTER TABLE public.roles OWNER TO postgres;
+
+--
+-- Name: role_permission_summary; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.role_permission_summary AS
+ SELECT r.roleid,
+    r.rolename,
+    count(rp.permission_id) AS total_permissions,
+    count(
+        CASE
+            WHEN ((p.permission_type)::text = 'menu_group'::text) THEN 1
+            ELSE NULL::integer
+        END) AS menu_group_count,
+    count(
+        CASE
+            WHEN ((p.permission_type)::text = 'menu'::text) THEN 1
+            ELSE NULL::integer
+        END) AS menu_count,
+    count(
+        CASE
+            WHEN ((p.permission_type)::text = 'action'::text) THEN 1
+            ELSE NULL::integer
+        END) AS action_count
+   FROM ((public.roles r
+     LEFT JOIN public.role_permissions rp ON ((r.roleid = rp.roleid)))
+     LEFT JOIN public.permissions p ON ((rp.permission_id = p.id)))
+  GROUP BY r.roleid, r.rolename;
+
+
+ALTER VIEW public.role_permission_summary OWNER TO postgres;
 
 --
 -- Name: roles_roleid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -892,12 +1000,11 @@ COPY public.jobposts (jobpostid, expectations, departmentid, companyid, createdb
 -- Data for Name: meetings; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.meetings (meetingid, companyroomid, meetingstartdate, meetingsubject, isempty, meetingenddate) FROM stdin;
-1	1	2024-11-25 14:00:00+00	Haftalık Sprint Toplantısı	f	\N
-2	2	2024-11-26 10:00:00+00	Stajyer Oryantasyonu	f	\N
-3	8	2025-12-12 18:30:00+00	Deneme	f	2025-12-12 19:30:00+00
-4	4	2025-12-13 12:30:00+00	fakan	f	2025-12-13 14:30:00+00
-5	8	2025-12-14 20:00:00+00	Can Sıkıntısı	f	2025-12-14 21:00:00+00
+COPY public.meetings (meetingid, companyroomid, meetingstartdate, meetingsubject, isempty, meetingenddate, meetingdepartmentid, relatedprojectid, description, participants, status) FROM stdin;
+8	4	2025-12-16 14:00:00+00	DENEME	f	2025-12-16 15:00:00+00	3	\N	asdqwe	ahmet	approved
+9	1	2025-12-17 11:00:00+00	React Tarafındaki Detaylandırma	f	2025-12-17 12:00:00+00	4	\N	React Tarafında ciddi iyileştirmeleri ayın 20sine kadar yapmamız gerekiyor	aysekaya,selcuk	pending
+10	5	2025-12-16 19:00:00+00	Deneme Projesindeki Dağılımlar	f	2025-12-16 20:00:00+00	5	1	deneme	aysekaya,selcuk	pending
+11	2	2025-12-18 15:55:00+00	asdqwe	f	2025-12-18 16:55:00+00	\N	\N	\N	\N	pending
 \.
 
 
@@ -1173,7 +1280,7 @@ COPY public.tasks (taskid, projectid, userid, title, "desc", status, priority, d
 1	3	3	Deneme	Deneme içindir.	pending	high	2025-12-14	\N
 2	3	30	kj	kjhbjk	pending	high	2025-12-13	Projeye basladım
 3	3	30	bkjhb	bjkbjk	pending	medium	2025-12-13	\N
-6	3	32	deneme5	pop	completed	high	2025-12-07	Deneme yapıldı\nDeneme2 yapıldı\nDeneme3 yapıldı\nDeneme4 yapıldı
+6	3	32	deneme5	pop	completed	high	2025-12-05	Deneme yapıldı\nDeneme2 yapıldı\nDeneme3 yapıldı\nDeneme4 yapıldı\nsame can habalı boğazlandı
 \.
 
 
@@ -1196,7 +1303,6 @@ COPY public.teamforproject (teamid, projectid, userid) FROM stdin;
 
 COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, usersalary, yearsworked, positionnames_id) FROM stdin;
 2	2	Ayşe Kaya	2	1	38500.00	5	19
-1	1	Ahmet Yılmaz	1	1	45000.50	3	2
 3	3	Mehmet Demir	1	2	24000.00	2	5
 4	4	Ahmet Yılmaz	5	1	64648.00	3	12
 5	5	Ayşe Demir	1	1	63300.00	3	1
@@ -1210,6 +1316,7 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 29	30	Batuhan	4	1	4500.00	2	1
 11	11	Elif Koç	1	1	70403.00	8	14
 12	12	Burak Aydın	5	1	58287.00	10	13
+1	1	Ahmet Yılmaz	1	1	65464.49	3	2
 13	13	Hande Özdemir	3	1	62452.00	4	13
 14	14	Can Arslan	5	1	27177.00	2	9
 15	15	Merve Doğan	5	1	55572.00	10	8
@@ -1232,38 +1339,38 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (userid, username, password, roleid) FROM stdin;
-4	ahmet.yilmaz	Sifre123!	\N
-5	ayse.demir	Sifre123!	\N
-6	mehmet.kaya	Sifre123!	\N
-7	fatma.celik	Sifre123!	\N
-8	mustafa.ozkan	Sifre123!	\N
-11	elif.koc	Sifre123!	\N
-12	burak.aydin	Sifre123!	\N
-13	hande.ozdemir	Sifre123!	\N
-14	can.arslan	Sifre123!	\N
-15	merve.dogan	Sifre123!	\N
-16	volkan.kilic	Sifre123!	\N
-17	ozlem.aksoy	Sifre123!	\N
-18	serkan.tasci	Sifre123!	\N
-19	busra.yucel	Sifre123!	\N
-20	tolga.avci	Sifre123!	\N
-21	gamze.polat	Sifre123!	\N
-22	sinan.coskun	Sifre123!	\N
-23	pelin.korkmaz	Sifre123!	\N
-24	onur.cetinkaya	Sifre123!	\N
-25	esra.eroglu	Sifre123!	\N
-26	mert.bulut	Sifre123!	\N
-27	deniz.karaca	Sifre123!	\N
-28	selin.yaman	Sifre123!	\N
-1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1
-3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3
-9	zeynep.sahin	Sifre123!	5
-10	emre.yildiz	Sifre123!	5
-2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2
-32	batuhan_karanfil	$2b$10$L5J2RE1cwUSeuWWHHc.N.OP2QKVDabLuuZ1fZzxE5FaK5WJ4ChE8q	5
-33	keles	$2b$10$0nTY264vXz2kF5h5k9TYs.zoSNsoz/ILFoemsAiKNA49t6UcjCFwG	7
-30	Karanfil	$2b$10$Y9lKB1QZBkj3xQ5IAKbuQOyNJTAOb/qkHEh.lV964WVyV2OqtvwZK	5
+COPY public.users (userid, username, password, roleid, last_activity) FROM stdin;
+2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2	2025-12-16 22:34:12.688531+00
+4	ahmet.yilmaz	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+5	ayse.demir	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+6	mehmet.kaya	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+7	fatma.celik	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+8	mustafa.ozkan	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+11	elif.koc	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+12	burak.aydin	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+13	hande.ozdemir	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+14	can.arslan	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+15	merve.dogan	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+16	volkan.kilic	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+17	ozlem.aksoy	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+18	serkan.tasci	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+19	busra.yucel	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+20	tolga.avci	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+21	gamze.polat	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+22	sinan.coskun	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+23	pelin.korkmaz	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+24	onur.cetinkaya	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+25	esra.eroglu	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+26	mert.bulut	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+27	deniz.karaca	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+28	selin.yaman	Sifre123!	\N	2025-12-16 20:57:40.059715+00
+1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1	2025-12-16 22:27:24.324823+00
+3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3	2025-12-16 20:57:40.059715+00
+9	zeynep.sahin	Sifre123!	5	2025-12-16 20:57:40.059715+00
+10	emre.yildiz	Sifre123!	5	2025-12-16 20:57:40.059715+00
+32	batuhan_karanfil	$2b$10$L5J2RE1cwUSeuWWHHc.N.OP2QKVDabLuuZ1fZzxE5FaK5WJ4ChE8q	5	2025-12-16 20:57:40.059715+00
+33	keles	$2b$10$0nTY264vXz2kF5h5k9TYs.zoSNsoz/ILFoemsAiKNA49t6UcjCFwG	7	2025-12-16 20:57:40.059715+00
+30	Karanfil	$2b$10$Y9lKB1QZBkj3xQ5IAKbuQOyNJTAOb/qkHEh.lV964WVyV2OqtvwZK	5	2025-12-16 20:57:40.059715+00
 \.
 
 
@@ -1313,7 +1420,7 @@ SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 11, true);
 -- Name: meetings_meetingid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.meetings_meetingid_seq', 5, true);
+SELECT pg_catalog.setval('public.meetings_meetingid_seq', 11, true);
 
 
 --
@@ -1603,6 +1710,22 @@ ALTER TABLE ONLY public.meetings
 
 
 --
+-- Name: meetings meetings_meetingdepartmentid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.meetings
+    ADD CONSTRAINT meetings_meetingdepartmentid_fkey FOREIGN KEY (meetingdepartmentid) REFERENCES public.departments(departmentid);
+
+
+--
+-- Name: meetings meetings_relatedprojectid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.meetings
+    ADD CONSTRAINT meetings_relatedprojectid_fkey FOREIGN KEY (relatedprojectid) REFERENCES public.projects(projectid);
+
+
+--
 -- Name: positions positions_departmentid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1762,6 +1885,24 @@ GRANT USAGE ON SCHEMA public TO postgres;
 GRANT USAGE ON SCHEMA public TO anon;
 GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT USAGE ON SCHEMA public TO service_role;
+
+
+--
+-- Name: PROCEDURE update_user_email(IN p_user_id integer, IN p_new_email character varying); Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON PROCEDURE public.update_user_email(IN p_user_id integer, IN p_new_email character varying) TO anon;
+GRANT ALL ON PROCEDURE public.update_user_email(IN p_user_id integer, IN p_new_email character varying) TO authenticated;
+GRANT ALL ON PROCEDURE public.update_user_email(IN p_user_id integer, IN p_new_email character varying) TO service_role;
+
+
+--
+-- Name: PROCEDURE update_user_salary(IN p_user_id integer, IN p_increase_percent numeric); Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON PROCEDURE public.update_user_salary(IN p_user_id integer, IN p_increase_percent numeric) TO anon;
+GRANT ALL ON PROCEDURE public.update_user_salary(IN p_user_id integer, IN p_increase_percent numeric) TO authenticated;
+GRANT ALL ON PROCEDURE public.update_user_salary(IN p_user_id integer, IN p_increase_percent numeric) TO service_role;
 
 
 --
@@ -2017,6 +2158,15 @@ GRANT ALL ON TABLE public.roles TO service_role;
 
 
 --
+-- Name: TABLE role_permission_summary; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.role_permission_summary TO anon;
+GRANT ALL ON TABLE public.role_permission_summary TO authenticated;
+GRANT ALL ON TABLE public.role_permission_summary TO service_role;
+
+
+--
 -- Name: SEQUENCE roles_roleid_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -2143,5 +2293,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict uPc3y2u7rt80cGwfy3jFUO4CZLYiasphdjEimqTu9t2kRY2jzbGKbxyUv9Gxy2t
+\unrestrict yIJZKPKC8kqUQGrBVQh83KujBHyRvLWnfm7Beam1GqW75O0VjwnyJGewbQmyiiZ
 
