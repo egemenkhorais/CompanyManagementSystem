@@ -4,6 +4,7 @@ import { FaUser } from "react-icons/fa";
 import { IoLockClosed } from "react-icons/io5";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import logo from '../Assets/logoC2.png'; // ← LOGO IMPORT
 
 const LoginForm = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
@@ -16,42 +17,29 @@ const LoginForm = ({ onLoginSuccess }) => {
         setLoading(true);
 
         try {
-            // YENİ ENDPOINT (önce bunu dene)
             const response = await axios.post('http://127.0.0.1:5001/api/auth/login', {
                 username: username,
                 password: password
             });
 
-            console.log('Backend Response:', response.data); // Debug için
-
             if (response.data.success) {
-                // Token ve kullanıcı bilgilerini localStorage'a kaydet
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
 
                 alert("Giriş Başarılı! Hoşgeldin " + username);
 
-                // Kullanıcının rolünü al
                 const userRole = response.data.user?.role || 'user';
-
-                // App.jsx'e bildir ve yönlendir
                 onLoginSuccess(userRole);
                 navigate('/home');
             } else {
                 alert("Hata: " + response.data.message);
             }
-
         } catch (error) {
-            console.error('Login Error:', error); // Debug için
-
             if (error.response) {
-                // Backend'den hata mesajı geldi
                 alert("Hata: " + error.response.data.message);
             } else if (error.request) {
-                // İstek gitti ama cevap gelmedi
-                alert("Sunucuya bağlanılamadı! Backend çalışıyor mu kontrol et.");
+                alert("Sunucuya bağlanılamadı!");
             } else {
-                // Başka bir hata
                 alert("Bir hata oluştu: " + error.message);
             }
         } finally {
@@ -63,6 +51,11 @@ const LoginForm = ({ onLoginSuccess }) => {
         <div className='login-container'>
             <div className='wrapper'>
                 <form onSubmit={handleLogin}>
+                    {/* LOGO EKLENDI */}
+                    <div className="logo-container">
+                        <img src={logo} alt="Connectage Logo" className="login-logo" />
+                    </div>
+
                     <h1>CONNECTAGE</h1>
 
                     <div className="input-box">

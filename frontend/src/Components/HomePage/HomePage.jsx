@@ -11,6 +11,9 @@ import Tasks from './Projects/Tasks';
 import DepartmentManagement from './DepartmentManagement/DepartmentManagement';
 import RoleManagement from './RoleManagement/RoleManagement';
 import PermissionManagement from './PermissionManagement/PermissionManagement';
+import logo from '../assets/logoC2.png';
+
+
 
 import {
     Users, Settings, LogOut, LayoutDashboard, Briefcase, Calendar,
@@ -376,7 +379,11 @@ const HomePage = ({ onLogout }) => {
                         <button className="menu-toggle-btn" onClick={toggleSidebar}>
                             {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
-                        <div className="logo-area">Şirket Yönetim Sistemi</div>
+                        {/* LOGO VE YAZI EKLENDİ */}
+                        <div className="logo-area">
+                            <img src={logo} alt="Connectage" className="header-logo" />
+                            <span className="header-title">Connectage</span>
+                        </div>
                     </div>
                     <div className="user-info">
                         <span>Hoşgeldin, {user?.username || 'Kullanıcı'}</span>

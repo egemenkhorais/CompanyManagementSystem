@@ -73,13 +73,30 @@ body {
 }
 
 .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.header-title {
     font-size: 24px;
     font-weight: 700;
-    color: #fff;
-    letter-spacing: 1px;
-    background: linear-gradient(90deg, #9d4edd, #c77dff);
+    letter-spacing: 1.5px;
+
+    /* MOR LEDLİ GRADIENT */
+    background: linear-gradient(90deg, #9d4edd, #c77dff, #e0aaff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+
+    /* GLOW EFEKTİ (Opsiyonel) */
+    filter: drop-shadow(0 0 8px rgba(157, 78, 221, 0.6));
 }
 
 .user-info span {
@@ -171,7 +188,24 @@ body {
 .menu-btn.logout:hover {
     background: rgba(220, 53, 69, 0.2);
     color: #ff4757;
-    transform: translateX(0);
+    transform: translateX(0);.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+    .header-logo {
+        width: 36px;
+        height: 36px;
+        object-fit: contain;
+    }
+
+    .header-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 0.5px;
+    }
 }
 
 .submenu-btn {

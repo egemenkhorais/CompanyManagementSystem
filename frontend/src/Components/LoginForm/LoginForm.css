@@ -166,6 +166,21 @@
     text-decoration: underline;
 }
 
+/* Logo container */
+.logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-logo {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    /* Beyaz arka plan varsa: */
+    background: white;
+    border-radius: 50%;
+    padding: 10px;
+}
 /* RESPONSİVE TASARIM */
 @media (max-width: 480px) {
     .wrapper {
