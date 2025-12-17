@@ -5,9 +5,9 @@ const API_URL = 'http://127.0.0.1:5001/api';
 // Özelleştirilmiş axios oluştur
 const axiosInstance = axios.create({
     baseURL: API_URL,
-    timeout: 60000,  // 60 saniye timeout (dosya yükleme için yeterli süre)
+    timeout: 60000,  // 60 saniye timeout
     headers: {
-        'Content-Type': 'application/json' // JSON gönderiyoruz (multipart/form-data için axios otomatik ayarlar)
+        'Content-Type': 'application/json'
     }
 });
 
@@ -25,16 +25,19 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-// Response Interceptor - 401 hatalarını yakala
+// Response Interceptor - Hataları yakala ama logout YAPMA
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Token geçersiz veya süresi dolmuş
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login';
+            console.error('⚠️ Token geçersiz veya süresi dolmuş!');
+
         }
+
+        if (error.response?.status === 403) {
+            console.error('⚠️ Bu işlem için yetkiniz yok!');
+        }
+
         return Promise.reject(error);
     }
 );
