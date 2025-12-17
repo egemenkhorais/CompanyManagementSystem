@@ -95,17 +95,10 @@ const DashboardView = ({ user }) => {
 
                 <div className="profile-stats">
                     <div className="stat-item">
-                        <Mail size={18} />
-                        <div>
-                            <span className="stat-label">E-posta</span>
-                            <span className="stat-value">{user?.email || '-'}</span>
-                        </div>
-                    </div>
-                    <div className="stat-item">
                         <BriefcaseIcon size={18} />
                         <div>
                             <span className="stat-label">Pozisyon</span>
-                            <span className="stat-value">{userDetails?.positionname || '-'}</span>
+                            <span className="stat-value">{userDetails?.position_name || '-'}</span>
                         </div>
                     </div>
                     <div className="stat-item">
@@ -127,7 +120,7 @@ const DashboardView = ({ user }) => {
 
             {/* Toplantılar Bölümü */}
             <div className="content-card">
-                <h3 className="section-title">📅 Yaklaşan Departman Toplantıları</h3>
+                <h3 className="section-title"> Yaklaşan Departman Toplantıları </h3>
 
                 {loading ? (
                     <div className="loading-state">
