@@ -1,7 +1,6 @@
 const meetingService = require('../services/meetingService');
 const { pool } = require('../config/database');
 
-// --- YARDIMCI: Şirket ID Bulma ---
 const getCompanyIdFromUser = async (user) => {
     if (user && (user.roomid || user.companyId)) return user.roomid || user.companyId;
 
@@ -18,8 +17,6 @@ const getCompanyIdFromUser = async (user) => {
     return null;
 };
 
-// --- CONTROLLER METODLARI ---
-
 const getMeetings = async (req, res) => {
     try {
         const companyId = await getCompanyIdFromUser(req.user);
@@ -33,19 +30,100 @@ const getMeetings = async (req, res) => {
     }
 };
 
+const getMeetingsByDepartment = async (req, res) => {
+    const { departmentId } = req.params;
+
+    console.log('📥 Gelen departmentId:', departmentId);
+
+    if (!departmentId) {
+        return res.status(400).json({ success: false, message: "Departman ID gerekli." });
+    }
+
+    try {
+        console.log('🔍 SQL Query hazırlanıyor...');
+
+        const query = `
+            SELECT
+                meetingid,
+                meetingsubject,
+                description,
+                meetingstartdate,
+                meetingenddate,
+                status,
+                meetingdepartmentid
+            FROM meetings
+            WHERE meetingdepartmentid = $1
+            AND meetingstartdate IS NOT NULL
+            ORDER BY meetingstartdate ASC
+        `;
+
+        console.log('⚡ Query çalıştırılıyor...');
+        const result = await pool.query(query, [departmentId]);
+
+        console.log(`✅ ${result.rows.length} adet toplantı bulundu`);
+        console.log('📊 Ham veri:', result.rows);
+
+        const formattedData = result.rows.map(meeting => {
+            console.log('🔄 İşlenen toplantı:', meeting.meetingid);
+
+            const startDate = new Date(meeting.meetingstartdate);
+
+            let endTime = '-';
+            if (meeting.meetingenddate) {
+                const endDate = new Date(meeting.meetingenddate);
+                endTime = endDate.toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Europe/Istanbul'
+                });
+            }
+
+            return {
+                meetingid: meeting.meetingid,
+                title: meeting.meetingsubject || 'Başlıksız Toplantı',
+                description: meeting.description || '',
+                status: meeting.status === 'pending' ? 'passive' : 'active',
+                start_time: startDate.toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Europe/Istanbul'
+                }),
+                end_time: endTime,
+                date: startDate.toISOString(),
+                room_name: 'Toplantı Odası',
+                department_id: meeting.meetingdepartmentid
+            };
+        });
+
+        console.log('📤 Frontend\'e gönderilen data:', formattedData);
+
+        res.json({ success: true, data: formattedData });
+
+    } catch (error) {
+        console.error("❌❌❌ HATA DETAYI ❌❌❌");
+        console.error("Hata mesajı:", error.message);
+        console.error("Hata kodu:", error.code);
+        console.error("Stack trace:", error.stack);
+
+        res.status(500).json({
+            success: false,
+            message: "Toplantılar yüklenirken sunucu hatası oluştu.",
+            error: error.message,
+            code: error.code
+        });
+    }
+};
+
 const createMeeting = async (req, res) => {
     try {
-        // Frontend'den gelen tüm yeni alanları alıyoruz
         const {
             room_id, title, meetingstartdate, start_time, end_time,
             description, participants, department_id, project_id
         } = req.body;
 
-        // Tarih ve Saati PostgreSQL TIMESTAMP formatına çevir (YYYY-MM-DD HH:mm:00)
         const startDateTime = `${meetingstartdate} ${start_time}:00`;
         const endDateTime = `${meetingstartdate} ${end_time}:00`;
 
-        // Tüm veriyi bir obje olarak servise gönderiyoruz
         const newMeeting = await meetingService.createMeeting({
             roomId: room_id,
             title,
@@ -110,11 +188,10 @@ const deleteMeeting = async (req, res) => {
     }
 };
 
-// Yeni: Durum Güncelleme (Onayla/Reddet)
 const updateMeetingStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; // 'approved' veya 'cancelled'
+        const { status } = req.body;
 
         const result = await meetingService.updateStatus(id, status);
         res.json({ success: true, data: result });
@@ -126,8 +203,9 @@ const updateMeetingStatus = async (req, res) => {
 
 module.exports = {
     getMeetings,
+    getMeetingsByDepartment,
     createMeeting,
     updateMeeting,
     deleteMeeting,
-    updateMeetingStatus // Yeni export
+    updateMeetingStatus
 };

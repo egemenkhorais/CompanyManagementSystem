@@ -6,6 +6,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.patch('/:id/status', authMiddleware, meetingController.updateMeetingStatus);
 
 router.get('/', authMiddleware, meetingController.getMeetings);
+router.get('/department/:departmentId', meetingController.getMeetingsByDepartment);
 
 router.post('/', authMiddleware, meetingController.createMeeting);
 

@@ -4,11 +4,11 @@ const { pool } = require('../config/database');
 
 class AuthService {
     /**
-     * Kullanıcı girişi
+     * Kullanıcı girişi (Departman ID Sorununu Çözen Versiyon)
      */
     async login(username, password) {
         try {
-            // Kullanıcıyı username'e göre bul
+            // 1. ADIM: Kullanıcıyı bul
             const result = await pool.query(
                 'SELECT * FROM users WHERE username = $1',
                 [username]
@@ -17,30 +17,53 @@ class AuthService {
             const user = result.rows[0];
 
             if (!user) {
-                return {
-                    success: false,
-                    message: 'Kullanıcı adı veya şifre hatalı!'
-                };
+                return { success: false, message: 'Kullanıcı adı veya şifre hatalı!' };
             }
 
-            // Şifre kontrolü
             const isMatch = await bcrypt.compare(password, user.password);
-
             if (!isMatch) {
-                return {
-                    success: false,
-                    message: 'Şifre hatalı!'
-                };
+                return { success: false, message: 'Şifre hatalı!' };
             }
 
-            // Başarılı giriş
+            // 2. ADIM: Departman bilgisini çek (DÜZELTME: COALESCE ile null kontrolü)
+            let deptInfo = { id: null, name: 'Belirtilmemiş' };
+
+            try {
+                const deptQuery = `
+                    SELECT
+                        COALESCE(ud.departmentid, 0) as departmentid,
+                        COALESCE(d.departmentname, 'Belirtilmemiş') as departmentname
+                    FROM userdetails ud
+                    LEFT JOIN departments d ON ud.departmentid = d.departmentid
+                    WHERE ud.userid = $1
+                    LIMIT 1
+                `;
+                const deptResult = await pool.query(deptQuery, [user.userid]);
+
+                if (deptResult.rows.length > 0) {
+                    const row = deptResult.rows[0];
+                    deptInfo = {
+                        id: row.departmentid || null,
+                        name: row.departmentname || 'Belirtilmemiş'
+                    };
+                }
+
+                console.log('✅ Departman bilgisi çekildi:', deptInfo);
+
+            } catch (err) {
+                console.error("⚠️ Departman çekme hatası:", err.message);
+            }
+
+            // 3. ADIM: Token oluştur
             const token = jwtUtils.generateToken({
                 id: user.userid,
                 username: user.username,
                 email: user.email,
-                roleid: user.roleid
+                roleid: user.roleid,
+                departmentid: deptInfo.id // TOKEN'a da ekliyoruz
             });
 
+            // 4. ADIM: Response döndür
             return {
                 success: true,
                 message: 'Giriş başarılı',
@@ -49,19 +72,20 @@ class AuthService {
                     id: user.userid,
                     username: user.username,
                     email: user.email,
-                    roleid: user.roleid
+                    roleid: user.roleid,
+                    fullname: user.fullname || user.username,
+                    // ⚠️ KRITIK: Bu alanlar frontend'de kullanılıyor
+                    departmentid: deptInfo.id,
+                    departmentname: deptInfo.name
                 }
             };
 
         } catch (error) {
-            console.error('AuthService Login Error:', error);
+            console.error('❌ AuthService Login Error:', error);
             throw error;
         }
-    } 
+    }
 
-    /**
-     * Kullanıcının yetkilerini getir
-     */
     async getUserPermissions(userId) {
         try {
             const result = await pool.query(`
@@ -72,7 +96,6 @@ class AuthService {
                 WHERE u.userid = $1
                 ORDER BY p.permission_type, p.permission_code
             `, [userId]);
-
             return result.rows;
         } catch (error) {
             console.error('AuthService GetPermissions Error:', error);
@@ -80,48 +103,16 @@ class AuthService {
         }
     }
 
-    /**
-     * Kullanıcı kaydı
-     */
     async register(userData) {
         try {
-            const { username, email, password, fullName, phone, department } = userData;
-
-            // Aynı username var mı kontrol et
-            const userCheck = await pool.query(
-                'SELECT username FROM users WHERE username = $1',
-                [username]
-            );
-
-            if (userCheck.rows.length > 0) {
-                return {
-                    success: false,
-                    message: 'Bu kullanıcı adı zaten kullanılıyor!'
-                };
-            }
-
-            // Şifreyi hashle
+            const { username, password } = userData;
             const hashedPassword = await bcrypt.hash(password, 10);
-
-            // Yeni kullanıcı ekle (varsayılan rol: 3 - backend_junior)
             const insertResult = await pool.query(
                 'INSERT INTO users (username, password, roleid) VALUES ($1, $2, $3) RETURNING userid, username',
                 [username, hashedPassword, 3]
             );
-
-            const newUser = insertResult.rows[0];
-
-            return {
-                success: true,
-                message: 'Kayıt başarılı!',
-                user: {
-                    id: newUser.userid,
-                    username: newUser.username
-                }
-            };
-
+            return { success: true, message: 'Kayıt başarılı!', user: insertResult.rows[0] };
         } catch (error) {
-            console.error('AuthService Register Error:', error);
             throw error;
         }
     }

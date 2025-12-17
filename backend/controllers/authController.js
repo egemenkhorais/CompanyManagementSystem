@@ -1,10 +1,11 @@
 const authService = require('../services/AuthService');
+const { pool } = require('../config/database');
 
 class AuthController {
     /**
      * Login İşlemi
      */
-    async login(req, res) { 
+    async login(req, res) {
         try {
             const { username, password } = req.body;
 
@@ -50,6 +51,53 @@ class AuthController {
             res.status(500).json({
                 success: false,
                 message: 'Yetkiler alınamadı.'
+            });
+        }
+    }
+
+    /**
+     * Kullanıcı detaylarını getir (Dashboard için)
+     */
+    async getUserDetails(req, res) {
+        try {
+            const userId = req.user.id; // Token'dan al
+
+            const query = `
+                SELECT
+                ud.userdetailsid,
+                ud.userid,
+                ud.usersalary,
+                ud.yearsworked,
+                pn.position_name,
+                pn.level,
+                d.departmentname
+                FROM userdetails ud
+                LEFT JOIN positions p ON ud.positionnames_id = p.id
+                LEFT JOIN positionnames pn ON p.position_name_id = pn.id
+                LEFT JOIN departments d ON p.departmentid = d.id
+                WHERE ud.userid = $1
+            `;
+
+            const result = await pool.query(query, [userId]);
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Kullanıcı detayları bulunamadı'
+                });
+            }
+
+            res.json({
+                success: true,
+                data: result.rows[0]
+            });
+
+        } catch (error) {
+            console.error('AuthController getUserDetails Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Kullanıcı detayları yüklenirken hata oluştu',
+                error: error.message
             });
         }
     }
