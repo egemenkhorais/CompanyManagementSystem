@@ -231,15 +231,13 @@ class RoleManagementService {
     /**
      * Rolün permission'larını güncelle
      */
-    // roleManagementService.js - updateRolePermissions fonksiyonunu BU ile değiştir:
-
     async updateRolePermissions(roleId, permissionIds) {
         try {
             // Önce mevcut permissions'ları al
             const current = await pool.query(`
                 SELECT permission_id
                 FROM role_permissions
-                WHERE role_id = $1
+                WHERE roleid = $1
             `, [roleId]);
 
             const currentIds = current.rows.map(r => r.permission_id);
@@ -254,18 +252,16 @@ class RoleManagementService {
             // Yeni permissions ekle
             for (const permId of toAdd) {
                 await pool.query(`
-                    INSERT INTO role_permissions (role_id, permission_id)
-                    VALUES ($1, $2) ON CONFLICT (role_id, permission_id) DO NOTHING
+                    INSERT INTO role_permissions (roleid, permission_id)
+                    VALUES ($1, $2) ON CONFLICT (roleid, permission_id) DO NOTHING
                 `, [roleId, permId]);
             }
 
-            // Sadece SEÇILEN permissions'ları kaldır - child'ları DOKUNMA!
+            // Sadece SEÇILEN permissions'ları kaldır
             for (const permId of toRemove) {
                 await pool.query(`
-                    DELETE
-                    FROM role_permissions
-                    WHERE role_id = $1
-                      AND permission_id = $2
+                    DELETE FROM role_permissions
+                    WHERE roleid = $1 AND permission_id = $2
                 `, [roleId, permId]);
             }
 
@@ -279,8 +275,6 @@ class RoleManagementService {
         }
     }
 
-    // roleManagementService.js içine eklenecek fonksiyonlar:
-
     /**
      * Yeni permission oluştur
      */
@@ -289,10 +283,10 @@ class RoleManagementService {
             const { permission_code, permission_type, description, parent_code } = permissionData;
 
             const result = await pool.query(`
-            INSERT INTO permissions (permission_code, permission_type, description, parent_code)
-            VALUES ($1, $2, $3, $4)
-            RETURNING *
-        `, [permission_code, permission_type, description, parent_code || null]);
+                INSERT INTO permissions (permission_code, permission_type, description, parent_code)
+                VALUES ($1, $2, $3, $4)
+                    RETURNING *
+            `, [permission_code, permission_type, description, parent_code || null]);
 
             return { success: true, data: result.rows[0] };
         } catch (error) {
@@ -309,14 +303,14 @@ class RoleManagementService {
             const { permission_code, permission_type, description, parent_code } = permissionData;
 
             const result = await pool.query(`
-            UPDATE permissions 
-            SET permission_code = $1,
-                permission_type = $2,
-                description = $3,
-                parent_code = $4
-            WHERE id = $5
-            RETURNING *
-        `, [permission_code, permission_type, description, parent_code || null, permissionId]);
+                UPDATE permissions
+                SET permission_code = $1,
+                    permission_type = $2,
+                    description = $3,
+                    parent_code = $4
+                WHERE id = $5
+                    RETURNING *
+            `, [permission_code, permission_type, description, parent_code || null, permissionId]);
 
             if (result.rows.length === 0) {
                 throw new Error('Permission not found');
@@ -336,10 +330,10 @@ class RoleManagementService {
         try {
             // Önce bu permission'ın child'ı var mı kontrol et
             const childCheck = await pool.query(`
-            SELECT COUNT(*) as count 
-            FROM permissions 
-            WHERE parent_code = (SELECT permission_code FROM permissions WHERE id = $1)
-        `, [permissionId]);
+                SELECT COUNT(*) as count
+                FROM permissions
+                WHERE parent_code = (SELECT permission_code FROM permissions WHERE id = $1)
+            `, [permissionId]);
 
             if (parseInt(childCheck.rows[0].count) > 0) {
                 throw new Error('Bu yetkinin alt yetkileri var. Önce onları silmelisiniz.');
@@ -347,13 +341,13 @@ class RoleManagementService {
 
             // Role_permissions tablosundan sil
             await pool.query(`
-            DELETE FROM role_permissions WHERE permission_id = $1
-        `, [permissionId]);
+                DELETE FROM role_permissions WHERE permission_id = $1
+            `, [permissionId]);
 
             // Permission'ı sil
             const result = await pool.query(`
-            DELETE FROM permissions WHERE id = $1 RETURNING *
-        `, [permissionId]);
+                DELETE FROM permissions WHERE id = $1 RETURNING *
+            `, [permissionId]);
 
             if (result.rows.length === 0) {
                 throw new Error('Permission not found');
@@ -365,7 +359,6 @@ class RoleManagementService {
             throw error;
         }
     }
-
 }
 
 module.exports = new RoleManagementService();
