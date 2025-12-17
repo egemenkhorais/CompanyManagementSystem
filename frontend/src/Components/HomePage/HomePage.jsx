@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import './HomePage.css';
 import CreateJobPost from './JobPosts/CreateJobPost';
 import CVAnalyze from './CVAnalyze/CVAnalyze';
-// RoomView SİLİNDİ, sadece bu kaldı:
 import RoomManagement from './Rooms/RoomManagement';
 import MeetingManagement from './Meetings/MeetingManagement';
 import MeetingView from './Meetings/MeetingView';
@@ -32,7 +31,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
-
 
 // ==================== VIEW COMPONENTS ====================
 
@@ -95,7 +93,7 @@ const ICON_MAP = {
     'admin:management': Shield,
     'admin:users': Users,
     'admin:roles': Shield,
-    'admin:permissions': Shield, // Permission için ikon eklendi
+    'admin:permissions': Shield,
     'admin:departments': Building,
     'hr:operations': Briefcase,
     'hr:job_post': FileText,
@@ -117,7 +115,11 @@ const ICON_MAP = {
 // ==================== MAIN COMPONENT ====================
 
 const HomePage = ({ onLogout }) => {
-    const [activeTab, setActiveTab] = useState('dashboard');
+    // localStorage'dan activeTab'i oku
+    const [activeTab, setActiveTab] = useState(() => {
+        return localStorage.getItem('activeTab') || 'dashboard';
+    });
+
     const [expandedGroups, setExpandedGroups] = useState({});
     const [permissions, setPermissions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -150,10 +152,16 @@ const HomePage = ({ onLogout }) => {
         fetchData();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    // activeTab değiştiğinde localStorage'a kaydet
+    useEffect(() => {
+        localStorage.setItem('activeTab', activeTab);
+    }, [activeTab]);
+
     // Çıkış
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('activeTab'); // activeTab'i de temizle
         if (onLogout) onLogout();
         navigate('/login');
     };
@@ -207,9 +215,7 @@ const HomePage = ({ onLogout }) => {
             case 'hr:applications':
                 return <ApplicationsView />;
 
-            // --- Oda Yönetimi (TEK BİLEŞEN) ---
-            // İster Görüntüle ister Yönetim olsun, aynı bileşene gider.
-            // Bileşen kendi içinde yetkiyi (userPermissions) kontrol edip buton gösterir/gizler.
+            // --- Oda Yönetimi ---
             case 'rooms':
             case 'rooms:view':
             case 'rooms:management':
