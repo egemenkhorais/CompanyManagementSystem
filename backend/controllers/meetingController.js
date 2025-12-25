@@ -121,8 +121,8 @@ const createMeeting = async (req, res) => {
             description, participants, department_id, project_id
         } = req.body;
 
-        const startDateTime = `${meetingstartdate} ${start_time}:00`;
-        const endDateTime = `${meetingstartdate} ${end_time}:00`;
+        const startDateTime = `${meetingstartdate}T${start_time}:00+03:00`;
+        const endDateTime = `${meetingstartdate}T${end_time}:00+03:00`;
 
         const newMeeting = await meetingService.createMeeting({
             roomId: room_id,
@@ -153,8 +153,8 @@ const updateMeeting = async (req, res) => {
             description, participants, department_id, project_id
         } = req.body;
 
-        const startDateTime = `${meetingstartdate} ${start_time}:00`;
-        const endDateTime = `${meetingstartdate} ${end_time}:00`;
+        const startDateTime = `${meetingstartdate}T${start_time}:00+03:00`;
+        const endDateTime = `${meetingstartdate}T${end_time}:00+03:00`;
 
         const updatedMeeting = await meetingService.updateMeeting(id, {
             roomId: room_id,

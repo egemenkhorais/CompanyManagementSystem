@@ -1,6 +1,6 @@
 const { pool } = require('../config/database');
 
-// Tüm toplantıları getir (Detaylı)
+
 const getAllMeetings = async (companyId) => {
     const query = `
         SELECT
@@ -32,7 +32,6 @@ const createMeeting = async (data) => {
         description, participants, departmentId, projectId
     } = data;
 
-    // 1. ÇAKIŞMA KONTROLÜ
     // Aynı odada, zaman aralığı çakışan başka toplantı var mı?
     // (İptal edilenler hariç)
     const conflictQuery = `
