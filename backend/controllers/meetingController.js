@@ -82,7 +82,7 @@ const getMeetingsByDepartment = async (req, res) => {
                 meetingid: meeting.meetingid,
                 title: meeting.meetingsubject || 'Başlıksız Toplantı',
                 description: meeting.description || '',
-                status: meeting.status === 'pending' ? 'passive' : 'active',
+                status: meeting.status === 'pending' ? 'passive' :meeting.status === 'cancelled' ? 'cancelled' : 'active',
                 start_time: startDate.toLocaleTimeString('tr-TR', {
                     hour: '2-digit',
                     minute: '2-digit',

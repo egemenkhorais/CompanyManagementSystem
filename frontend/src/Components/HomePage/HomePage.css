@@ -396,7 +396,11 @@ body {
     color: #a0a0a0;
     border: 1px solid rgba(128, 128, 128, 0.3);
 }
-
+.status-badge.cancelled {
+    background: rgba(255, 71, 87, 0.2); /* Kırmızımsı arka plan */
+    color: #ff4757;                     /* Kırmızı yazı */
+    border: 1px solid rgba(255, 71, 87, 0.3);
+}
 .meeting-details {
     display: flex;
     flex-direction: column;

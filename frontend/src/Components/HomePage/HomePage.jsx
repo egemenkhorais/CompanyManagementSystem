@@ -139,7 +139,11 @@ const DashboardView = ({ user }) => {
                                 <div className="meeting-header">
                                     <span className="meeting-title">{meeting.title}</span>
                                     <span className={`status-badge ${meeting.status}`}>
-                                        {meeting.status === 'active' ? 'Aktif' : 'Pasif'}
+                                        {meeting.status === 'active' || meeting.status === 'approved'
+                                            ? 'Aktif'
+                                            : meeting.status === 'cancelled'
+                                                ? 'İptal Edildi'
+                                                : 'Pasif'}
                                     </span>
                                 </div>
                                 <div className="meeting-details">
