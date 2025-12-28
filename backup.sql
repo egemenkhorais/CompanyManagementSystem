@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict Yc2JpDbAiUD95gwKMVSsRLg2ftzPipnpwaX9zsFdgInrJ3e7zxeLXQJJaVmx8Lx
+\restrict awgf6JskYaJMfY1nrERYqnhFlv9Il6EYqe18xBHpGL7CGkbsfVpqpzJGoVz9ktD
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -1460,7 +1460,7 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 14	14	Can Arslan	1	1	27177.00	2	14
 34	35	Mehmed Ekinci	3	1	55000.00	18	8
 31	32	Muhammet Batuhan Karanfil	4	1	8421.00	6	3
-3	3	Mehmet Demir	4	1	30000.00	2	1
+3	3	Mehmet Demir	4	1	30500.00	2	1
 12	12	Burak Aydın	5	1	58287.00	10	13
 1	1	Ahmet Yılmaz	7	1	65465.00	3	19
 10	10	Emre Yıldız	4	1	28456.00	7	3
@@ -1492,14 +1492,13 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 
 COPY public.users (userid, username, password, roleid, last_activity) FROM stdin;
 5	ayse.demir	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	21	2025-12-16 20:57:40.059715+00
-3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3	2025-12-17 18:39:58.861985+00
 4	ahmet.dalavere	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	23	2025-12-16 20:57:40.059715+00
 10	emre.yildiz	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	5	2025-12-17 16:26:35.98959+00
 36	samet_habali	$2b$10$c7tOlOplo4noIcdveLD3h.xNrpFLeWcW4ugIZnneJHfoxBO85M0im	15	2025-12-24 09:10:39.899598+00
 32	batuhan_karanfil	$2b$10$L5J2RE1cwUSeuWWHHc.N.OP2QKVDabLuuZ1fZzxE5FaK5WJ4ChE8q	5	2025-12-25 08:34:58.0998+00
 33	keles_egemen	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	10	2025-12-18 10:47:02.284572+00
-37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2025-12-25 07:59:34.746799+00
 1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1	2025-12-25 08:31:07.810396+00
+3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3	2025-12-17 18:39:58.861985+00
 8	mustafa.ozkan	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	4	2025-12-17 16:00:46.349452+00
 26	john_duran	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	17	2025-12-25 07:10:46.07658+00
 25	esra.eroglu	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	19	2025-12-16 20:57:40.059715+00
@@ -1519,6 +1518,7 @@ COPY public.users (userid, username, password, roleid, last_activity) FROM stdin
 2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2	2025-12-24 20:45:22.670419+00
 13	hande.ozdemir	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	2	2025-12-16 20:57:40.059715+00
 30	Karanfil	$2b$10$Y9lKB1QZBkj3xQ5IAKbuQOyNJTAOb/qkHEh.lV964WVyV2OqtvwZK	3	2025-12-18 12:45:20.550113+00
+37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2025-12-27 20:57:47.714621+00
 27	deniz.karaca	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	8	2025-12-16 20:57:40.059715+00
 12	burak.aydin	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	22	2025-12-16 20:57:40.059715+00
 11	elif.koc	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	2	2025-12-16 20:57:40.059715+00
@@ -2447,5 +2447,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict Yc2JpDbAiUD95gwKMVSsRLg2ftzPipnpwaX9zsFdgInrJ3e7zxeLXQJJaVmx8Lx
+\unrestrict awgf6JskYaJMfY1nrERYqnhFlv9Il6EYqe18xBHpGL7CGkbsfVpqpzJGoVz9ktD
 
