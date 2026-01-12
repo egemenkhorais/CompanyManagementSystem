@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict S5PMPvWlAehA2Q90Cbz3Qk8GCimwjF5a4sHseL2OVolch7wMufJuwUqBNZQkF6D
+\restrict DE5E6sLjG6EzyCF9JHRyl7Dyag4rYx3wozHjdaBb6fUfM6WeTfRCpNV5WlHtlEh
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -998,6 +998,7 @@ COPY public.meetings (meetingid, companyroomid, meetingstartdate, meetingsubject
 18	5	2025-12-25 10:30:00+00	Veritabanı Optimizasyonu 	f	2025-12-25 12:00:00+00	4	5	Database normalizasyonu ve data implementasyonları hakkında konuşulacak.	Batuhan Karanfil (john duran) ve backend departmanı	approved
 19	4	2025-12-26 08:30:00+00	Intern Sorumluları	f	2025-12-26 09:00:00+00	4	\N	Seniorlarımızın altında çalışacak internler seçilecek.	Backend Departmanında intern alacak Senior Dev'ler	cancelled
 25	3	2025-12-25 12:30:00+00	deneme	f	2025-12-25 13:30:00+00	\N	\N	\N	\N	pending
+26	2	2026-01-11 09:00:00+00	asd	f	2026-01-11 10:00:00+00	\N	\N	\N	\N	pending
 \.
 
 
@@ -1463,10 +1464,11 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 34	35	Mehmed Ekinci	3	1	55000.00	18	8
 31	32	Muhammet Batuhan Karanfil	4	1	8421.00	6	3
 3	3	Mehmet Demir	4	1	30500.00	2	1
+8	8	Mustafa Özkan	4	1	75032.00	7	2
+2	2	Ayşe Kaya	2	1	39500.00	5	24
 12	12	Burak Aydın	5	1	58287.00	10	13
 1	1	Ahmet Yılmaz	7	1	65465.00	3	19
 10	10	Emre Yıldız	4	1	28456.00	7	3
-2	2	Ayşe Kaya	2	1	38500.00	5	24
 36	37	Burak Tuzcu	7	1	100000.00	6	25
 35	36	Samet Habalı	3	1	45000.00	4	7
 9	9	Zeynep Şahin	4	1	55571.00	2	2
@@ -1484,7 +1486,6 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 21	22	Sinan Coşkun	3	1	77226.00	1	7
 23	24	Onur Çetinkaya	3	1	72962.00	2	6
 11	11	Elif Koç	2	1	70403.00	8	24
-8	8	Mustafa Özkan	4	1	73032.00	7	2
 \.
 
 
@@ -1497,10 +1498,11 @@ COPY public.users (userid, username, password, roleid, last_activity) FROM stdin
 4	ahmet.dalavere	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	23	2025-12-16 20:57:40.059715+00
 10	emre.yildiz	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	5	2025-12-17 16:26:35.98959+00
 36	samet_habali	$2b$10$c7tOlOplo4noIcdveLD3h.xNrpFLeWcW4ugIZnneJHfoxBO85M0im	15	2025-12-24 09:10:39.899598+00
-33	keles_egemen	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	10	2025-12-18 10:47:02.284572+00
-1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1	2025-12-25 08:31:07.810396+00
+1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1	2026-01-11 14:18:24.219541+00
+37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2026-01-11 13:27:21.449315+00
+33	keles_egemen	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	10	2026-01-11 14:19:07.792951+00
+2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2	2025-12-30 19:43:32.75066+00
 3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3	2025-12-17 18:39:58.861985+00
-8	mustafa.ozkan	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	4	2025-12-17 16:00:46.349452+00
 26	john_duran	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	17	2025-12-25 07:10:46.07658+00
 32	batuhan_karanfil	$2b$10$L5J2RE1cwUSeuWWHHc.N.OP2QKVDabLuuZ1fZzxE5FaK5WJ4ChE8q	5	2025-12-30 19:45:05.33631+00
 25	esra.eroglu	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	19	2025-12-16 20:57:40.059715+00
@@ -1517,10 +1519,9 @@ COPY public.users (userid, username, password, roleid, last_activity) FROM stdin
 15	merve.dogan	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	9	2025-12-16 20:57:40.059715+00
 14	can.arslan	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	21	2025-12-16 20:57:40.059715+00
 28	selin.yaman	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	7	2025-12-16 20:57:40.059715+00
-2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2	2025-12-30 19:43:32.75066+00
 13	hande.ozdemir	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	2	2025-12-16 20:57:40.059715+00
 30	Karanfil	$2b$10$Y9lKB1QZBkj3xQ5IAKbuQOyNJTAOb/qkHEh.lV964WVyV2OqtvwZK	3	2025-12-18 12:45:20.550113+00
-37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2025-12-27 20:57:47.714621+00
+8	mustafa.ozkan	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	4	2025-12-17 16:00:46.349452+00
 27	deniz.karaca	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	8	2025-12-16 20:57:40.059715+00
 12	burak.aydin	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	22	2025-12-16 20:57:40.059715+00
 11	elif.koc	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	2	2025-12-16 20:57:40.059715+00
@@ -1576,7 +1577,7 @@ SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 16, true);
 -- Name: meetings_meetingid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.meetings_meetingid_seq', 25, true);
+SELECT pg_catalog.setval('public.meetings_meetingid_seq', 26, true);
 
 
 --
@@ -2449,5 +2450,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict S5PMPvWlAehA2Q90Cbz3Qk8GCimwjF5a4sHseL2OVolch7wMufJuwUqBNZQkF6D
+\unrestrict DE5E6sLjG6EzyCF9JHRyl7Dyag4rYx3wozHjdaBb6fUfM6WeTfRCpNV5WlHtlEh
 
