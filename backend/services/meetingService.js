@@ -1,5 +1,17 @@
 const { pool } = require('../config/database');
 
+// Yardımcı Fonksiyon: Kullanıcı ID'sinden Company ID bulma
+const getUserCompanyId = async (userId) => {
+    try {
+        const query = 'SELECT companyid FROM userdetails WHERE userid = $1';
+        const result = await pool.query(query, [userId]);
+        if (result.rows.length > 0) return result.rows[0].companyid;
+        return null;
+    } catch (error) {
+        console.error('Service - Şirket bilgisi hatası:', error);
+        throw error;
+    }
+};
 
 const getAllMeetings = async (companyId) => {
     const query = `
@@ -11,13 +23,13 @@ const getAllMeetings = async (companyId) => {
             m.description,
             m.participants,
             m.status,
-            m.meetingdepartmentid,  -- Edit modalı için
-            m.relatedprojectid,     -- Edit modalı için 
-            r.companyroomname,      -- Tabloda göstermek icin
+            m.meetingdepartmentid,
+            m.relatedprojectid,
+            r.companyroomname,
             r.companyroomid,
             r.roomid as company_id
         FROM meetings m
-                 JOIN companyrooms r ON m.companyroomid = r.companyroomid
+        JOIN companyrooms r ON m.companyroomid = r.companyroomid
         WHERE r.roomid = $1
         ORDER BY m.meetingstartdate DESC
     `;
@@ -25,15 +37,73 @@ const getAllMeetings = async (companyId) => {
     return result.rows;
 };
 
-// Yeni toplantı oluştur
+// Departmana göre toplantıları getir ve formatla
+const getMeetingsByDepartment = async (departmentId) => {
+    const query = `
+        SELECT
+            meetingid,
+            meetingsubject,
+            description,
+            meetingstartdate,
+            meetingenddate,
+            status,
+            meetingdepartmentid
+        FROM meetings
+        WHERE meetingdepartmentid = $1
+        AND meetingstartdate IS NOT NULL
+        ORDER BY meetingstartdate ASC
+    `;
+
+    const result = await pool.query(query, [departmentId]);
+
+    // Veri formatlama işlemleri Service katmanında yapılır
+    return result.rows.map(meeting => {
+        const startDate = new Date(meeting.meetingstartdate);
+        let endTime = '-';
+
+        if (meeting.meetingenddate) {
+            const endDate = new Date(meeting.meetingenddate);
+            endTime = endDate.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Europe/Istanbul'
+            });
+        }
+
+        // Status mapping
+        let statusMap = 'active';
+        if (meeting.status === 'pending') statusMap = 'passive';
+        if (meeting.status === 'cancelled') statusMap = 'cancelled';
+
+        return {
+            meetingid: meeting.meetingid,
+            title: meeting.meetingsubject || 'Başlıksız Toplantı',
+            description: meeting.description || '',
+            status: statusMap,
+            start_time: startDate.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Europe/Istanbul'
+            }),
+            end_time: endTime,
+            date: startDate.toISOString(),
+            room_name: 'Toplantı Odası',
+            department_id: meeting.meetingdepartmentid
+        };
+    });
+};
+
 const createMeeting = async (data) => {
     const {
-        roomId, title, startDateTime, endDateTime,
+        roomId, title, meetingstartdate, start_time, end_time,
         description, participants, departmentId, projectId
     } = data;
 
-    // Aynı odada, zaman aralığı çakışan başka toplantı var mı?
-    // (İptal edilenler hariç)
+    // Tarih birleştirme işlemi Service'te yapılır
+    const startDateTime = `${meetingstartdate}T${start_time}:00+03:00`;
+    const endDateTime = `${meetingstartdate}T${end_time}:00+03:00`;
+
+    // Çakışma Kontrolü
     const conflictQuery = `
         SELECT * FROM meetings
         WHERE companyroomid = $1
@@ -47,7 +117,6 @@ const createMeeting = async (data) => {
         throw new Error('CONFLICT_ERROR');
     }
 
-    // 2. KAYIT EKLEME
     const insertQuery = `
         INSERT INTO meetings (
             companyroomid, meetingsubject, meetingstartdate, meetingenddate, 
@@ -68,22 +137,22 @@ const createMeeting = async (data) => {
         departmentId || null,
         projectId || null,
         false,
-        'pending' // Varsayılan durum
+        'pending'
     ];
 
     const result = await pool.query(insertQuery, values);
     return result.rows[0];
 };
 
-// Toplantı güncelle
 const updateMeeting = async (id, data) => {
     const {
-        roomId, title, startDateTime, endDateTime,
+        roomId, title, meetingstartdate, start_time, end_time,
         description, participants, departmentId, projectId
     } = data;
 
-    // Not: Güncelleme yaparken de çakışma kontrolü yapılabilir ancak
-    // kendi ID'sini hariç tutmak gerekir. Basitlik adına şu an atlıyoruz.
+    // Tarih birleştirme
+    const startDateTime = `${meetingstartdate}T${start_time}:00+03:00`;
+    const endDateTime = `${meetingstartdate}T${end_time}:00+03:00`;
 
     const query = `
         UPDATE meetings
@@ -111,14 +180,12 @@ const updateMeeting = async (id, data) => {
     return result.rows[0];
 };
 
-// Toplantı sil
 const deleteMeeting = async (id) => {
     const query = 'DELETE FROM meetings WHERE meetingid = $1';
     await pool.query(query, [id]);
     return true;
 };
 
-// Durum Güncelle (Onayla/İptal Et)
 const updateStatus = async (id, status) => {
     const query = 'UPDATE meetings SET status = $1 WHERE meetingid = $2 RETURNING *';
     const result = await pool.query(query, [status, id]);
@@ -127,8 +194,10 @@ const updateStatus = async (id, status) => {
 
 module.exports = {
     getAllMeetings,
+    getMeetingsByDepartment,
     createMeeting,
     updateMeeting,
     deleteMeeting,
-    updateStatus
+    updateStatus,
+    getUserCompanyId
 };

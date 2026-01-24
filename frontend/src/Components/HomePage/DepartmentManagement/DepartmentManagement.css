@@ -1,24 +1,33 @@
-/* CONTAINER */
+/* --- GENEL AYARLAR (Layout Fix) --- */
 .dept-management {
-    padding: 20px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #151521;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+    overflow: hidden;
 }
 
-/* MAIN LAYOUT */
 .dept-content {
     display: flex;
+    flex: 1;
     gap: 20px;
-    height: calc(100vh - 150px);
+    padding: 20px;
+    overflow: hidden;
 }
 
-/* SIDEBAR - DEPARTMANLAR */
+/* --- SOL PANEL (Departman Listesi) --- */
 .dept-sidebar {
     width: 350px;
     background: linear-gradient(135deg, rgba(30, 30, 45, 0.9), rgba(45, 27, 78, 0.9));
     border: 1px solid rgba(157, 78, 221, 0.3);
     border-radius: 15px;
-    padding: 20px;
     display: flex;
     flex-direction: column;
+    padding: 20px;
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-header {
@@ -31,49 +40,47 @@
 }
 
 .sidebar-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #9d4edd;
     margin: 0;
-}
-
-.add-dept-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: rgba(157, 78, 221, 0.2);
-    border: 1px solid rgba(157, 78, 221, 0.4);
-    border-radius: 8px;
+    font-size: 1.1rem;
     color: #9d4edd;
-    cursor: pointer;
-    font-size: 14px;
     font-weight: 600;
-    transition: all 0.3s ease;
 }
 
-.add-dept-btn:hover {
-    background: rgba(157, 78, 221, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
-}
-
+/* --- LİSTE ELEMANLARI --- */
 .dept-list {
     flex: 1;
     overflow-y: auto;
+    padding-right: 5px;
+}
+
+.dept-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dept-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.dept-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #9d4edd, #7b2cbf);
+    border-radius: 10px;
 }
 
 .dept-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 14px;
     margin-bottom: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid transparent;
     border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: 1px solid transparent;
+    position: relative;
 }
 
 .dept-item:hover {
@@ -87,58 +94,40 @@
     box-shadow: 0 4px 15px rgba(157, 78, 221, 0.3);
 }
 
-.dept-info {
-    flex: 1;
-}
-
 .dept-name {
+    font-weight: 500;
     font-size: 15px;
-    font-weight: 600;
-    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
 }
 
-.edit-dept-icon,
-.delete-dept-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    cursor: pointer;
+.dept-actions {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    background: transparent;
-    border: none;
+    gap: 8px;
     flex-shrink: 0;
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.edit-dept-icon {
-    color: #9d4edd;
+.dept-item:hover .dept-actions {
+    opacity: 1;
 }
 
-.edit-dept-icon:hover {
-    background: rgba(157, 78, 221, 0.3);
-    transform: scale(1.15);
-}
-
-.delete-dept-icon {
-    color: #ff6b6b;
-}
-
-.delete-dept-icon:hover {
-    background: rgba(220, 53, 69, 0.3);
-    transform: scale(1.15);
-}
-
-/* DETAILS - POZİSYONLAR */
+/* --- SAĞ PANEL (Pozisyonlar) --- */
 .pos-details {
     flex: 1;
     background: linear-gradient(135deg, rgba(30, 30, 45, 0.9), rgba(45, 27, 78, 0.9));
     border: 1px solid rgba(157, 78, 221, 0.3);
     border-radius: 15px;
-    padding: 20px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
 
 .pos-header {
@@ -146,153 +135,161 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(157, 78, 221, 0.3);
 }
 
 .pos-header h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff;
     margin: 0;
+    font-size: 1.3rem;
+    color: #fff;
 }
 
-.add-pos-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #9d4edd, #7b2cbf);
+/* --- BUTONLAR --- */
+.dept-management button {
+    cursor: pointer;
     border: none;
+    background: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+/* Ana Ekleme Butonları */
+.add-dept-btn, .add-pos-btn {
+    background: linear-gradient(135deg, #9d4edd, #7b2cbf);
+    color: white;
+    padding: 10px 20px;
     border-radius: 10px;
-    color: #fff;
     font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(157, 78, 221, 0.3);
 }
 
-.add-pos-btn:hover {
+.add-dept-btn:hover, .add-pos-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(157, 78, 221, 0.4);
 }
 
-.pos-table-container {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.pos-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.pos-table thead {
-    background: rgba(157, 78, 221, 0.2);
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.pos-table th {
-    padding: 12px 16px;
-    text-align: left;
-    color: #9d4edd;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.pos-table tbody tr {
-    border-bottom: 1px solid rgba(157, 78, 221, 0.1);
-    transition: all 0.2s ease;
-}
-
-.pos-table tbody tr:hover {
-    background: rgba(157, 78, 221, 0.1);
-}
-
-.pos-table td {
-    padding: 14px 16px;
-    color: #e5e5e5;
-    font-size: 14px;
-}
-
-.pos-table td.empty {
-    text-align: center;
-    color: #888;
-    font-style: italic;
-    padding: 40px;
-}
-
-.pos-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.edit-pos-icon,
-.delete-pos-icon {
+/* İkon Butonları */
+.edit-dept-icon, .edit-pos-icon {
     width: 32px;
     height: 32px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    background: transparent;
-    border: none;
-}
-
-.edit-pos-icon {
     color: #9d4edd;
+    padding: 0;
+    border-radius: 6px;
+    background: transparent;
+    flex-shrink: 0;
 }
 
-.edit-pos-icon:hover {
+.edit-dept-icon:hover, .edit-pos-icon:hover {
     background: rgba(157, 78, 221, 0.3);
     transform: scale(1.15);
 }
 
-.delete-pos-icon {
+.delete-dept-icon, .delete-pos-icon {
+    width: 32px;
+    height: 32px;
     color: #ff6b6b;
+    padding: 0;
+    border-radius: 6px;
+    background: transparent;
+    flex-shrink: 0;
 }
 
-.delete-pos-icon:hover {
+.delete-dept-icon:hover, .delete-pos-icon:hover {
     background: rgba(220, 53, 69, 0.3);
     transform: scale(1.15);
 }
 
+/* --- TABLO TASARIMI --- */
+.pos-table-container {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    border-radius: 10px;
+}
+
+.pos-table-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pos-table-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.pos-table-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #9d4edd, #7b2cbf);
+    border-radius: 10px;
+}
+
+.pos-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.pos-table th {
+    background: rgba(157, 78, 221, 0.15);
+    text-align: left;
+    padding: 16px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9d4edd;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(157, 78, 221, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.pos-table td {
+    padding: 16px;
+    border-bottom: 1px solid rgba(157, 78, 221, 0.2);
+    color: #e5e5e5;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.pos-table tr:hover td {
+    background: rgba(157, 78, 221, 0.1);
+}
+
+/* Boş Durum */
 .empty-state {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
     color: #888;
+    border: 2px dashed rgba(157, 78, 221, 0.3);
+    border-radius: 12px;
+    margin-top: 20px;
     font-size: 14px;
 }
 
-/* MODAL */
+/* --- MODAL (POPUP) --- */
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
     display: flex;
-    align-items: center;
     justify-content: center;
-    z-index: 1000;
+    align-items: center;
+    z-index: 9999;
 }
 
 .modal-content {
     background: linear-gradient(135deg, #1e1e2d, #2d1b4e);
-    border: 1px solid rgba(157, 78, 221, 0.4);
-    border-radius: 20px;
+    color: #e2e8f0;
     padding: 30px;
+    border-radius: 20px;
     width: 100%;
-    max-width: 500px;
+    max-width: 450px;
+    border: 1px solid rgba(157, 78, 221, 0.4);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -304,9 +301,9 @@
 }
 
 .modal-header h3 {
+    margin: 0;
     color: #fff;
     font-size: 20px;
-    margin: 0;
 }
 
 .close-btn {
@@ -327,39 +324,32 @@
 }
 
 .form-group label {
-    display: block;
     color: #9d4edd;
-    font-size: 12px;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
+    letter-spacing: 1px;
 }
 
 .form-group input,
-.form-group select,
 .form-group textarea {
-    width: 100%;
-    padding: 12px 15px;
-    background: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(157, 78, 221, 0.3);
+    color: white;
+    padding: 12px;
     border-radius: 10px;
-    color: #e5e5e5;
+    width: 100%;
+    box-sizing: border-box;
     font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.form-group textarea {
-    resize: vertical;
-    font-family: inherit;
 }
 
 .form-group input:focus,
-.form-group select:focus,
 .form-group textarea:focus {
-    outline: none;
     border-color: #9d4edd;
-    background: rgba(0, 0, 0, 0.4);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
 }
 
 .modal-actions {
@@ -388,9 +378,6 @@
 }
 
 .save-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     padding: 12px 25px;
     background: linear-gradient(135deg, #9d4edd, #7b2cbf);
     border: none;
@@ -405,22 +392,4 @@
 .save-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(157, 78, 221, 0.4);
-}
-
-/* SCROLLBAR */
-.dept-list::-webkit-scrollbar,
-.pos-table-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.dept-list::-webkit-scrollbar-track,
-.pos-table-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-}
-
-.dept-list::-webkit-scrollbar-thumb,
-.pos-table-container::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #9d4edd, #7b2cbf);
-    border-radius: 10px;
 }

@@ -1,6 +1,9 @@
 /* CONTAINER */
 .role-management-container {
     padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 /* HEADER */
@@ -39,9 +42,11 @@
     font-size: 16px;
 }
 
+/* Header Ekleme Butonu */
 .add-role-btn-header {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: 10px 20px;
     background: linear-gradient(135deg, #9d4edd, #7b2cbf);
@@ -54,6 +59,10 @@
     transition: all 0.3s ease;
 }
 
+.add-role-btn-header svg {
+    flex-shrink: 0; /* İkonun ezilmesini önler */
+}
+
 .add-role-btn-header:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(157, 78, 221, 0.4);
@@ -63,7 +72,8 @@
 .role-content {
     display: flex;
     gap: 20px;
-    height: calc(100vh - 250px);
+    flex: 1;
+    overflow: hidden; /* Taşmayı engelle */
 }
 
 /* SIDEBAR - ROLLER */
@@ -75,6 +85,7 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-header {
@@ -93,34 +104,18 @@
     margin: 0;
 }
 
-.add-role-btn {
-    width: 32px;
-    height: 32px;
-    background: rgba(157, 78, 221, 0.2);
-    border: 1px solid rgba(157, 78, 221, 0.4);
-    border-radius: 8px;
-    color: #9d4edd;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.add-role-btn:hover {
-    background: rgba(157, 78, 221, 0.4);
-    transform: scale(1.1);
-}
-
 .roles-list {
     flex: 1;
     overflow-y: auto;
+    padding-right: 5px;
 }
 
+/* ROLE ITEM (LİSTE ELEMANI) */
 .role-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    /* justify-content: space-between; KALDIRILDI: Flex ile kontrol edilecek */
+    width: 100%;
     padding: 12px;
     margin-bottom: 8px;
     background: rgba(0, 0, 0, 0.2);
@@ -128,12 +123,13 @@
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
+    box-sizing: border-box;
 }
 
 .role-item:hover {
     background: rgba(157, 78, 221, 0.15);
     border-color: rgba(157, 78, 221, 0.4);
+    transform: translateX(5px);
 }
 
 .role-item.active {
@@ -142,8 +138,11 @@
     box-shadow: 0 4px 15px rgba(157, 78, 221, 0.3);
 }
 
+/* İsim ve Meta Bilgisi Alanı */
 .role-info {
     flex: 1;
+    min-width: 0; /* Text taşmasını engeller */
+    margin-right: 10px;
 }
 
 .role-name {
@@ -151,6 +150,9 @@
     font-weight: 600;
     color: #fff;
     margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .role-meta {
@@ -172,9 +174,28 @@
 }
 
 .role-meta-badge svg {
+    width: 12px;
+    height: 12px;
     opacity: 0.7;
+    flex-shrink: 0;
 }
 
+/* AKSİYON BUTONLARI GRUBU */
+.role-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    margin-left: auto;
+    opacity: 0; /* Başlangıçta gizli */
+    transition: opacity 0.3s ease;
+}
+
+.role-item:hover .role-actions {
+    opacity: 1; /* Hover'da göster */
+}
+
+/* Edit ve Delete Butonları */
 .edit-role-icon,
 .delete-role-icon {
     width: 32px;
@@ -187,13 +208,16 @@
     transition: all 0.3s ease;
     background: transparent;
     border: none;
-    flex-shrink: 0;
-    opacity: 0; /* Başlangıçta görünmez */
+    padding: 0;
 }
 
-.role-item:hover .edit-role-icon,
-.role-item:hover .delete-role-icon {
-    opacity: 1; /* Hover'da görünür */
+/* Buton içindeki ikonların görünürlüğü için */
+.edit-role-icon svg,
+.delete-role-icon svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    pointer-events: none;
 }
 
 .edit-role-icon {
@@ -214,7 +238,7 @@
     transform: scale(1.15);
 }
 
-/* DETAILS */
+/* DETAILS PANEL */
 .role-details {
     flex: 1;
     background: linear-gradient(135deg, rgba(30, 30, 45, 0.9), rgba(45, 27, 78, 0.9));
@@ -223,6 +247,7 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* TABS */
@@ -261,7 +286,7 @@
 
 /* INFO TAB */
 .info-tab {
-    max-width: 500px;
+    max-width: 600px;
 }
 
 .form-group {
@@ -276,6 +301,24 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    border-radius: 10px;
+    color: #e5e5e5;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #9d4edd;
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .role-name-display {
@@ -321,6 +364,12 @@
     align-items: center;
     justify-content: center;
     color: #9d4edd;
+    flex-shrink: 0;
+}
+
+.stat-icon svg {
+    width: 24px;
+    height: 24px;
 }
 
 .stat-content {
@@ -345,127 +394,6 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-}
-
-.permission-tree {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.permission-section {
-    margin-bottom: 15px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.section-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 15px;
-    background: rgba(157, 78, 221, 0.15);
-    border: none;
-    color: #9d4edd;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.section-header:hover {
-    background: rgba(157, 78, 221, 0.25);
-}
-
-.section-count {
-    margin-left: auto;
-    font-size: 12px;
-    color: #888;
-}
-
-.section-content {
-    padding: 10px;
-}
-
-.hierarchy-node {
-    margin-bottom: 5px;
-}
-
-.permission-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
-    margin-bottom: 3px;
-    transition: all 0.3s ease;
-}
-
-.permission-item:hover {
-    background: rgba(157, 78, 221, 0.1);
-}
-
-.permission-children {
-    margin-left: 20px;
-    border-left: 2px solid rgba(157, 78, 221, 0.2);
-    padding-left: 10px;
-    margin-top: 5px;
-}
-
-.expand-btn,
-.checkbox-btn {
-    background: transparent;
-    border: none;
-    color: #9d4edd;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.expand-btn {
-    width: 20px;
-    height: 20px;
-}
-
-.expand-btn:hover {
-    transform: scale(1.2);
-}
-
-.expand-spacer {
-    width: 20px;
-}
-
-.checkbox-btn:hover {
-    transform: scale(1.15);
-}
-
-.permission-icon {
-    width: 20px;
-    height: 20px;
-    color: #9d4edd;
-    opacity: 0.7;
-}
-
-.permission-label {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
-}
-
-.permission-desc {
-    color: #e5e5e5;
-    font-size: 13px;
-}
-
-.permission-code {
-    color: #888;
-    font-size: 11px;
-    font-family: monospace;
 }
 
 .permission-actions {
@@ -508,6 +436,7 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    backdrop-filter: blur(4px);
 }
 
 .modal-content {
@@ -515,9 +444,15 @@
     border: 1px solid rgba(157, 78, 221, 0.4);
     border-radius: 20px;
     padding: 30px;
-    width: 100%;
+    width: 90%;
     max-width: 450px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
@@ -540,6 +475,9 @@
     cursor: pointer;
     padding: 5px;
     transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .close-btn:hover {
@@ -588,8 +526,7 @@
     box-shadow: 0 5px 20px rgba(157, 78, 221, 0.4);
 }
 
-.empty-state,
-.loading-state {
+.loading-state, .empty-state {
     text-align: center;
     padding: 60px 20px;
     color: #888;
@@ -597,22 +534,16 @@
 }
 
 /* SCROLLBAR */
-.roles-list::-webkit-scrollbar,
-.tab-content::-webkit-scrollbar,
-.permission-tree::-webkit-scrollbar {
+::-webkit-scrollbar {
     width: 8px;
 }
 
-.roles-list::-webkit-scrollbar-track,
-.tab-content::-webkit-scrollbar-track,
-.permission-tree::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
 }
 
-.roles-list::-webkit-scrollbar-thumb,
-.tab-content::-webkit-scrollbar-thumb,
-.permission-tree::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, #9d4edd, #7b2cbf);
     border-radius: 10px;
 }

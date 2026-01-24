@@ -4,7 +4,7 @@ const { pool } = require('../config/database');
 
 class AuthService {
     /**
-     * Kullanıcı girişi (Departman ID Sorununu Çözen Versiyon)
+     * Kullanıcı girişi ve Token oluşturma
      */
     async login(username, password) {
         try {
@@ -25,7 +25,7 @@ class AuthService {
                 return { success: false, message: 'Şifre hatalı!' };
             }
 
-            // 2. ADIM: Departman bilgisini çek (DÜZELTME: COALESCE ile null kontrolü)
+            // 2. ADIM: Departman bilgisini çek
             let deptInfo = { id: null, name: 'Belirtilmemiş' };
 
             try {
@@ -34,9 +34,9 @@ class AuthService {
                         COALESCE(ud.departmentid, 0) as departmentid,
                         COALESCE(d.departmentname, 'Belirtilmemiş') as departmentname
                     FROM userdetails ud
-                    LEFT JOIN departments d ON ud.departmentid = d.departmentid
+                             LEFT JOIN departments d ON ud.departmentid = d.departmentid
                     WHERE ud.userid = $1
-                    LIMIT 1
+                        LIMIT 1
                 `;
                 const deptResult = await pool.query(deptQuery, [user.userid]);
 
@@ -47,9 +47,6 @@ class AuthService {
                         name: row.departmentname || 'Belirtilmemiş'
                     };
                 }
-
-                console.log('✅ Departman bilgisi çekildi:', deptInfo);
-
             } catch (err) {
                 console.error("⚠️ Departman çekme hatası:", err.message);
             }
@@ -60,10 +57,9 @@ class AuthService {
                 username: user.username,
                 email: user.email,
                 roleid: user.roleid,
-                departmentid: deptInfo.id // TOKEN'a da ekliyoruz
+                departmentid: deptInfo.id
             });
 
-            // 4. ADIM: Response döndür
             return {
                 success: true,
                 message: 'Giriş başarılı',
@@ -74,7 +70,6 @@ class AuthService {
                     email: user.email,
                     roleid: user.roleid,
                     fullname: user.fullname || user.username,
-                    // ⚠️ KRITIK: Bu alanlar frontend'de kullanılıyor
                     departmentid: deptInfo.id,
                     departmentname: deptInfo.name
                 }
@@ -86,6 +81,43 @@ class AuthService {
         }
     }
 
+    /**
+     * Kullanıcı detaylarını veritabanından çeker (SQL Controller'dan buraya taşındı)
+     */
+    async getUserDetails(userId) {
+        try {
+            const query = `
+                SELECT 
+                    ud.userdetailsid,
+                    ud.userid,
+                    u.username,
+                    -- u.email,
+                    ud.usersalary,
+                    ud.yearsworked,
+                    pn.position_name,
+                    pn.level,
+                    d.departmentname
+                FROM userdetails ud
+                LEFT JOIN users u ON ud.userid = u.userid
+                LEFT JOIN positionnames pn ON ud.positionnames_id = pn.id
+                LEFT JOIN departments d ON ud.departmentid = d.departmentid
+                WHERE ud.userid = $1
+            `;
+
+            const result = await pool.query(query, [userId]);
+
+            // Veri varsa ilk satırı, yoksa null dönüyoruz
+            return result.rows.length > 0 ? result.rows[0] : null;
+
+        } catch (error) {
+            console.error('❌ AuthService getUserDetails Error:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Kullanıcı yetkilerini getir
+     */
     async getUserPermissions(userId) {
         try {
             const result = await pool.query(`
@@ -98,21 +130,29 @@ class AuthService {
             `, [userId]);
             return result.rows;
         } catch (error) {
-            console.error('AuthService GetPermissions Error:', error);
+            console.error('❌ AuthService GetPermissions Error:', error);
             throw error;
         }
     }
 
+    /**
+     * Yeni kullanıcı kaydı
+     */
     async register(userData) {
         try {
+            // Not: userData içinde email, fullname vb. geliyorsa userdetails tablosuna da kayıt eklenmesi gerekebilir.
+            // Mevcut kodunuzda sadece users tablosuna insert vardı, onu korudum.
             const { username, password } = userData;
             const hashedPassword = await bcrypt.hash(password, 10);
+
             const insertResult = await pool.query(
                 'INSERT INTO users (username, password, roleid) VALUES ($1, $2, $3) RETURNING userid, username',
                 [username, hashedPassword, 3]
             );
+
             return { success: true, message: 'Kayıt başarılı!', user: insertResult.rows[0] };
         } catch (error) {
+            console.error('❌ AuthService Register Error:', error);
             throw error;
         }
     }

@@ -11,7 +11,7 @@ const pool = new Pool({
     port: process.env.DB_PORT,
     max: 3,                    // Maksimum 3 client (Supabase free tier için güvenli)
     idleTimeoutMillis: 30000,  // 30 saniye boşta kalırsa kapat
-    connectionTimeoutMillis: 5000  // 5 saniye içinde bağlanamazsa hata ver
+    connectionTimeoutMillis: 5000 // 5 saniye içinde bağlanamazsa hata ver
 });
 
 // İlk bağlantı kontrolü

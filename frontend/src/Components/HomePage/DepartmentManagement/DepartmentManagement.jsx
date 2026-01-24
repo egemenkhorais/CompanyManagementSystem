@@ -218,25 +218,27 @@ const DepartmentManagement = () => {
                                 className={`dept-item ${selectedDepartment?.departmentid === dept.departmentid ? 'active' : ''}`}
                                 onClick={() => handleSelectDepartment(dept)}
                             >
-                                <div className="dept-info">
-                                    <div className="dept-name">{dept.departmentname}</div>
+                                {/* DÜZELTME 1: İsim alanı direkt yazıldı ve butonlar dept-actions içine alındı */}
+                                <div className="dept-name">{dept.departmentname}</div>
+
+                                <div className="dept-actions">
+                                    <button
+                                        className="edit-dept-icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setDepartmentForm({ name: dept.departmentname });
+                                            setShowEditDepartment(true);
+                                        }}
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        className="delete-dept-icon"
+                                        onClick={(e) => handleDeleteDepartment(dept.departmentid, e)}
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
                                 </div>
-                                <button
-                                    className="edit-dept-icon"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setDepartmentForm({ name: dept.departmentname });
-                                        setShowEditDepartment(true);
-                                    }}
-                                >
-                                    <Edit2 size={16} />
-                                </button>
-                                <button
-                                    className="delete-dept-icon"
-                                    onClick={(e) => handleDeleteDepartment(dept.departmentid, e)}
-                                >
-                                    <Trash2 size={16} />
-                                </button>
                             </div>
                         ))}
                     </div>
@@ -261,7 +263,8 @@ const DepartmentManagement = () => {
                                         <th>Seviye</th>
                                         <th>Kontenjan</th>
                                         <th>Mevcut</th>
-                                        <th>İşlemler</th>
+                                        {/* CSS'te th:last-child sağa hizalandı, başlık boş kalabilir veya "İşlemler" yazabilir */}
+                                        <th style={{textAlign: 'right'}}>İşlemler</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -272,7 +275,8 @@ const DepartmentManagement = () => {
                                             <td>{pos.quota}</td>
                                             <td>{pos.current_count || 0}</td>
                                             <td>
-                                                <div className="pos-actions">
+                                                {/* DÜZELTME 2: Class ismi table-actions olarak güncellendi */}
+                                                <div className="table-actions">
                                                     <button
                                                         className="edit-pos-icon"
                                                         onClick={() => {
@@ -300,7 +304,7 @@ const DepartmentManagement = () => {
                                         </tr>
                                     )) : (
                                         <tr>
-                                            <td colSpan="5" className="empty">Pozisyon bulunamadı</td>
+                                            <td colSpan="5" className="empty-state">Pozisyon bulunamadı</td>
                                         </tr>
                                     )}
                                     </tbody>
@@ -315,6 +319,7 @@ const DepartmentManagement = () => {
                 </div>
             </div>
 
+            {/* MODALS - AYNI KALDI */}
             {/* Add Department Modal */}
             {showAddDepartment && (
                 <div className="modal-overlay" onClick={() => setShowAddDepartment(false)}>

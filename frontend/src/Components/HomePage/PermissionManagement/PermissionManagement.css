@@ -41,6 +41,7 @@
 .add-permission-btn {
     display: flex;
     align-items: center;
+    justify-content: center; /* İkonu ortalamak için */
     gap: 8px;
     padding: 10px 20px;
     background: linear-gradient(135deg, #9d4edd, #7b2cbf);
@@ -51,6 +52,11 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+/* İkonların ezilmesini önler */
+.add-permission-btn svg {
+    flex-shrink: 0;
 }
 
 .add-permission-btn:hover {
@@ -83,6 +89,9 @@
     border: 1px solid rgba(157, 78, 221, 0.3);
     border-radius: 15px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh; /* Kategorinin çok uzamasını engeller */
 }
 
 .category-header {
@@ -92,10 +101,12 @@
     padding: 20px;
     background: rgba(157, 78, 221, 0.15);
     border-bottom: 1px solid rgba(157, 78, 221, 0.3);
+    flex-shrink: 0;
 }
 
 .category-header svg {
     color: #9d4edd;
+    flex-shrink: 0;
 }
 
 .category-header h3 {
@@ -117,8 +128,8 @@
 
 .category-content {
     padding: 15px;
-    max-height: 600px;
     overflow-y: auto;
+    flex: 1;
 }
 
 /* PERMISSION CARD */
@@ -140,7 +151,7 @@
     transform: translateX(5px);
 }
 
-.card-icon {
+.permission-card .card-icon {
     width: 40px;
     height: 40px;
     background: rgba(157, 78, 221, 0.2);
@@ -152,25 +163,32 @@
     flex-shrink: 0;
 }
 
-.card-content {
+.permission-card .card-content {
     flex: 1;
+    min-width: 0;
 }
 
-.card-title {
+.permission-card .card-title {
     font-size: 14px;
     font-weight: 600;
     color: #fff;
     margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.card-code {
+.permission-card .card-code {
     font-size: 11px;
     font-family: monospace;
     color: #888;
     margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.card-parent {
+.permission-card .card-parent {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -182,17 +200,20 @@
     margin-top: 5px;
 }
 
-.card-parent svg {
+.permission-card .card-parent svg {
     opacity: 0.7;
+    width: 12px;
+    height: 12px;
 }
 
-.card-actions {
+.permission-card .card-actions {
     display: flex;
     gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
-.edit-btn,
-.delete-btn {
+.permission-card .card-actions button {
     width: 32px;
     height: 32px;
     border-radius: 6px;
@@ -203,22 +224,29 @@
     justify-content: center;
     transition: all 0.3s ease;
     background: transparent;
+    padding: 0; /* Padding sıfırlama önemli */
 }
 
-.edit-btn {
+/* Aksiyon buton ikonlarının görünürlüğü için kritik */
+.permission-card .card-actions button svg {
+    flex-shrink: 0;
+    pointer-events: none; /* Tıklamayı butona geçirir */
+}
+
+.permission-card .card-actions .edit-btn {
     color: #9d4edd;
 }
 
-.edit-btn:hover {
+.permission-card .card-actions .edit-btn:hover {
     background: rgba(157, 78, 221, 0.3);
     transform: scale(1.1);
 }
 
-.delete-btn {
+.permission-card .card-actions .delete-btn {
     color: #ff6b6b;
 }
 
-.delete-btn:hover {
+.permission-card .card-actions .delete-btn:hover {
     background: rgba(220, 53, 69, 0.3);
     transform: scale(1.1);
 }
@@ -235,6 +263,7 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    backdrop-filter: blur(5px); /* Arka planı biraz bulanıklaştırır */
 }
 
 .modal-content {
@@ -242,9 +271,15 @@
     border: 1px solid rgba(157, 78, 221, 0.4);
     border-radius: 20px;
     padding: 30px;
-    width: 100%;
+    width: 90%;
     max-width: 500px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
@@ -267,6 +302,9 @@
     cursor: pointer;
     padding: 5px;
     transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .close-btn:hover {
@@ -297,6 +335,7 @@
     color: #e5e5e5;
     font-size: 14px;
     transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -308,6 +347,12 @@
 
 .form-group select {
     cursor: pointer;
+}
+
+/* Select içindeki optionlar için arka plan (tarayıcı varsayılanı beyaz olmasın diye) */
+.form-group select option {
+    background-color: #1e1e2d;
+    color: #fff;
 }
 
 .modal-actions {
@@ -338,6 +383,7 @@
 .save-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: 12px 25px;
     background: linear-gradient(135deg, #9d4edd, #7b2cbf);
@@ -350,29 +396,11 @@
     transition: all 0.3s ease;
 }
 
+.save-btn svg {
+    flex-shrink: 0;
+}
+
 .save-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(157, 78, 221, 0.4);
-}
-
-.loading-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #888;
-    font-size: 14px;
-}
-
-/* SCROLLBAR */
-.category-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.category-content::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-}
-
-.category-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #9d4edd, #7b2cbf);
-    border-radius: 10px;
 }

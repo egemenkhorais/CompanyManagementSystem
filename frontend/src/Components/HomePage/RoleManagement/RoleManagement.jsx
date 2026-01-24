@@ -31,7 +31,8 @@ const RoleManagement = () => {
 
             if (rolesRes.data.success) {
                 setRoles(rolesRes.data.data);
-                if (rolesRes.data.data.length > 0) {
+                // Eğer hiç rol seçili değilse ve roller geldiyse ilkini seç
+                if (rolesRes.data.data.length > 0 && !selectedRole) {
                     handleRoleSelect(rolesRes.data.data[0]);
                 }
             }
@@ -41,7 +42,7 @@ const RoleManagement = () => {
             }
         } catch (error) {
             console.error('Veri yüklenirken hata:', error);
-            alert('Veriler yüklenemedi!');
+            // alert('Veriler yüklenemedi!');
         } finally {
             setLoading(false);
         }
@@ -164,7 +165,7 @@ const RoleManagement = () => {
                     </div>
                     <button className="add-role-btn-header" onClick={() => setShowNewRoleModal(true)}>
                         <Plus size={18} />
-                        Yeni Rol
+                        <span>Yeni Rol</span>
                     </button>
                 </div>
             </div>
@@ -187,37 +188,40 @@ const RoleManagement = () => {
                                     <div className="role-meta">
                                         <span className="role-meta-badge">
                                             <Users size={12} />
-                                            {role.user_count}
+                                            {role.user_count || 0}
                                         </span>
                                         <span className="role-meta-badge">
                                             <Zap size={12} />
-                                            {role.permission_count}
+                                            {role.permission_count || 0}
                                         </span>
                                     </div>
                                 </div>
-                                <button
-                                    className="edit-role-icon"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedRole(role);
-                                        setTempRoleName(role.rolename);
-                                        setEditingRoleName(true);
-                                        setShowEditModal(true);
-                                    }}
-                                    title="Düzenle"
-                                >
-                                    <Edit2 size={16} />
-                                </button>
-                                <button
-                                    className="delete-role-icon"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteRole(role.roleid, role.rolename);
-                                    }}
-                                    title="Sil"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+                                {/* DÜZELTME: Butonlar role-actions div içine alındı */}
+                                <div className="role-actions">
+                                    <button
+                                        className="edit-role-icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedRole(role);
+                                            setTempRoleName(role.rolename);
+                                            setEditingRoleName(true);
+                                            setShowEditModal(true);
+                                        }}
+                                        title="Düzenle"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        className="delete-role-icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteRole(role.roleid, role.rolename);
+                                        }}
+                                        title="Sil"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -257,7 +261,7 @@ const RoleManagement = () => {
                                                     <Users size={20} />
                                                 </div>
                                                 <div className="stat-content">
-                                                    <div className="stat-value">{selectedRole.user_count}</div>
+                                                    <div className="stat-value">{selectedRole.user_count || 0}</div>
                                                     <div className="stat-label">Kullanıcı</div>
                                                 </div>
                                             </div>
@@ -266,7 +270,7 @@ const RoleManagement = () => {
                                                     <Zap size={20} />
                                                 </div>
                                                 <div className="stat-content">
-                                                    <div className="stat-value">{selectedRole.permission_count}</div>
+                                                    <div className="stat-value">{selectedRole.permission_count || 0}</div>
                                                     <div className="stat-label">Yetki</div>
                                                 </div>
                                             </div>
