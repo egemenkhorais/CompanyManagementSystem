@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict VkYRujAf0TjmmIVp4ptHCPBgJVfa5Gu4wGLTetDENQ5Nu6rJLSXf5AI2LxcAzsD
+\restrict dgqq1c4jIQTb8k9B5EpXXoj0ogumpzdGXErpRqe0BG739pV69PSPAYpiKl5c97X
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -1525,7 +1525,6 @@ COPY public.userdetails (userdetailsid, userid, name, departmentid, companyid, u
 
 COPY public.users (userid, username, password, roleid, last_activity) FROM stdin;
 5	ayse.demir	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	21	2025-12-16 20:57:40.059715+00
-37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2026-01-14 14:36:37.132254+00
 32	batuhan_karanfil	$2b$10$L5J2RE1cwUSeuWWHHc.N.OP2QKVDabLuuZ1fZzxE5FaK5WJ4ChE8q	5	2026-01-13 23:53:52.271171+00
 4	ahmet.dalavere	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	23	2025-12-16 20:57:40.059715+00
 10	emre.yildiz	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	5	2025-12-17 16:26:35.98959+00
@@ -1533,6 +1532,7 @@ COPY public.users (userid, username, password, roleid, last_activity) FROM stdin
 2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2	2026-01-24 11:37:25.481232+00
 33	keles_egemen	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	10	2026-01-11 14:19:07.792951+00
 3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3	2025-12-17 18:39:58.861985+00
+37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2026-01-25 14:14:13.600387+00
 26	john_duran	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	17	2025-12-25 07:10:46.07658+00
 25	esra.eroglu	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	19	2025-12-16 20:57:40.059715+00
 35	ihsan_ekinci	$2b$10$k5Y0Gf0EgS5wDe2imrtIvuUh797f4kvmTpPOHdjXQ/bcaUN9.5A6a	14	2025-12-25 05:55:00.712005+00
@@ -2480,5 +2480,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict VkYRujAf0TjmmIVp4ptHCPBgJVfa5Gu4wGLTetDENQ5Nu6rJLSXf5AI2LxcAzsD
+\unrestrict dgqq1c4jIQTb8k9B5EpXXoj0ogumpzdGXErpRqe0BG739pV69PSPAYpiKl5c97X
 
