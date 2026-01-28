@@ -11,7 +11,7 @@ import Tasks from './Projects/Tasks';
 import DepartmentManagement from './DepartmentManagement/DepartmentManagement';
 import RoleManagement from './RoleManagement/RoleManagement';
 import PermissionManagement from './PermissionManagement/PermissionManagement';
-import logo from '../assets/logoC2.png';
+import logo from '../Assets/logoC2.png';
 
 
 

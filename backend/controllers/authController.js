@@ -1,5 +1,4 @@
-const authService = require('../services/AuthService');
-// DİKKAT: pool (database) require'ı buradan kaldırıldı. Controller veritabanını bilmez.
+const AuthService = require('../services/authService');
 
 class AuthController {
     /**
@@ -9,7 +8,8 @@ class AuthController {
         try {
             const { username, password } = req.body;
 
-            // Basit Validasyon (Controller seviyesinde kalabilir)
+            console.log('📥 Login request:', { username });
+
             if (!username || !password) {
                 return res.status(400).json({
                     success: false,
@@ -17,20 +17,24 @@ class AuthController {
                 });
             }
 
-            // İş mantığı servise devredildi
-            const result = await authService.login(username, password);
+            const result = await AuthService.login(username, password);
 
             if (!result.success) {
+                console.log('❌ Login failed:', result.message);
                 return res.status(401).json(result);
             }
 
+            console.log('✅ Login successful for:', username);
             res.json(result);
 
         } catch (error) {
-            // Servis katmanında loglanıyor ama HTTP yanıtı için burada catch şart
+            console.error('❌ Login Controller Hatası:', error);
+            console.error('Stack:', error.stack);
+
             res.status(500).json({
                 success: false,
-                message: 'Sunucu tarafında bir hata oluştu.'
+                message: 'Sunucu tarafında bir hata oluştu.',
+                error: error.message
             });
         }
     }
@@ -40,8 +44,19 @@ class AuthController {
      */
     async getMyPermissions(req, res) {
         try {
+            console.log('📥 Get permissions for user:', req.user?.id);
+
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bulunamadı'
+                });
+            }
+
             const userId = req.user.id;
-            const permissions = await authService.getUserPermissions(userId);
+            const permissions = await AuthService.getUserPermissions(userId);
+
+            console.log('✅ Permissions found:', permissions);
 
             res.json({
                 success: true,
@@ -49,23 +64,33 @@ class AuthController {
             });
 
         } catch (error) {
+            console.error('❌ Get Permissions Error:', error);
+            console.error('Stack:', error.stack);
+
             res.status(500).json({
                 success: false,
-                message: 'Yetkiler alınamadı.'
+                message: 'Yetkiler alınamadı.',
+                error: error.message
             });
         }
     }
 
     /**
-     * Kullanıcı detaylarını getir (Dashboard için)
-     * REFACTOR NOTU: SQL sorgusu buradan tamamen temizlendi.
+     * Kullanıcı detaylarını getir
      */
     async getUserDetails(req, res) {
         try {
-            const userId = req.user.id;
+            console.log('📥 Get user details for:', req.user?.id);
 
-            // Service çağrısı
-            const userDetails = await authService.getUserDetails(userId);
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Kullanıcı bulunamadı'
+                });
+            }
+
+            const userId = req.user.id;
+            const userDetails = await AuthService.getUserDetails(userId);
 
             if (!userDetails) {
                 return res.status(404).json({
@@ -74,12 +99,17 @@ class AuthController {
                 });
             }
 
+            console.log('✅ User details found for:', userDetails.username);
+
             res.json({
                 success: true,
                 data: userDetails
             });
 
         } catch (error) {
+            console.error('❌ Get User Details Error:', error);
+            console.error('Stack:', error.stack);
+
             res.status(500).json({
                 success: false,
                 message: 'Kullanıcı detayları yüklenirken hata oluştu',
@@ -102,7 +132,7 @@ class AuthController {
                 });
             }
 
-            const result = await authService.register({
+            const result = await AuthService.register({
                 username,
                 email,
                 password,
@@ -118,9 +148,11 @@ class AuthController {
             res.status(201).json(result);
 
         } catch (error) {
+            console.error('❌ Register Error:', error);
             res.status(500).json({
                 success: false,
-                message: 'Kayıt sırasında bir hata oluştu.'
+                message: 'Kayıt sırasında bir hata oluştu.',
+                error: error.message
             });
         }
     }

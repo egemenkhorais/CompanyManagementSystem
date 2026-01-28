@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:5001/api';
+// DOCKER İÇİN: Relative path kullan (Nginx proxy ile çalışır)
+const API_URL = '/api';
 
 // Özelleştirilmiş axios oluştur
 const axiosInstance = axios.create({
@@ -17,25 +18,45 @@ axiosInstance.interceptors.request.use(
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+            console.log('🔐 Token eklendi:', token.substring(0, 20) + '...');
+        } else {
+            console.warn('⚠️ Token bulunamadı!');
         }
+        console.log('📤 Request:', config.method.toUpperCase(), config.url);
         return config;
     },
     (error) => {
+        console.error('❌ Request error:', error);
         return Promise.reject(error);
     }
 );
 
-// Response Interceptor - Hataları yakala ama logout YAPMA
+// Response Interceptor - Hataları yakala
 axiosInstance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        console.log('✅ Response:', response.config.url, response.status);
+        return response;
+    },
     (error) => {
-        if (error.response?.status === 401) {
-            console.error('⚠️ Token geçersiz veya süresi dolmuş!');
+        console.error('❌ Response error:', {
+            url: error.config?.url,
+            status: error.response?.status,
+            message: error.response?.data?.message || error.message
+        });
 
+        if (error.response?.status === 401) {
+            console.error('⚠️ 401 Unauthorized - Token geçersiz veya süresi dolmuş!');
+            // Opsiyonel: Kullanıcıyı login sayfasına yönlendir
+            // localStorage.removeItem('token');
+            // window.location.href = '/login';
         }
 
         if (error.response?.status === 403) {
-            console.error('⚠️ Bu işlem için yetkiniz yok!');
+            console.error('⚠️ 403 Forbidden - Bu işlem için yetkiniz yok!');
+        }
+
+        if (error.response?.status === 500) {
+            console.error('⚠️ 500 Server Error - Backend hatası!');
         }
 
         return Promise.reject(error);

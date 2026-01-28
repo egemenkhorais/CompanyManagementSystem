@@ -17,7 +17,8 @@ const LoginForm = ({ onLoginSuccess }) => {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:5001/api/auth/login', {
+            // window.location.hostname otomatik olarak localhost veya sunucu IP'ni yakalar.
+            const response = await axios.post(`http://${window.location.hostname}:5001/api/auth/login`, {
                 username: username,
                 password: password
             });

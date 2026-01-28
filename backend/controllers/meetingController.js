@@ -47,29 +47,72 @@ const getMeetingsByDepartment = async (req, res) => {
 
 const createMeeting = async (req, res) => {
     try {
-        // Body'i olduğu gibi servise gönderiyoruz, parçalama işlemini servis yapıyor
-        const newMeeting = await meetingService.createMeeting(req.body);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📨 CONTROLLER - Gelen req.body:', JSON.stringify(req.body, null, 2));
+        console.log('📨 CONTROLLER - req.body keys:', Object.keys(req.body));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+        // ✅ SORUN ÇÖZÜMÜ: Frontend camelCase gönderiyorsa, service snake_case bekleyebilir
+        // Her iki formatı da destekleyelim
+        const payload = {
+            roomId: req.body.roomId || req.body.room_id,
+            title: req.body.title || req.body.meetingsubject,
+            description: req.body.description,
+            meetingstartdate: req.body.meetingstartdate || req.body.meeting_date,
+            start_time: req.body.start_time,
+            end_time: req.body.end_time,
+            participants: req.body.participants,
+            departmentId: req.body.departmentId || req.body.department_id,
+            projectId: req.body.projectId || req.body.project_id
+        };
+
+        console.log('🔄 CONTROLLER - Normalize edilmiş payload:', JSON.stringify(payload, null, 2));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+        const newMeeting = await meetingService.createMeeting(payload);
+
+        console.log('✅ CONTROLLER - Oluşturulan meeting:', JSON.stringify(newMeeting, null, 2));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
         res.json({ success: true, data: newMeeting });
     } catch (error) {
         if (error.message === 'CONFLICT_ERROR') {
             return res.status(400).json({ success: false, message: 'Bu tarih ve saat aralığında oda dolu!' });
         }
-        console.error('Toplantı oluşturma hatası:', error.message);
+        console.error('❌ CONTROLLER - Toplantı oluşturma hatası:', error.message);
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
 const updateMeeting = async (req, res) => {
     try {
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📝 CONTROLLER - Update için gelen req.body:', JSON.stringify(req.body, null, 2));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
         const { id } = req.params;
-        const updatedMeeting = await meetingService.updateMeeting(id, req.body);
+
+        // ✅ Update için de normalize edelim
+        const payload = {
+            roomId: req.body.roomId || req.body.room_id,
+            title: req.body.title || req.body.meetingsubject,
+            description: req.body.description,
+            meetingstartdate: req.body.meetingstartdate || req.body.meeting_date,
+            start_time: req.body.start_time,
+            end_time: req.body.end_time,
+            participants: req.body.participants,
+            departmentId: req.body.departmentId || req.body.department_id,
+            projectId: req.body.projectId || req.body.project_id
+        };
+
+        const updatedMeeting = await meetingService.updateMeeting(id, payload);
 
         if (!updatedMeeting) {
             return res.status(404).json({ success: false, message: 'Toplantı bulunamadı' });
         }
         res.json({ success: true, data: updatedMeeting });
     } catch (error) {
-        console.error('Güncelleme hatası:', error.message);
+        console.error('❌ CONTROLLER - Güncelleme hatası:', error.message);
         res.status(500).json({ success: false, message: error.message });
     }
 };

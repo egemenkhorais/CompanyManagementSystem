@@ -44,32 +44,22 @@ const MeetingManagement = ({ userPermissions = [] }) => {
         if (isManual) setRefreshing(true);
         else setLoading(true);
 
+        // Docker network cache'ini kırmak için timestamp ekliyoruz
+        const config = { params: { _t: Date.now() } };
+
         try {
-            // 1. Toplantılar
-            try {
-                const meetingsRes = await axiosInstance.get('/meetings');
-                if (meetingsRes.data.success) {
-                    setMeetings(meetingsRes.data.data);
-                }
-            } catch (err) { console.error("Toplantı listesi hatası:", err); }
+            // Tüm istekleri Promise.all ile paralel çekerek performansı artırıyoruz
+            const [mRes, rRes, dRes, pRes] = await Promise.all([
+                axiosInstance.get('/meetings', config),
+                axiosInstance.get('/rooms', config),
+                axiosInstance.get('/departments', config),
+                axiosInstance.get('/projects', config)
+            ]);
 
-            // 2. Odalar
-            try {
-                const roomsRes = await axiosInstance.get('/rooms');
-                if (roomsRes.data.success) setRooms(roomsRes.data.data);
-            } catch (err) { console.error("Oda listesi hatası:", err); }
-
-            // 3. Departmanlar
-            try {
-                const deptsRes = await axiosInstance.get('/departments');
-                if (deptsRes.data.success) setDepartments(deptsRes.data.data);
-            } catch (err) { console.warn("Departmanlar çekilemedi."); }
-
-            // 4. Projeler
-            try {
-                const projsRes = await axiosInstance.get('/projects');
-                if (projsRes.data.success) setProjects(projsRes.data.data);
-            } catch (err) { console.warn("Projeler çekilemedi."); }
+            if (mRes.data.success) setMeetings(mRes.data.data);
+            if (rRes.data.success) setRooms(rRes.data.data);
+            if (dRes.data.success) setDepartments(dRes.data.data);
+            if (pRes.data.success) setProjects(pRes.data.data);
 
         } catch (error) {
             console.error('Genel veri yükleme hatası:', error);
@@ -147,17 +137,17 @@ const MeetingManagement = ({ userPermissions = [] }) => {
             return;
         }
 
+        // --- KRİTİK DÜZELTME: Service katmanındaki destructuring ile tam uyum ---
         const payload = {
-            companyroomid: formData.room_id,
-            room_id: formData.room_id,
+            roomId: formData.room_id,          // room_id -> roomId
             title: formData.title,
             description: formData.description,
             meetingstartdate: formData.meeting_date,
             start_time: formData.start_time,
             end_time: formData.end_time,
             participants: formData.participants,
-            department_id: formData.department_id || null,
-            project_id: formData.project_id || null
+            departmentId: formData.department_id || null, // department_id -> departmentId
+            projectId: formData.project_id || null        // project_id -> projectId
         };
 
         try {
@@ -168,7 +158,7 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                 if (response.data.success) {
                     alert('Güncelleme başarılı!');
                     handleCloseModal();
-                    await fetchData();
+                    await fetchData(true);
                 }
             } else {
                 const response = await axiosInstance.post('/meetings', payload);
@@ -176,7 +166,7 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                 if (response.data.success) {
                     alert('Toplantı oluşturuldu!');
                     handleCloseModal();
-                    await fetchData();
+                    await fetchData(true);
                 }
             }
         } catch (error) {
@@ -191,7 +181,7 @@ const MeetingManagement = ({ userPermissions = [] }) => {
         try {
             await axiosInstance.delete(`/meetings/${id}`);
             alert('Toplantı silindi!');
-            await fetchData();
+            await fetchData(true);
         } catch(e){
             alert("Silinemedi!");
         }
@@ -215,7 +205,7 @@ const MeetingManagement = ({ userPermissions = [] }) => {
                 : 'Toplantı iptal edildi!';
             alert(successMessage);
 
-            await fetchData();
+            await fetchData(true);
         } catch(e) {
             alert("Durum güncellenemedi!");
         }

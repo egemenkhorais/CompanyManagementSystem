@@ -99,6 +99,21 @@ const createMeeting = async (data) => {
         description, participants, departmentId, projectId
     } = data;
 
+    console.log('📥 Service - Gelen departmentId:', departmentId, 'Type:', typeof departmentId);
+    console.log('📥 Service - Gelen projectId:', projectId, 'Type:', typeof projectId);
+
+    // ✅ Boş string veya "0" değerlerini NULL'a çevir
+    const deptId = (departmentId && departmentId !== '' && departmentId !== '0')
+        ? parseInt(departmentId)
+        : null;
+
+    const projId = (projectId && projectId !== '' && projectId !== '0')
+        ? parseInt(projectId)
+        : null;
+
+    console.log('✅ Service - İşlenmiş departmentId:', deptId);
+    console.log('✅ Service - İşlenmiş projectId:', projId);
+
     // Tarih birleştirme işlemi Service'te yapılır
     const startDateTime = `${meetingstartdate}T${start_time}:00+03:00`;
     const endDateTime = `${meetingstartdate}T${end_time}:00+03:00`;
@@ -119,8 +134,8 @@ const createMeeting = async (data) => {
 
     const insertQuery = `
         INSERT INTO meetings (
-            companyroomid, meetingsubject, meetingstartdate, meetingenddate, 
-            description, participants, meetingdepartmentid, relatedprojectid, 
+            companyroomid, meetingsubject, meetingstartdate, meetingenddate,
+            description, participants, meetingdepartmentid, relatedprojectid,
             isempty, status
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -134,11 +149,13 @@ const createMeeting = async (data) => {
         endDateTime,
         description || null,
         participants || null,
-        departmentId || null,
-        projectId || null,
+        deptId,  // ✅ Düzeltilmiş değer
+        projId,  // ✅ Düzeltilmiş değer
         false,
         'pending'
     ];
+
+    console.log('🔍 SQL VALUES:', values);
 
     const result = await pool.query(insertQuery, values);
     return result.rows[0];
@@ -150,16 +167,25 @@ const updateMeeting = async (id, data) => {
         description, participants, departmentId, projectId
     } = data;
 
+    // ✅ Update için de aynı validasyon
+    const deptId = (departmentId && departmentId !== '' && departmentId !== '0')
+        ? parseInt(departmentId)
+        : null;
+
+    const projId = (projectId && projectId !== '' && projectId !== '0')
+        ? parseInt(projectId)
+        : null;
+
     // Tarih birleştirme
     const startDateTime = `${meetingstartdate}T${start_time}:00+03:00`;
     const endDateTime = `${meetingstartdate}T${end_time}:00+03:00`;
 
     const query = `
         UPDATE meetings
-        SET 
+        SET
             companyroomid = $1,
-            meetingsubject = $2, 
-            meetingstartdate = $3, 
+            meetingsubject = $2,
+            meetingstartdate = $3,
             meetingenddate = $4,
             description = $5,
             participants = $6,
@@ -172,7 +198,8 @@ const updateMeeting = async (id, data) => {
     const values = [
         roomId, title, startDateTime, endDateTime,
         description || null, participants || null,
-        departmentId || null, projectId || null,
+        deptId,  // ✅ Düzeltilmiş değer
+        projId,  // ✅ Düzeltilmiş değer
         id
     ];
 
