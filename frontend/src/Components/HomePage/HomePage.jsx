@@ -88,7 +88,7 @@ const DashboardView = ({ user }) => {
                         <User size={48} />
                     </div>
                     <div className="profile-info">
-                        <h2>{user?.fullname || user?.username}</h2>
+                        <h2>{userDetails?.fullname || userDetails?.name}</h2>
                         <p className="profile-role">{user?.departmentname || 'Departman Belirtilmemiş'}</p>
                     </div>
                 </div>

@@ -547,3 +547,127 @@
     background: linear-gradient(180deg, #9d4edd, #7b2cbf);
     border-radius: 10px;
 }
+.permission-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.permission-section {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(157, 78, 221, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.section-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: rgba(157, 78, 221, 0.08);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.section-header:hover {
+    background: rgba(157, 78, 221, 0.15);
+}
+
+.section-count {
+    margin-left: auto;
+    font-size: 12px;
+    color: #888;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.section-content {
+    padding: 10px;
+}
+
+/* PERMISSION ITEM (THE ROWS) */
+.permission-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    min-height: 40px;
+}
+
+.permission-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* BUTTONS & ICONS inside items */
+.expand-btn, .checkbox-btn {
+    background: transparent;
+    border: none;
+    color: #9d4edd;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    transition: transform 0.2s ease;
+}
+
+.expand-btn:hover {
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.expand-spacer {
+    width: 24px; /* Chevron ile aynı genişlikte boşluk */
+    display: inline-block;
+}
+
+.permission-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    width: 20px;
+}
+
+/* LABEL & CODE */
+.permission-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.permission-desc {
+    font-size: 14px;
+    color: #e5e5e5;
+    font-weight: 500;
+}
+
+.permission-code {
+    font-size: 10px;
+    color: #666;
+    font-family: 'Courier New', Courier, monospace;
+    text-transform: lowercase;
+}
+
+/* CHILD INDENTATION */
+.permission-children {
+    border-left: 1px dashed rgba(157, 78, 221, 0.3);
+    margin-left: 18px; /* İkonun ortasından hizalama */
+    padding-left: 5px;
+}
+
+/* SPECIFIC COLORS FOR ACTIONS */
+.permission-item:has(.Zap) .permission-icon { color: #ffd166; }
+.permission-item:has(.Plus) .permission-icon { color: #06d6a0; }
+.permission-item:has(.Edit2) .permission-icon { color: #118ab2; }
+.permission-item:has(.Trash2) .permission-icon { color: #ef476f; }
