@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict SPH0yAc8dBKuMg8E3J0lbC8MhVEKnhrNWDdj32Q7cwAdgnbcF8SeqYLsmQCUyzk
+\restrict JKGxL6ATNwtEp8z1NifZS4zBWMXs2cGjIEAId8nWG0PcocPtpainZIPA8Lm9L23
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
@@ -1014,6 +1014,15 @@ COPY public.meetings (meetingid, companyroomid, meetingstartdate, meetingsubject
 19	4	2025-12-26 08:30:00+00	Intern Sorumluları	f	2025-12-26 09:00:00+00	4	\N	Seniorlarımızın altında çalışacak internler seçilecek.	Backend Departmanında intern alacak Senior Dev'ler	cancelled
 25	3	2025-12-25 12:30:00+00	deneme	f	2025-12-25 13:30:00+00	\N	\N	\N	\N	pending
 26	2	2026-01-11 09:00:00+00	asd	f	2026-01-11 10:00:00+00	\N	\N	\N	\N	pending
+28	\N	2026-01-28 11:00:00+00	denemeee	f	2026-01-28 12:00:00+00	\N	\N	asd	benben	pending
+29	\N	2026-01-28 11:00:00+00	dasaq	f	2026-01-28 12:00:00+00	\N	\N	affafa	sadf	pending
+30	\N	2026-01-28 11:00:00+00	denemneeeeee	f	2026-01-28 12:00:00+00	\N	\N	dfggd	fdgd	pending
+31	\N	2026-01-28 11:00:00+00	denemeson	f	2026-01-28 12:00:00+00	\N	\N	asdas	asdas	pending
+32	\N	2026-01-28 11:00:00+00	qweqwe	f	2026-01-28 12:00:00+00	\N	\N	dasads	rtreter	pending
+33	\N	2026-01-29 12:00:00+00	sss	f	2026-01-29 13:00:00+00	\N	\N	qewqew	asqw	pending
+27	4	2026-01-28 10:00:00+00	DENEME	f	2026-01-28 11:00:00+00	2	11	deniyorum adamım	ewq	pending
+34	\N	2026-01-28 12:00:00+00	asddeneme	f	2026-01-28 13:00:00+00	\N	\N	denedim	deniyorum	pending
+35	5	2026-01-28 08:11:00+00	qwe	f	2026-01-28 09:12:00+00	3	6	qweqeqw	asd	approved
 \.
 
 
@@ -1441,10 +1450,10 @@ COPY public.roles (roleid, rolename) FROM stdin;
 
 COPY public.tasks (taskid, projectid, userid, title, "desc", status, priority, deudate, updates) FROM stdin;
 8	5	35	frontned mimarisi olusturulacka	frontend mimarisine giriş yapalım dosya düzenlerini vs oluşturalım	pending	high	\N	\N
-9	5	33	test yaz	backend ve frontend mimari icin test yaz	pending	medium	2025-12-18	\N
 10	5	10	node.js çalış	node.js öğrenmen gerekiyor öncesinde sonrasında sana taskler atanıcak.	pending	low	2025-12-18	\N
 14	9	32	taskdeneme	hızlı bitir	in_progress	high	2025-12-25	ilk kısmı bitirdim
 15	10	32	deneme	deneme	pending	medium	2026-01-31	\N
+9	5	33	test yaz	backend ve frontend mimari icin test yaz	in_progress	medium	2025-12-18	zortzort
 \.
 
 
@@ -1529,10 +1538,9 @@ COPY public.users (userid, username, password, roleid, last_activity) FROM stdin
 4	ahmet.dalavere	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	23	2025-12-16 20:57:40.059715+00
 10	emre.yildiz	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	5	2025-12-17 16:26:35.98959+00
 36	samet_habali	$2b$10$c7tOlOplo4noIcdveLD3h.xNrpFLeWcW4ugIZnneJHfoxBO85M0im	15	2025-12-24 09:10:39.899598+00
-2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2	2026-01-24 11:37:25.481232+00
-33	keles_egemen	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	10	2026-01-11 14:19:07.792951+00
+1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1	2026-01-28 19:06:56.371543+00
 3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3	2025-12-17 18:39:58.861985+00
-37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2026-01-25 14:14:13.600387+00
+37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2026-01-28 19:07:21.206011+00
 26	john_duran	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	17	2025-12-25 07:10:46.07658+00
 25	esra.eroglu	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	19	2025-12-16 20:57:40.059715+00
 35	ihsan_ekinci	$2b$10$k5Y0Gf0EgS5wDe2imrtIvuUh797f4kvmTpPOHdjXQ/bcaUN9.5A6a	14	2025-12-25 05:55:00.712005+00
@@ -1548,9 +1556,10 @@ COPY public.users (userid, username, password, roleid, last_activity) FROM stdin
 15	merve.dogan	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	9	2025-12-16 20:57:40.059715+00
 14	can.arslan	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	21	2025-12-16 20:57:40.059715+00
 28	selin.yaman	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	7	2025-12-16 20:57:40.059715+00
+33	keles_egemen	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	10	2026-01-28 16:17:59.845545+00
 13	hande.ozdemir	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	2	2025-12-16 20:57:40.059715+00
 30	Karanfil	$2b$10$Y9lKB1QZBkj3xQ5IAKbuQOyNJTAOb/qkHEh.lV964WVyV2OqtvwZK	3	2025-12-18 12:45:20.550113+00
-1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1	2026-01-24 14:40:22.681101+00
+2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2	2026-01-28 18:45:35.486669+00
 8	mustafa.ozkan	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	4	2025-12-17 16:00:46.349452+00
 27	deniz.karaca	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	8	2025-12-16 20:57:40.059715+00
 12	burak.aydin	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	22	2025-12-16 20:57:40.059715+00
@@ -1607,7 +1616,7 @@ SELECT pg_catalog.setval('public.jobpost_jobpostid_seq', 23, true);
 -- Name: meetings_meetingid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.meetings_meetingid_seq', 26, true);
+SELECT pg_catalog.setval('public.meetings_meetingid_seq', 35, true);
 
 
 --
@@ -2480,5 +2489,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict SPH0yAc8dBKuMg8E3J0lbC8MhVEKnhrNWDdj32Q7cwAdgnbcF8SeqYLsmQCUyzk
+\unrestrict JKGxL6ATNwtEp8z1NifZS4zBWMXs2cGjIEAId8nWG0PcocPtpainZIPA8Lm9L23
 
