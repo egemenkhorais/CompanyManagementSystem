@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict xOWXt51vTpVAu0uBhttc7GjluR3Z4EjcNKaN3YW77DA2llbXscyfUz2J7sSGkAc
+\restrict e5DePEfW5Cl3PtbdVLx00S07aa9qNUEkiILilTehcbIIH8SZPmQ8g8IIlIjy4TA
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.9 (Debian 17.9-1.pgdg13+1)
@@ -1387,7 +1387,6 @@ COPY public.role_permissions (roleid, permission_id) FROM stdin;
 1	51
 1	53
 1	52
-1	49
 1	30
 1	32
 1	31
@@ -1413,6 +1412,7 @@ COPY public.role_permissions (roleid, permission_id) FROM stdin;
 16	61
 14	61
 14	62
+1	49
 \.
 
 
@@ -1538,9 +1538,9 @@ COPY public.users (userid, username, password, roleid, last_activity) FROM stdin
 4	ahmet.dalavere	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	23	2025-12-16 20:57:40.059715+00
 10	emre.yildiz	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	5	2025-12-17 16:26:35.98959+00
 36	samet_habali	$2b$10$c7tOlOplo4noIcdveLD3h.xNrpFLeWcW4ugIZnneJHfoxBO85M0im	15	2025-12-24 09:10:39.899598+00
+37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2026-02-27 09:15:31.527155+00
 1	ahmet_yilmaz	$2b$10$3xs.x67PbGll4z8rVQCtG.F4Qp5b4MZtD59fdlQ9XDss.MTMJShpi	1	2026-01-28 19:06:56.371543+00
 3	mehmet_demir	$2b$10$T2saZs88wAskRMhkHyIGxu0NKzVuKU/CUca.i/6i9I.4XvR7lB1Ou	3	2025-12-17 18:39:58.861985+00
-37	burak_tuzcu	$2b$10$GBoKII51ACf1rRvtuWMhu.S5Yh1BKUBGd7P0SIflqJ5RPUjJgUhpi	1	2026-01-28 19:07:21.206011+00
 26	john_duran	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	17	2025-12-25 07:10:46.07658+00
 2	ayse_kaya	$2b$10$m6x4t9je0zCyITZGeuN73e.DLCM6Yf5pDJmnQxAbyAsDBdrsRO52C	2	2026-01-30 09:58:41.224817+00
 25	esra.eroglu	$2b$10$F1invwxQZs2Ps7gC0xydQuCKOE8lOI6kfbJ87WZtGM3wDFnxJmxwm	19	2025-12-16 20:57:40.059715+00
@@ -2489,5 +2489,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict xOWXt51vTpVAu0uBhttc7GjluR3Z4EjcNKaN3YW77DA2llbXscyfUz2J7sSGkAc
+\unrestrict e5DePEfW5Cl3PtbdVLx00S07aa9qNUEkiILilTehcbIIH8SZPmQ8g8IIlIjy4TA
 
