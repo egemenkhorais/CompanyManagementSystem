@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict kkpSP2wyGEl90uQdnNvTsH5XW2oaAdqWUj1cWc4rvOYHTTnbVeYVyGZksTAVA53
+\restrict 0IgDfNP9WJ1jDU3zpXn4UV0vtXvtMocReYyFAYqT7OrmKW8FvVEodR2Jtdid7Bd
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.10 (Debian 17.10-1.pgdg13+1)
@@ -2492,5 +2492,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict kkpSP2wyGEl90uQdnNvTsH5XW2oaAdqWUj1cWc4rvOYHTTnbVeYVyGZksTAVA53
+\unrestrict 0IgDfNP9WJ1jDU3zpXn4UV0vtXvtMocReYyFAYqT7OrmKW8FvVEodR2Jtdid7Bd
 
