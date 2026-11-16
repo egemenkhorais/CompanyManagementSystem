@@ -1,3 +1,1 @@
-*.sql linguist-detectable=false
-backup/** linguist-detectable=false
-backup.sql linguist-detectable=false
+backup.sql linguist-generated
