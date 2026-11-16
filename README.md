@@ -137,4 +137,4 @@ Giriş ve kayıt dışındaki tüm uç noktalar `Authorization: Bearer <token>` 
 
 ## Lisans
 
-Bu depo için henüz bir lisans belirtilmemiştir.
+MIT
