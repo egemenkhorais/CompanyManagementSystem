@@ -1,3 +1,2 @@
-# Yedek klasörünü ve SQL dosyalarını Linguist istatistiklerinin dışına çıkar
-backup/** linguist-detectable=false
 *.sql linguist-detectable=false
+backup/** linguist-detectable=false
